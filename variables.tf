@@ -1,23 +1,13 @@
-variable "mandatory" {
-  type        = string
-  description = "this field is mandatory"
+variable "profile" {
+  description = "The aws profile to use"
 }
 
-variable "optional" {
-  default     = "default_value"
-  description = "this field is optional"
-}
-
-variable "name" {
-  description = "the name of your stack, e.g. \"demo\""
+variable "region" {
+  description = "The aws region"
 }
 
 variable "environment" {
   description = "the name of your environment, e.g. \"prod\""
-}
-
-variable "subnets" {
-  description = "Comma separated list of subnet IDs"
 }
 
 variable "vpc_id" {
@@ -43,11 +33,11 @@ variable "name" {
 variable "subnets" {
   description = "List of subnet IDs"
 }
-
+/*
 variable "ecs_service_security_groups" {
   description = "Comma separated list of security groups"
 }
-
+*/
 variable "container_port" {
   description = "Port of container"
 }
@@ -64,14 +54,14 @@ variable "container_image" {
   description = "Docker image to be launched"
 }
 
-variable "aws_alb_target_group_arn" {
-  description = "ARN of the alb target group"
-}
+#variable "aws_alb_target_group_arn" {
+#  description = "ARN of the alb target group"
+#}
 
 variable "service_desired_count" {
   description = "Number of services running in parallel"
 }
-
+/*
 variable "container_environment" {
   description = "The container environmnent variables"
   type        = list
@@ -90,3 +80,4 @@ variable "application-secrets" {
   description = "A map of secrets that is passed into the application. Formatted like ENV_VAR = VALUE"
   type        = map
 }
+*/

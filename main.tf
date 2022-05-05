@@ -1,22 +1,20 @@
-terraform {
-  required_providers {
-    null = {
-      version = "3.1.0"
-      source  = "hashicorp/null"
-    }
-  }
+provider "aws" {
+  region     = var.region
+  version    = "~> 4.0"
 }
 
-resource "null_resource" "example" {}
-
+#terraform {
+#  backend "s3" {
+#  }
+#}
 
 resource "aws_lb" "main" {
   name               = "${var.name}-alb-${var.environment}"
   internal           = false
   load_balancer_type = "application"
   security_groups    = var.alb_security_groups
-  subnets            = var.subnets.*.id
-
+  #subnets           = var.subnets.*.id
+  subnets            = ["subnet-02a09c9b7b22ba00a","subnet-0f76d443d6aa1891b"]
   enable_deletion_protection = false
 
   tags = {
@@ -65,44 +63,6 @@ resource "aws_alb_listener" "http" {
   }
 }
 
-resource "aws_lb" "main" {
-  name               = "${var.name}-alb-${var.environment}"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = var.alb_security_groups
-  subnets            = var.subnets.*.id
-
-  enable_deletion_protection = false
-
-  tags = {
-    Name        = "${var.name}-alb-${var.environment}"
-    Environment = var.environment
-  }
-}
-
-resource "aws_alb_target_group" "main" {
-  name        = "${var.name}-tg-${var.environment}"
-  port        = 80
-  protocol    = "HTTP"
-  vpc_id      = var.vpc_id
-  target_type = "ip"
-
-  health_check {
-    healthy_threshold   = "3"
-    interval            = "30"
-    protocol            = "HTTP"
-    matcher             = "200"
-    timeout             = "3"
-    path                = var.health_check_path
-    unhealthy_threshold = "2"
-  }
-
-  tags = {
-    Name        = "${var.name}-tg-${var.environment}"
-    Environment = var.environment
-  }
-}
-
 resource "aws_ecr_repository" "main" {
   name                 = "${var.name}-${var.environment}"
   image_tag_mutability = "MUTABLE"
@@ -133,22 +93,6 @@ resource "aws_ecr_lifecycle_policy" "main" {
 
 output "aws_ecr_repository_url" {
     value = aws_ecr_repository.main.repository_url
-}
-
-
-# Redirect traffic to target group
-resource "aws_alb_listener" "https" {
-    load_balancer_arn = aws_lb.main.id
-    port              = 443
-    protocol          = "HTTPS"
-
-    ssl_policy        = "ELBSecurityPolicy-2016-08"
-    certificate_arn   = var.alb_tls_cert_arn
-
-    default_action {
-        target_group_arn = aws_alb_target_group.main.id
-        type             = "forward"
-    }
 }
 
 resource "aws_iam_role" "ecs_task_execution_role" {
@@ -191,7 +135,7 @@ resource "aws_iam_role" "ecs_task_role" {
 EOF
 }
 
-
+/*
 resource "aws_iam_policy" "secrets" {
   name        = "${var.name}-task-policy-secrets"
   description = "Policy that allows access to the secrets we created"
@@ -212,18 +156,18 @@ resource "aws_iam_policy" "secrets" {
 }
 EOF
 }
-
+*/
 
 resource "aws_iam_role_policy_attachment" "ecs-task-execution-role-policy-attachment" {
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
-
+/*
 resource "aws_iam_role_policy_attachment" "ecs-task-role-policy-attachment-for-secrets" {
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = aws_iam_policy.secrets.arn
 }
-
+*/
 resource "aws_cloudwatch_log_group" "main" {
   name = "/ecs/${var.name}-task-${var.environment}"
 
@@ -245,7 +189,7 @@ resource "aws_ecs_task_definition" "main" {
     name        = "${var.name}-container-${var.environment}"
     image       = "${var.container_image}:latest"
     essential   = true
-    environment = var.container_environment
+    #environment = var.container_environment
     portMappings = [{
       protocol      = "tcp"
       containerPort = var.container_port
@@ -259,7 +203,7 @@ resource "aws_ecs_task_definition" "main" {
         awslogs-region        = var.region
       }
     }
-    secrets = var.container_secrets
+    #secrets = var.container_secrets
   }])
 
   tags = {
@@ -288,13 +232,14 @@ resource "aws_ecs_service" "main" {
   scheduling_strategy                = "REPLICA"
 
   network_configuration {
-    security_groups  = var.ecs_service_security_groups
-    subnets          = var.subnets.*.id
+    #security_groups  = var.ecs_service_security_groups
+    #subnets          = var.subnets.*.id
+    subnets          = ["subnet-0a8ad8675ba94a41a","subnet-0684a88ac45bc33a1"]
     assign_public_ip = false
   }
 
   load_balancer {
-    target_group_arn = var.aws_alb_target_group_arn
+    target_group_arn = aws_alb_target_group.main.arn
     container_name   = "${var.name}-container-${var.environment}"
     container_port   = var.container_port
   }
@@ -306,7 +251,7 @@ resource "aws_ecs_service" "main" {
     ignore_changes = [task_definition, desired_count]
   }
 }
-
+/*
 resource "aws_appautoscaling_target" "ecs_target" {
   max_capacity       = 4
   min_capacity       = 1
@@ -314,55 +259,19 @@ resource "aws_appautoscaling_target" "ecs_target" {
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
 }
+*/
 
-
-resource "aws_appautoscaling_policy" "ecs_policy_memory" {
-  name               = "memory-autoscaling"
-  policy_type        = "TargetTrackingScaling"
-  resource_id        = aws_appautoscaling_target.ecs_target.resource_id
-  scalable_dimension = aws_appautoscaling_target.ecs_target.scalable_dimension
-  service_namespace  = aws_appautoscaling_target.ecs_target.service_namespace
-
-  target_tracking_scaling_policy_configuration {
-    predefined_metric_specification {
-      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
-    }
-
-    target_value       = 80
-    scale_in_cooldown  = 300
-    scale_out_cooldown = 300
-  }
-}
-
-resource "aws_appautoscaling_policy" "ecs_policy_cpu" {
-  name               = "cpu-autoscaling"
-  policy_type        = "TargetTrackingScaling"
-  resource_id        = aws_appautoscaling_target.ecs_target.resource_id
-  scalable_dimension = aws_appautoscaling_target.ecs_target.scalable_dimension
-  service_namespace  = aws_appautoscaling_target.ecs_target.service_namespace
-
-  target_tracking_scaling_policy_configuration {
-    predefined_metric_specification {
-      predefined_metric_type = "ECSServiceAverageCPUUtilization"
-    }
-
-    target_value       = 60
-    scale_in_cooldown  = 300
-    scale_out_cooldown = 300
-  }
-}
 
 # This file creates secrets in the AWS Secret Manager
 # Note that this does not contain any actual secret values
 # make sure to not commit any secret values to git!
 # you could put them in secrets.tfvars which is in .gitignore
 
-
+/*
 resource "aws_secretsmanager_secret" "application_secrets" {
   count = length(var.application-secrets)
   name  = "${var.name}-application-secrets-${var.environment}-${element(keys(var.application-secrets), count.index)}"
 }
-
 
 resource "aws_secretsmanager_secret_version" "application_secrets_values" {
   count         = length(var.application-secrets)
@@ -380,14 +289,14 @@ locals {
 
   ]
 }
+*/
+#output "application_secrets_arn" {
+#  value = aws_secretsmanager_secret_version.solaris_broker_application_secrets_values.*.arn
+#}
 
-output "application_secrets_arn" {
-  value = aws_secretsmanager_secret_version.solaris_broker_application_secrets_values.*.arn
-}
-
-output "secrets_map" {
-  value = local.secretMap
-}
+#output "secrets_map" {
+#  value = local.secretMap
+#}
 
 resource "aws_security_group" "alb" {
   name   = "${var.name}-sg-alb-${var.environment}"
