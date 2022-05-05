@@ -1,4 +1,4 @@
-module "example_module" {
+module "ecs_fargate" {
   source = "../."
 
   mandatory = "mandatory_string"
