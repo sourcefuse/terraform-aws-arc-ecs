@@ -16,7 +16,7 @@ variable "alb_tls_cert_arn" {
 
 variable "subnets" {
   description = "List of subnet IDs"
-  default = []
+  default     = []
 }
 
 variable "health_check_path" {
@@ -44,7 +44,6 @@ variable "container_memory" {
   description = "Memory for container"
 }
 
-
-
-
-
+variable "container_port" {
+  description = "Memory for container"
+}
