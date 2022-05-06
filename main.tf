@@ -1,20 +1,17 @@
-provider "aws" {
-  region     = var.region
-  version    = "~> 4.0"
+terraform {
+  required_providers {
+    aws = {
+      version = "~> 4.0"
+    }
+  }
 }
 
-#terraform {
-#  backend "s3" {
-#  }
-#}
-
 resource "aws_lb" "main" {
-  name               = "${var.name}-alb-${var.environment}"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = var.alb_security_groups
-  #subnets           = var.subnets.*.id
-  subnets            = ["subnet-02a09c9b7b22ba00a","subnet-0f76d443d6aa1891b"]
+  name                       = "${var.name}-alb-${var.environment}"
+  internal                   = false
+  load_balancer_type         = "application"
+  security_groups            = [aws_security_group.alb.id]
+  subnets                    = var.subnets
   enable_deletion_protection = false
 
   tags = {
@@ -23,7 +20,7 @@ resource "aws_lb" "main" {
   }
 }
 
-resource "aws_alb_target_group" "main" {
+resource "aws_lb_target_group" "main" {
   name        = "${var.name}-tg-${var.environment}"
   port        = 80
   protocol    = "HTTP"
@@ -44,6 +41,10 @@ resource "aws_alb_target_group" "main" {
     Name        = "${var.name}-tg-${var.environment}"
     Environment = var.environment
   }
+
+  depends_on = [
+    aws_lb.main
+  ]
 }
 
 # Redirect to https listener
@@ -63,6 +64,20 @@ resource "aws_alb_listener" "http" {
   }
 }
 
+resource "aws_alb_listener" "https" {
+  load_balancer_arn = aws_lb.main.id
+  port              = 443
+  protocol          = "HTTPS"
+
+  ssl_policy      = "ELBSecurityPolicy-2016-08"
+  certificate_arn = var.alb_tls_cert_arn
+
+  default_action {
+    target_group_arn = aws_lb_target_group.main.id
+    type             = "forward"
+  }
+}
+
 resource "aws_ecr_repository" "main" {
   name                 = "${var.name}-${var.environment}"
   image_tag_mutability = "MUTABLE"
@@ -79,10 +94,10 @@ resource "aws_ecr_lifecycle_policy" "main" {
     rules = [{
       rulePriority = 1
       description  = "keep last 10 images"
-      action       = {
+      action = {
         type = "expire"
       }
-      selection     = {
+      selection = {
         tagStatus   = "any"
         countType   = "imageCountMoreThan"
         countNumber = 10
@@ -91,9 +106,7 @@ resource "aws_ecr_lifecycle_policy" "main" {
   })
 }
 
-output "aws_ecr_repository_url" {
-    value = aws_ecr_repository.main.repository_url
-}
+
 
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "${var.name}-ecsTaskExecutionRole"
@@ -135,39 +148,12 @@ resource "aws_iam_role" "ecs_task_role" {
 EOF
 }
 
-/*
-resource "aws_iam_policy" "secrets" {
-  name        = "${var.name}-task-policy-secrets"
-  description = "Policy that allows access to the secrets we created"
-
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "AccessSecrets",
-            "Effect": "Allow",
-            "Action": [
-              "secretsmanager:GetSecretValue"
-            ],
-            "Resource": ${jsonencode(var.container_secrets_arns)}
-        }
-    ]
-}
-EOF
-}
-*/
 
 resource "aws_iam_role_policy_attachment" "ecs-task-execution-role-policy-attachment" {
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
-/*
-resource "aws_iam_role_policy_attachment" "ecs-task-role-policy-attachment-for-secrets" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = aws_iam_policy.secrets.arn
-}
-*/
+
 resource "aws_cloudwatch_log_group" "main" {
   name = "/ecs/${var.name}-task-${var.environment}"
 
@@ -186,10 +172,9 @@ resource "aws_ecs_task_definition" "main" {
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn            = aws_iam_role.ecs_task_role.arn
   container_definitions = jsonencode([{
-    name        = "${var.name}-container-${var.environment}"
-    image       = "${var.container_image}:latest"
-    essential   = true
-    #environment = var.container_environment
+    name      = "${var.name}-container-${var.environment}"
+    image     = "${var.container_image}:latest"
+    essential = true
     portMappings = [{
       protocol      = "tcp"
       containerPort = var.container_port
@@ -203,7 +188,6 @@ resource "aws_ecs_task_definition" "main" {
         awslogs-region        = var.region
       }
     }
-    #secrets = var.container_secrets
   }])
 
   tags = {
@@ -232,14 +216,13 @@ resource "aws_ecs_service" "main" {
   scheduling_strategy                = "REPLICA"
 
   network_configuration {
-    #security_groups  = var.ecs_service_security_groups
-    #subnets          = var.subnets.*.id
-    subnets          = ["subnet-0a8ad8675ba94a41a","subnet-0684a88ac45bc33a1"]
+    security_groups  = [aws_security_group.ecs_tasks.id]
+    subnets          = ["subnet-0a8ad8675ba94a41a", "subnet-0684a88ac45bc33a1"]
     assign_public_ip = false
   }
 
   load_balancer {
-    target_group_arn = aws_alb_target_group.main.arn
+    target_group_arn = aws_lb_target_group.main.arn
     container_name   = "${var.name}-container-${var.environment}"
     container_port   = var.container_port
   }
@@ -251,52 +234,7 @@ resource "aws_ecs_service" "main" {
     ignore_changes = [task_definition, desired_count]
   }
 }
-/*
-resource "aws_appautoscaling_target" "ecs_target" {
-  max_capacity       = 4
-  min_capacity       = 1
-  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.main.name}"
-  scalable_dimension = "ecs:service:DesiredCount"
-  service_namespace  = "ecs"
-}
-*/
 
-
-# This file creates secrets in the AWS Secret Manager
-# Note that this does not contain any actual secret values
-# make sure to not commit any secret values to git!
-# you could put them in secrets.tfvars which is in .gitignore
-
-/*
-resource "aws_secretsmanager_secret" "application_secrets" {
-  count = length(var.application-secrets)
-  name  = "${var.name}-application-secrets-${var.environment}-${element(keys(var.application-secrets), count.index)}"
-}
-
-resource "aws_secretsmanager_secret_version" "application_secrets_values" {
-  count         = length(var.application-secrets)
-  secret_id     = element(aws_secretsmanager_secret.application_secrets.*.id, count.index)
-  secret_string = element(values(var.application-secrets), count.index)
-}
-
-locals {
-  secrets = zipmap(keys(var.application-secrets), aws_secretsmanager_secret_version.solaris_broker_application_secrets_values.*.arn)
-
-  secretMap = [for secretKey in keys(var.application-secrets) : {
-    name      = secretKey
-    valueFrom = lookup(local.secrets, secretKey)
-    }
-
-  ]
-}
-*/
-#output "application_secrets_arn" {
-#  value = aws_secretsmanager_secret_version.solaris_broker_application_secrets_values.*.arn
-#}
-
-#output "secrets_map" {
-#  value = local.secretMap
-#}
 
 resource "aws_security_group" "alb" {
   name   = "${var.name}-sg-alb-${var.environment}"
@@ -356,12 +294,4 @@ resource "aws_security_group" "ecs_tasks" {
     Name        = "${var.name}-sg-task-${var.environment}"
     Environment = var.environment
   }
-}
-
-output "alb" {
-  value = aws_security_group.alb.id
-}
-
-output "ecs_tasks" {
-  value = aws_security_group.ecs_tasks.id
 }
