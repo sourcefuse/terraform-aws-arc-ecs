@@ -54,8 +54,13 @@ variable "service_desired_count" {
 variable "container_environment" {
   description = "The container environmnent variables"
   type        = list(any)
+  default = []
 }
 
 variable "ecs_cluster_id" {
+ type = string
+}
 
+variable "target_group_arn" {
+  type = string
 }

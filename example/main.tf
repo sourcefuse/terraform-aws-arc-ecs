@@ -11,7 +11,6 @@ module "ecs_fargate" {
 module "ecs_service_fargate" {
   source                = "../health_check_service"
   environment           = var.environment
-  cluster               = var.ecs_cluster_id
   target_group_arn      = module.ecs_fargate.ecs_target_group_arn
   name                  = var.name
   health_check_path     = var.health_check_path
@@ -23,10 +22,10 @@ module "ecs_service_fargate" {
   container_cpu         = var.container_cpu
   container_memory      = var.container_memory
   vpc_id                = var.vpc_id
-  container_environment = var.container_environment
 
   depends_on = [
     module.ecs_fargate
   ]
 
+  ecs_cluster_id         = module.ecs_fargate.ecs_cluster_id
 }

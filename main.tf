@@ -81,55 +81,6 @@ resource "aws_ecr_lifecycle_policy" "main" {
   })
 }
 
-
-
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "${var.name}-ecsTaskExecutionRole"
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "ecs-tasks.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
-}
-
-resource "aws_iam_role" "ecs_task_role" {
-  name = "${var.name}-ecsTaskRole"
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "ecs-tasks.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
-}
-
-
-resource "aws_iam_role_policy_attachment" "ecs-task-execution-role-policy-attachment" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-
 resource "aws_ecs_cluster" "main" {
   name = "${var.name}-cluster-${var.environment}"
   tags = {
@@ -138,6 +89,7 @@ resource "aws_ecs_cluster" "main" {
   }
 }
 
+// TODO: implement HTTPS redirect
 resource "aws_security_group" "alb" {
   name   = "${var.name}-sg-alb-${var.environment}"
   vpc_id = var.vpc_id
@@ -168,6 +120,29 @@ resource "aws_security_group" "alb" {
 
   tags = {
     Name        = "${var.name}-sg-alb-${var.environment}"
+    Environment = var.environment
+  }
+}
+
+resource "aws_lb_target_group" "main" {
+  name        = "${var.name}-tg-${var.environment}"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+
+  health_check {
+    healthy_threshold   = "3"
+    interval            = "30"
+    protocol            = "HTTP"
+    matcher             = "200"
+    timeout             = "3"
+    path                =  "/"
+    unhealthy_threshold = "2"
+  }
+
+  tags = {
+    Name        = "${var.name}-tg-${var.environment}"
     Environment = var.environment
   }
 }
