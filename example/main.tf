@@ -1,7 +1,3 @@
-output "ecs_cluster_id" {
-  value = aws_ecs_cluster.main.id
-}
-
 module "ecs_fargate" {
   source           = "../."
   vpc_id           = var.vpc_id
@@ -15,7 +11,8 @@ module "ecs_fargate" {
 module "ecs_service_fargate" {
   source                = "../health_check_service"
   environment           = var.environment
-  cluster               = module.ecs_fargate.ecs_cluster_id
+  cluster               = var.ecs_cluster_id
+  target_group_arn      = module.ecs_fargate.ecs_target_group_arn
   name                  = var.name
   health_check_path     = var.health_check_path
   subnets               = var.subnets

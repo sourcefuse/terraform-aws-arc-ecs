@@ -47,8 +47,6 @@ variable "container_memory" {
 
 }
 
-
-
 #variable "container_environment" {
 #
 #}
