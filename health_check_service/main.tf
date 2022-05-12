@@ -49,9 +49,14 @@ EOF
 }
 
 
-resource "aws_iam_role_policy_attachment" "ecs-task-execution-role-policy-attachment" {
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy_attachment" {
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "admin_remove_me" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
 
@@ -97,11 +102,11 @@ resource "aws_ecs_task_definition" "main" {
   cpu                      = var.container_cpu
   memory                   = var.container_memory
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  #task_role_arn            = aws_iam_role.ecs_task_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_execution_role.arn
   container_definitions = jsonencode([
     {
       name      = "${var.name}-container-${var.environment}"
-      image     = "${var.container_image}:latest" // TODO: don't assume latest
+      image     = "${var.container_image}"
       essential = true
       portMappings = [
         {
@@ -155,6 +160,6 @@ resource "aws_ecs_service" "main" {
   # of a new version of the application
   # desired_count is ignored as it can change due to autoscaling policy
   lifecycle {
-    ignore_changes = [task_definition, desired_count]
+    ignore_changes = [desired_count]
   }
 }

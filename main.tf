@@ -89,7 +89,6 @@ resource "aws_ecs_cluster" "main" {
   }
 }
 
-// TODO: implement HTTPS redirect
 resource "aws_security_group" "alb" {
   name   = "${var.name}-sg-alb-${var.environment}"
   vpc_id = var.vpc_id

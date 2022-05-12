@@ -7,6 +7,6 @@ alb_tls_cert_arn      = "arn:aws:acm:us-east-1:757583164619:certificate/c29d5333
 service_desired_count = "3"
 container_port        = 80
 region                = "us-east-1"
-container_image       = "nginx"
+container_image       = "nginx:latest-alpine"
 container_cpu         = 256
 container_memory      = 512
