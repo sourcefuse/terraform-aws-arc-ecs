@@ -24,8 +24,8 @@ module "ecs_service_fargate" {
   vpc_id                = var.vpc_id
 
   depends_on = [
-    module.ecs_fargate
+    module.ecs_fargate.ecs_target_group_arn
   ]
 
-  ecs_cluster_id         = module.ecs_fargate.ecs_cluster_id
+  ecs_cluster_id = module.ecs_fargate.ecs_cluster_id
 }

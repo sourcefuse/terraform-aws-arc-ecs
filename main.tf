@@ -137,7 +137,7 @@ resource "aws_lb_target_group" "main" {
     protocol            = "HTTP"
     matcher             = "200"
     timeout             = "3"
-    path                =  "/"
+    path                = "/"
     unhealthy_threshold = "2"
   }
 

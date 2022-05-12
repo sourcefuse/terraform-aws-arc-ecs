@@ -5,3 +5,7 @@ output "output_name" {
 output "ecs_cluster_id" {
   value = module.ecs_fargate.ecs_cluster_id
 }
+
+output "alb" {
+  value = module.ecs_fargate.alb
+}
