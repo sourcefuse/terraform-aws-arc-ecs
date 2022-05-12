@@ -24,7 +24,7 @@ resource "aws_lb" "main" {
 
 # Redirect to https listener
 resource "aws_alb_listener" "http" {
-  load_balancer_arn = aws_lb.main.arn
+  load_balancer_arn = aws_lb.main.id
   port              = 80
   protocol          = "HTTP"
 
@@ -40,7 +40,7 @@ resource "aws_alb_listener" "http" {
 }
 
 resource "aws_alb_listener" "https" {
-  load_balancer_arn = aws_lb.main.arn
+  load_balancer_arn = aws_lb.main.id
   port              = 443
   protocol          = "HTTPS"
 
@@ -48,7 +48,7 @@ resource "aws_alb_listener" "https" {
   certificate_arn = var.alb_tls_cert_arn
 
   default_action {
-    target_group_arn = aws_lb_target_group.main.arn
+    target_group_arn = aws_lb_target_group.main.id
     type             = "forward"
   }
 }
@@ -145,4 +145,8 @@ resource "aws_lb_target_group" "main" {
     Name        = "${var.name}-tg-${var.environment}"
     Environment = var.environment
   }
+
+  depends_on = [
+    aws_lb.main
+  ]
 }
