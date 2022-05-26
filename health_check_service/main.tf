@@ -6,46 +6,106 @@ terraform {
   }
 }
 
+data "aws_region" "current" {}
+
+# Task role assume policy
+data "aws_iam_policy_document" "task_assume" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ecs-tasks.amazonaws.com"]
+    }
+  }
+}
+
+# Task logging privileges
+data "aws_iam_policy_document" "task_permissions" {
+  statement {
+    effect = "Allow"
+
+    resources = [
+      aws_cloudwatch_log_group.main.arn,
+      "${aws_cloudwatch_log_group.main.arn}:*"
+    ]
+
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+  }
+}
+
+# Task permissions to allow ECS Exec command
+data "aws_iam_policy_document" "task_ecs_exec_policy" {
+  # count = var.enable_execute_command ? 1 : 0
+
+  statement {
+    effect = "Allow"
+
+    resources = ["*"]
+
+    actions = [
+      "ssmmessages:CreateControlChannel",
+      "ssmmessages:CreateDataChannel",
+      "ssmmessages:OpenControlChannel",
+      "ssmmessages:OpenDataChannel"
+    ]
+  }
+}
+
+# Task ecr privileges
+data "aws_iam_policy_document" "task_execution_permissions" {
+  statement {
+    effect = "Allow"
+
+    resources = [
+      "*",
+    ]
+
+    actions = [
+      "ecr:GetAuthorizationToken",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+  }
+}
+
 // TODO: permissions need to be fixed
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "${var.name}-ecsTaskExecutionRole"
+  name               = "${var.name}-ecs-task-execution-role"
+  assume_role_policy = data.aws_iam_policy_document.task_assume.json
+}
 
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "ecs-tasks.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
+resource "aws_iam_role_policy" "task_execution" {
+  name   = "${var.name}-task-execution"
+  role   = aws_iam_role.ecs_task_execution_role.id
+  policy = data.aws_iam_policy_document.task_execution_permissions.json
 }
-EOF
-}
+
+#resource "aws_iam_role_policy" "read_repository_credentials" {
+#count = var.create_repository_credentials_iam_policy ? 1 : 0
+
+# name   = "${var.name}-read-repository-credentials"
+# role   = aws_iam_role.ecs_task_execution_role.id
+# policy = data.aws_iam_policy_document.read_repository_credentials.json
+#}
 
 // TODO: permissions need to be fixed
 resource "aws_iam_role" "ecs_task_role" {
-  name = "${var.name}-ecsTaskRole"
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "ecs-tasks.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
+  name               = "${var.name}-ecsTaskRole"
+  assume_role_policy = data.aws_iam_policy_document.task_assume.json
 }
-EOF
+
+resource "aws_iam_role_policy" "log_agent" {
+  name   = "${var.name}-log-permissions"
+  role   = aws_iam_role.ecs_task_role.id
+  policy = data.aws_iam_policy_document.task_permissions.json
 }
 
 
@@ -88,20 +148,24 @@ resource "aws_security_group" "ecs_tasks" {
     Name        = "${var.name}-sg-task-${var.environment}"
     Environment = var.environment
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_ecs_task_definition" "main" {
-  family                   = "${var.name}-task-${var.environment}"
+  family = "${var.name}-task-${var.environment}"
+  #  task_role_arn            = aws_iam_role.ecs_task_role.arn
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.container_cpu
   memory                   = var.container_memory
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
-  #task_role_arn            = aws_iam_role.ecs_task_role.arn
   container_definitions = jsonencode([
     {
       name      = "${var.name}-container-${var.environment}"
-      image     = "${var.container_image}:latest" // TODO: don't assume latest
+      image     = var.container_image
       essential = true
       portMappings = [
         {
@@ -140,8 +204,8 @@ resource "aws_ecs_service" "main" {
 
   network_configuration {
     #    security_groups  = [var.ecs_security_group_id] // TODO: define this
-    security_groups  = [aws_security_group.ecs_tasks.id] // TODO: define this
-    subnets          = var.subnets
+    security_groups  = [aws_security_group.ecs_tasks.id]
+    subnets          = ["subnet-0a8ad8675ba94a41a", "subnet-0684a88ac45bc33a1"]
     assign_public_ip = false
   }
 
