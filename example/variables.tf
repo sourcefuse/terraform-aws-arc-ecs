@@ -19,6 +19,10 @@ variable "vpc_id" {
   description = "VPC ID"
 }
 
+variable "dns_name" {}
+
+variable "zone_id" {}
+
 variable "alb_tls_cert_arn" {
 
 }
@@ -46,7 +50,3 @@ variable "container_cpu" {
 variable "container_memory" {
 
 }
-
-#variable "container_environment" {
-#
-#}

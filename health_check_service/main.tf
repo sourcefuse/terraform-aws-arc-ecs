@@ -76,7 +76,6 @@ data "aws_iam_policy_document" "task_execution_permissions" {
   }
 }
 
-// TODO: permissions need to be fixed
 resource "aws_iam_role" "ecs_task_execution_role" {
   name               = "${var.name}-ecs-task-execution-role"
   assume_role_policy = data.aws_iam_policy_document.task_assume.json
@@ -88,15 +87,6 @@ resource "aws_iam_role_policy" "task_execution" {
   policy = data.aws_iam_policy_document.task_execution_permissions.json
 }
 
-#resource "aws_iam_role_policy" "read_repository_credentials" {
-#count = var.create_repository_credentials_iam_policy ? 1 : 0
-
-# name   = "${var.name}-read-repository-credentials"
-# role   = aws_iam_role.ecs_task_execution_role.id
-# policy = data.aws_iam_policy_document.read_repository_credentials.json
-#}
-
-// TODO: permissions need to be fixed
 resource "aws_iam_role" "ecs_task_role" {
   name               = "${var.name}-ecsTaskRole"
   assume_role_policy = data.aws_iam_policy_document.task_assume.json
@@ -155,8 +145,7 @@ resource "aws_security_group" "ecs_tasks" {
 }
 
 resource "aws_ecs_task_definition" "main" {
-  family = "${var.name}-task-${var.environment}"
-  #  task_role_arn            = aws_iam_role.ecs_task_role.arn
+  family                   = "${var.name}-task-${var.environment}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.container_cpu
@@ -203,9 +192,8 @@ resource "aws_ecs_service" "main" {
   scheduling_strategy                = "REPLICA"
 
   network_configuration {
-    #    security_groups  = [var.ecs_security_group_id] // TODO: define this
     security_groups  = [aws_security_group.ecs_tasks.id]
-    subnets          = ["subnet-0a8ad8675ba94a41a", "subnet-0684a88ac45bc33a1"]
+    subnets          = var.subnets
     assign_public_ip = false
   }
 

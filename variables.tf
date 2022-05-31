@@ -26,3 +26,11 @@ variable "name" {
 variable "subnets" {
   description = "List of subnet IDs"
 }
+
+variable "dns_name" {
+  description = "Alias record created for LB"
+}
+
+variable "zone_id" {
+  description = "Route53 zone for alias record"
+}
