@@ -16,7 +16,7 @@ module "ecs_service_fargate" {
   target_group_arn      = module.ecs_fargate.ecs_target_group_arn
   name                  = var.name
   health_check_path     = var.health_check_path
-  subnets               = ["subnet-0a8ad8675ba94a41a", "subnet-0684a88ac45bc33a1"]
+  subnets               = var.subnets
   service_desired_count = var.service_desired_count
   container_port        = var.container_port
   region                = var.region
