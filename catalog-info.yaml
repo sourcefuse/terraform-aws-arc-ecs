@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terraform-aws-refarch-ecs
+  description: ARC Terraform module for provisioning an ECS Fargate cluster
+  annotations:
+    github.com/project-slug: sourcefuse/terraform-aws-refarch-ecs
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: library
+  owner: sfdevops@sourcefuse.com
+  lifecycle: production

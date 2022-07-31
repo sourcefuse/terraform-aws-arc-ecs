@@ -11,7 +11,7 @@ module "ecs_fargate" {
 }
 
 module "ecs_service_fargate" {
-  source                = "../health_check_service"
+  source                = "../health-check-service"
   environment           = var.environment
   target_group_arn      = module.ecs_fargate.ecs_target_group_arn
   name                  = var.name

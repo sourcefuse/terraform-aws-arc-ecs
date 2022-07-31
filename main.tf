@@ -20,8 +20,6 @@ resource "aws_lb" "main" {
   }
 }
 
-
-
 # Redirect to https listener
 resource "aws_alb_listener" "http" {
   load_balancer_arn = aws_lb.main.id

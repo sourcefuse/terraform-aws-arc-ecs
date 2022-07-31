@@ -1,0 +1,5 @@
+site_name: terraform-aws-ref-arch-cognito
+site_description: ARC Terraform module for provisioning Cognito resources.
+
+plugins:
+  - techdocs-core
