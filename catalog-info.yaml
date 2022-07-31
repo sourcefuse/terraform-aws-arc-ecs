@@ -7,6 +7,6 @@ metadata:
     github.com/project-slug: sourcefuse/terraform-aws-refarch-ecs
     backstage.io/techdocs-ref: dir:.
 spec:
-  type: library
+  type: service
   owner: sfdevops@sourcefuse.com
   lifecycle: production
