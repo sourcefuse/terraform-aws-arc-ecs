@@ -1,162 +1,119 @@
+################################################################################
+## defaults
+################################################################################
 terraform {
-  required_version = ">= 1.0.8"
+  required_version = "~> 1.3"
+
   required_providers {
     aws = {
+      source  = "hashicorp/aws"
       version = "~> 4.0"
     }
   }
 }
 
-resource "aws_lb" "main" {
-  name                       = "${var.name}-alb-${var.environment}"
-  internal                   = false
-  load_balancer_type         = "application"
-  security_groups            = [aws_security_group.alb.id]
-  subnets                    = var.subnets
-  enable_deletion_protection = false
+################################################################################
+## ecs
+################################################################################
+module "ecs" {
+  source = "git@github.com:terraform-aws-modules/terraform-aws-ecs?ref=v4.1.2"
 
-  tags = {
-    Name        = "${var.name}-alb-${var.environment}"
-    Environment = var.environment
+  cluster_name = local.cluster_name
+
+  fargate_capacity_providers     = var.fargate_capacity_providers
+  autoscaling_capacity_providers = var.autoscaling_capacity_providers
+
+  cluster_configuration = {
+    execute_command_configuration = {
+      kms_key_id = data.aws_iam_policy_document.cloudwatch_loggroup_kms.json
+      logging    = "OVERRIDE"
+
+      log_configuration = {
+        cloud_watch_log_group_name = aws_cloudwatch_log_group.this.name
+      }
+    }
   }
+
+  tags = merge(var.tags, tomap({
+    Name = local.cluster_name
+  }))
 }
 
-# Redirect to https listener
-resource "aws_alb_listener" "http" {
-  load_balancer_arn = aws_lb.main.id
-  port              = 80
-  protocol          = "HTTP"
+################################################################################
+## cloudwatch
+################################################################################
+## iam policy
+data "aws_iam_policy_document" "cloudwatch_loggroup_kms" {
+  version = "2012-10-17"
 
-  default_action {
-    type = "redirect"
+  ## allow ec2 access to the key
+  statement {
+    effect = "Allow"
 
-    redirect {
-      port        = 443
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
+    actions = [
+      "kms:Encrypt*",
+      "kms:Decrypt*",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:Describe*"
+    ]
+
+    resources = ["*"]
+
+    principals {
+      type = "Service"
+      identifiers = [
+        "cloudwatch.amazonaws.com",
+        "ec2.amazonaws.com",
+        "logs.${var.region}.amazonaws.com"
+      ]
+    }
+  }
+
+  ## allow administration of the key
+  dynamic "statement" {
+    for_each = toset(sort(var.kms_admin_iam_role_identifier_arns))
+
+    content {
+      effect = "Allow"
+
+      // * is required to avoid this error from the API - MalformedPolicyDocumentException: The new key policy will not allow you to update the key policy in the future.
+      actions = ["kms:*"]
+
+      // * is required to avoid this error from the API - MalformedPolicyDocumentException: The new key policy will not allow you to update the key policy in the future.
+      resources = ["*"]
+
+      principals {
+        type        = "AWS"
+        identifiers = [statement.value]
+      }
     }
   }
 }
 
-resource "aws_alb_listener" "https" {
-  load_balancer_arn = aws_lb.main.id
-  port              = 443
-  protocol          = "HTTPS"
+## kms
+module "cloudwatch_kms" {
+  source = "git::https://github.com/cloudposse/terraform-aws-kms-key?ref=0.12.1"
 
-  ssl_policy      = "ELBSecurityPolicy-2016-08"
-  certificate_arn = var.alb_tls_cert_arn
+  name                    = local.cloudwatch_kms_key_name
+  description             = "KMS key for CloudWatch Log Group."
+  label_key_case          = "lower"
+  multi_region            = false
+  deletion_window_in_days = 7
+  enable_key_rotation     = true
+  alias                   = "alias/${var.namespace}/${var.environment}/${local.cloudwatch_kms_key_name}"
+  policy                  = data.aws_iam_policy_document.cloudwatch_loggroup_kms.json
 
-  default_action {
-    target_group_arn = aws_lb_target_group.main.id
-    type             = "forward"
-  }
+  tags = var.tags
 }
 
-resource "aws_ecr_repository" "main" {
-  name                 = "${var.name}-${var.environment}"
-  image_tag_mutability = "MUTABLE"
+## log group
+resource "aws_cloudwatch_log_group" "this" {
+  name              = local.cloudwatch_log_group_name
+  kms_key_id        = module.cloudwatch_kms.key_arn
+  retention_in_days = var.cloudwatch_log_group_retention_days
 
-  image_scanning_configuration {
-    scan_on_push = false
-  }
-}
-
-resource "aws_ecr_lifecycle_policy" "main" {
-  repository = aws_ecr_repository.main.name
-
-  policy = jsonencode({
-    rules = [{
-      rulePriority = 1
-      description  = "keep last 10 images"
-      action = {
-        type = "expire"
-      }
-      selection = {
-        tagStatus   = "any"
-        countType   = "imageCountMoreThan"
-        countNumber = 10
-      }
-    }]
-  })
-}
-
-resource "aws_ecs_cluster" "main" {
-  name = "${var.name}-cluster-${var.environment}"
-  tags = {
-    Name        = "${var.name}-cluster-${var.environment}"
-    Environment = var.environment
-  }
-}
-
-resource "aws_security_group" "alb" {
-  name   = "${var.name}-sg-alb-${var.environment}"
-  vpc_id = var.vpc_id
-
-  ingress {
-    protocol         = "tcp"
-    from_port        = 80
-    to_port          = 80
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  ingress {
-    protocol         = "tcp"
-    from_port        = 443
-    to_port          = 443
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  egress {
-    protocol         = "-1"
-    from_port        = 0
-    to_port          = 0
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  tags = {
-    Name        = "${var.name}-sg-alb-${var.environment}"
-    Environment = var.environment
-  }
-}
-
-resource "aws_lb_target_group" "main" {
-  name        = "${var.name}-tg-${var.environment}"
-  port        = 80
-  protocol    = "HTTP"
-  vpc_id      = var.vpc_id
-  target_type = "ip"
-
-  health_check {
-    healthy_threshold   = "3"
-    interval            = "30"
-    protocol            = "HTTP"
-    matcher             = "200"
-    timeout             = "3"
-    path                = "/"
-    unhealthy_threshold = "2"
-  }
-
-  tags = {
-    Name        = "${var.name}-tg-${var.environment}"
-    Environment = var.environment
-  }
-
-  depends_on = [
-    aws_lb.main
-  ]
-}
-
-
-resource "aws_route53_record" "main" {
-  zone_id = var.zone_id
-  name    = var.dns_name
-  type    = "A"
-  alias {
-    name                   = aws_lb.main.dns_name
-    zone_id                = aws_lb.main.zone_id
-    evaluate_target_health = true
-  }
+  tags = merge(var.tags, tomap({
+    Name = local.cloudwatch_log_group_name
+  }))
 }

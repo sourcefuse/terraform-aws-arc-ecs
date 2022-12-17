@@ -1,52 +1,47 @@
-variable "name" {
-  default = "default_value"
+################################################################################
+## shared
+################################################################################
+variable "region" {
+  type        = string
+  default     = "us-east-1"
+  description = "AWS region"
 }
 
 variable "environment" {
-  default = ""
+  description = "ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT'"
+  type        = string
+  default     = "dev"
 }
 
-variable "region" {
-  default = "us-east-1"
+variable "namespace" {
+  type        = string
+  description = "Namespace for the resources."
+  default     = "arc"
 }
 
-variable "subnets" {
-  description = "List of subnet IDs"
+################################################################################
+## kms
+################################################################################
+variable "kms_admin_iam_role_identifier_arns" {
+  description = "IAM Role ARN to add to the KMS key for management"
+  type        = list(string)
   default     = []
 }
 
-variable "vpc_id" {
-  description = "VPC ID"
+################################################################################
+## autoscaling
+################################################################################
+variable "ami_owners" {
+  description = "The list of owners used to select the AMI for instances."
+  type        = list(string)
+  default     = ["amazon"]
 }
 
-variable "dns_name" {}
+variable "ami_filter" {
+  description = "List of maps used to create the AMI filter for AMI."
+  type        = map(list(string))
 
-variable "zone_id" {}
-
-variable "alb_tls_cert_arn" {
-
-}
-
-variable "health_check_path" {
-
-}
-
-variable "service_desired_count" {
-
-}
-
-variable "container_port" {
-
-}
-
-variable "container_image" {
-
-}
-
-variable "container_cpu" {
-
-}
-
-variable "container_memory" {
-
+  default = {
+    name = ["amzn2-ami-hvm-2.*-x86_64-ebs"]
+  }
 }
