@@ -45,6 +45,17 @@ data "aws_ami" "this" {
   }
 }
 
+data "aws_subnets" "private" {
+  filter {
+    name = "tag:Name"
+
+    values = var.private_subnets != null ? var.private_subnets : [
+      "${var.namespace}-${terraform.workspace}-privatesubnet-private-${var.region}a",
+      "${var.namespace}-${terraform.workspace}-privatesubnet-private-${var.region}b",
+    ]
+  }
+}
+
 ################################################################################
 ## autoscaling
 ################################################################################
@@ -59,11 +70,11 @@ resource "aws_launch_template" "this" {
 }
 
 resource "aws_autoscaling_group" "this" {
-  name_prefix        = "example-"
-  availability_zones = ["us-east-1a", "us-east-1b"]
-  desired_capacity   = 1
-  max_size           = 3
-  min_size           = 1
+  name_prefix         = "example-"
+  desired_capacity    = 1
+  max_size            = 3
+  min_size            = 1
+  vpc_zone_identifier = data.aws_subnets.private.ids
 
   health_check_grace_period = 300
   health_check_type         = "ELB"

@@ -20,6 +20,15 @@ variable "namespace" {
 }
 
 ################################################################################
+## subnets
+################################################################################
+variable "private_subnets" {
+  description = "List of private subnet names for the autoscaling group to launch instances in."
+  type        = list(string)
+  default     = null
+}
+
+################################################################################
 ## kms
 ################################################################################
 variable "kms_admin_iam_role_identifier_arns" {
