@@ -22,6 +22,72 @@ variable "tags" {
   default     = {}
 }
 
+variable "vpc_id" {
+  description = "Id of the VPC where the resources will live"
+  type        = string
+}
+
+################################################################################
+## alb
+################################################################################
+variable "alb_acm_certificate_arn" {
+  description = "ARN to the certificate that will be used on the ALB."
+  type        = string
+  default     = ""
+}
+
+variable "alb_target_groups" {
+  description = "Target groups to add to the ALB"
+  type = list(object({
+    name         = string
+    port         = number
+    protocol     = string
+    target_type  = string
+    host_headers = list(string)
+    path_pattern = list(string)
+  }))
+  default = [
+    {
+      name         = "example"
+      port         = 443
+      protocol     = "HTTPS"
+      target_type  = "ip"
+      host_headers = ["example.arc-demo.io"]
+      path_pattern = [
+        "/",
+        "/*"
+      ]
+    }
+  ]
+}
+
+variable "alb_internal" {
+  description = "Determines if this load balancer is internally or externally facing."
+  type        = bool
+  default     = false
+}
+
+variable "alb_idle_timeout" {
+  description = "The time that the connection is allowed to be idle."
+  type        = number
+  default     = 300
+}
+
+variable "alb_subnets_ids" {
+  description = "Subnet Ids assigned to the LB"
+  type        = list(string)
+}
+
+variable "alb_security_group_ids" {
+  description = "Security group Ids for access"
+  type        = list(string)
+}
+
+variable "alb_private_subnet_names" {
+  description = "Names of the private subnet in the VPC"
+  type        = list(string)
+}
+
 ################################################################################
 ## kms
 ################################################################################

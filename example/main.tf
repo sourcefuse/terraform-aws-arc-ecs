@@ -31,73 +31,19 @@ provider "aws" {
 ################################################################################
 ## lookups
 ################################################################################
-data "aws_ami" "this" {
-  owners      = var.ami_owners
-  most_recent = "true"
-
-  dynamic "filter" {
-    for_each = var.ami_filter
-
-    content {
-      name   = filter.key
-      values = filter.value
-    }
-  }
-}
-
-data "aws_subnets" "private" {
-  filter {
-    name = "tag:Name"
-
-    values = var.private_subnets != null ? var.private_subnets : [
-      "${var.namespace}-${terraform.workspace}-privatesubnet-private-${var.region}a",
-      "${var.namespace}-${terraform.workspace}-privatesubnet-private-${var.region}b",
-    ]
-  }
-}
-
-################################################################################
-## autoscaling
-################################################################################
-resource "aws_launch_template" "this" {
-  name_prefix   = "example-"
-  image_id      = data.aws_ami.this.image_id
-  instance_type = "t3.medium"
-
-  tags = merge(module.tags.tags, tomap({
-    NamePrefix = "example-"
-  }))
-}
-
-resource "aws_autoscaling_group" "this" {
-  name_prefix         = "example-"
-  desired_capacity    = 1
-  max_size            = 3
-  min_size            = 1
-  vpc_zone_identifier = data.aws_subnets.private.ids
-
-  health_check_grace_period = 300
-  health_check_type         = "ELB"
-  force_delete              = true
-  protect_from_scale_in     = true
-
-  launch_template {
-    id      = aws_launch_template.this.id
-    version = "$Latest"
-  }
-
-  dynamic "tag" {
-    for_each = merge(module.tags.tags, tomap({
-      NamePrefix = "example-"
-    }))
-
-    content {
-      key                 = tag.key
-      value               = tag.value
-      propagate_at_launch = true
-    }
-  }
-}
+#data "aws_ami" "this" {
+#  owners      = var.ami_owners
+#  most_recent = "true"
+#
+#  dynamic "filter" {
+#    for_each = var.ami_filter
+#
+#    content {
+#      name   = filter.key
+#      values = filter.value
+#    }
+#  }
+#}
 
 ################################################################################
 ## ecs

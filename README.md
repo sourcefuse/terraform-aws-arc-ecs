@@ -30,6 +30,7 @@ module "ecs" {
 
 | Name | Source | Version |
 |------|--------|---------|
+| <a name="module_alb"></a> [alb](#module\_alb) | ./modules/alb | n/a |
 | <a name="module_cloudwatch_kms"></a> [cloudwatch\_kms](#module\_cloudwatch\_kms) | git::https://github.com/cloudposse/terraform-aws-kms-key | 0.12.1 |
 | <a name="module_ecs"></a> [ecs](#module\_ecs) | git@github.com:terraform-aws-modules/terraform-aws-ecs | v4.1.2 |
 
@@ -37,13 +38,23 @@ module "ecs" {
 
 | Name | Type |
 |------|------|
+| [aws_autoscaling_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group) | resource |
 | [aws_cloudwatch_log_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
+| [aws_launch_template.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template) | resource |
 | [aws_iam_policy_document.cloudwatch_loggroup_kms](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_subnets.private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnets) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_alb_acm_certificate_arn"></a> [alb\_acm\_certificate\_arn](#input\_alb\_acm\_certificate\_arn) | ARN to the certificate that will be used on the ALB. | `string` | `""` | no |
+| <a name="input_alb_idle_timeout"></a> [alb\_idle\_timeout](#input\_alb\_idle\_timeout) | The time that the connection is allowed to be idle. | `number` | `300` | no |
+| <a name="input_alb_internal"></a> [alb\_internal](#input\_alb\_internal) | Determines if this load balancer is internally or externally facing. | `bool` | `false` | no |
+| <a name="input_alb_private_subnet_names"></a> [alb\_private\_subnet\_names](#input\_alb\_private\_subnet\_names) | Names of the private subnet in the VPC | `list(string)` | n/a | yes |
+| <a name="input_alb_security_group_ids"></a> [alb\_security\_group\_ids](#input\_alb\_security\_group\_ids) | Security group Ids for access | `list(string)` | n/a | yes |
+| <a name="input_alb_subnets_ids"></a> [alb\_subnets\_ids](#input\_alb\_subnets\_ids) | Subnet Ids assigned to the LB | `list(string)` | n/a | yes |
+| <a name="input_alb_target_groups"></a> [alb\_target\_groups](#input\_alb\_target\_groups) | Target groups to add to the ALB | <pre>list(object({<br>    name         = string<br>    port         = number<br>    protocol     = string<br>    target_type  = string<br>    host_headers = list(string)<br>    path_pattern = list(string)<br>  }))</pre> | <pre>[<br>  {<br>    "host_headers": [<br>      "example.arc-demo.io"<br>    ],<br>    "name": "example",<br>    "path_pattern": [<br>      "/",<br>      "/*"<br>    ],<br>    "port": 443,<br>    "protocol": "HTTPS",<br>    "target_type": "ip"<br>  }<br>]</pre> | no |
 | <a name="input_autoscaling_capacity_providers"></a> [autoscaling\_capacity\_providers](#input\_autoscaling\_capacity\_providers) | Map of autoscaling capacity provider definitions to create for the cluster | `any` | `{}` | no |
 | <a name="input_cloudwatch_kms_key_name_override"></a> [cloudwatch\_kms\_key\_name\_override](#input\_cloudwatch\_kms\_key\_name\_override) | Cloudwatch. If null, the default will be `/aws/ecs/namespace-environment-ecs-fargate` | `string` | `null` | no |
 | <a name="input_cloudwatch_log_group_name_override"></a> [cloudwatch\_log\_group\_name\_override](#input\_cloudwatch\_log\_group\_name\_override) | Log group name override. If null, the default will be `/aws/ecs/namespace-environment-ecs-fargate` | `string` | `null` | no |
@@ -55,6 +66,7 @@ module "ecs" {
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for the resources. | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | AWS region | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to assign the resources. | `map(string)` | `{}` | no |
+| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | Id of the VPC where the resources will live | `string` | n/a | yes |
 
 ## Outputs
 

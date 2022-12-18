@@ -13,6 +13,94 @@ terraform {
 }
 
 ################################################################################
+## lookups
+################################################################################
+data "aws_subnets" "private" {
+  filter {
+    name = "tag:Name"
+
+    values = var.alb_private_subnet_names
+  }
+}
+
+################################################################################
+## load balancer
+################################################################################
+module "alb" {
+  source = "./modules/alb"
+
+  namespace          = var.namespace
+  environment        = var.environment
+  vpc_id             = var.vpc_id
+  subnet_ids         = var.alb_subnets_ids
+  security_group_ids = var.alb_security_group_ids
+
+  access_logs_enabled                             = true
+  alb_access_logs_s3_bucket_force_destroy         = false
+  alb_access_logs_s3_bucket_force_destroy_enabled = false
+  acm_certificate_arn                             = var.alb_acm_certificate_arn
+  alb_target_groups                               = var.alb_target_groups
+  internal                                        = var.alb_internal
+  idle_timeout                                    = var.alb_idle_timeout
+
+  // TODO - change to variable
+  http_ingress_cidr_blocks = [
+    "0.0.0.0/0"
+  ]
+
+  // TODO - change to variable
+  https_ingress_cidr_blocks = [
+    "0.0.0.0/0"
+  ]
+
+  tags = var.tags
+}
+
+################################################################################
+## autoscaling
+################################################################################
+resource "aws_launch_template" "this" {
+  name_prefix   = local.cluster_name
+  image_id      = var.cluster_image_id
+  instance_type = "t3.medium"
+
+  tags = merge(var.tags, tomap({
+    NamePrefix = local.cluster_name
+  }))
+}
+
+resource "aws_autoscaling_group" "this" {
+  name_prefix         = local.cluster_name
+  desired_capacity    = 1
+  max_size            = 3
+  min_size            = 1
+  vpc_zone_identifier = data.aws_subnets.private.ids
+
+  health_check_grace_period = 300
+  health_check_type         = "ELB"
+  force_delete              = true
+  protect_from_scale_in     = true
+  target_group_arns         = []
+
+  launch_template {
+    id      = aws_launch_template.this.id
+    version = "$Latest"
+  }
+
+  dynamic "tag" {
+    for_each = merge(var.tags, tomap({
+      NamePrefix = local.cluster_name
+    }))
+
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
+  }
+}
+
+################################################################################
 ## ecs
 ################################################################################
 module "ecs" {
