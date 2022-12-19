@@ -33,7 +33,6 @@ variable "vpc_id" {
 variable "alb_acm_certificate_arn" {
   description = "ARN to the certificate that will be used on the ALB."
   type        = string
-  default     = ""
 }
 
 variable "alb_target_groups" {

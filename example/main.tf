@@ -29,72 +29,21 @@ provider "aws" {
 }
 
 ################################################################################
-## lookups
+## certificates
 ################################################################################
-data "aws_vpc" "vpc" {
-  filter {
-    name   = "tag:Name"
-    values = var.vpc_names
-  }
-}
+module "acm" {
+  source = "git::https://github.com/cloudposse/terraform-aws-acm-request-certificate?ref=0.17.0"
 
-## private
-// TODO - remove if not needed in future
-#data "aws_subnets" "private" {
-#  filter {
-#    name = "tag:Name"
-#
-#    values = var.alb_private_subnet_names
-#  }
-#}
+  name                              = "example"
+  namespace                         = var.namespace
+  environment                       = var.environment
+  zone_name                         = trimprefix(var.acm_domain_name, "*.")
+  domain_name                       = var.acm_domain_name
+  subject_alternative_names         = var.acm_subject_alternative_names
+  process_domain_validation_options = true
+  ttl                               = "300"
 
-// TODO - remove if not needed in future
-#data "aws_subnet" "private" {
-#  for_each = toset(data.aws_subnets.private.ids)
-#  id       = each.value
-#}
-
-## public
-data "aws_subnets" "public" {
-  filter {
-    name = "tag:Name"
-
-    values = var.public_subnet_names
-  }
-}
-
-// TODO - remove if not needed in future
-#data "aws_subnet" "public" {
-#  for_each = toset(data.aws_subnets.public.ids)
-#  id       = each.value
-#}
-
-## security group
-data "aws_security_groups" "web_sg" {
-  filter {
-    name   = "group-name"
-    values = var.web_security_group_names
-  }
-
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.vpc.id]
-  }
-}
-
-## cluster ami
-data "aws_ami" "this" {
-  owners      = var.ami_owners
-  most_recent = "true"
-
-  dynamic "filter" {
-    for_each = var.ami_filter
-
-    content {
-      name   = filter.key
-      values = filter.value
-    }
-  }
+  tags = module.tags.tags
 }
 
 ################################################################################
@@ -113,6 +62,7 @@ module "ecs" {
   autoscaling_subnet_names           = var.private_subnet_names
   cluster_image_id                   = data.aws_ami.this.image_id
   kms_admin_iam_role_identifier_arns = var.kms_admin_iam_role_identifier_arns
+  alb_acm_certificate_arn            = module.acm.arn
 
   fargate_capacity_providers = {
     FARGATE = {
@@ -131,3 +81,12 @@ module "ecs" {
 
   tags = module.tags.tags
 }
+
+################################################################################
+## alb
+################################################################################
+#resource "aws_lb_target_group_attachment" "example" {
+#  target_group_arn = module.ecs.target_group_arns["example"]
+#  target_id        = ""
+#  port             = 443
+#}

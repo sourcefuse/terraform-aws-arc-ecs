@@ -35,9 +35,9 @@ module "alb" {
   subnet_ids         = var.alb_subnets_ids
   security_group_ids = var.alb_security_group_ids
 
-  access_logs_enabled                             = true
-  alb_access_logs_s3_bucket_force_destroy         = false
-  alb_access_logs_s3_bucket_force_destroy_enabled = false
+  access_logs_enabled                             = true  // TODO - change to variable
+  alb_access_logs_s3_bucket_force_destroy         = false // TODO - change to variable
+  alb_access_logs_s3_bucket_force_destroy_enabled = false // TODO - change to variable
   acm_certificate_arn                             = var.alb_acm_certificate_arn
   alb_target_groups                               = var.alb_target_groups
   internal                                        = var.alb_internal
@@ -56,6 +56,8 @@ module "alb" {
   tags = var.tags
 }
 
+// TODO - remove autoscaling?? make optional??
+/*
 ################################################################################
 ## autoscaling
 ################################################################################
@@ -99,7 +101,7 @@ resource "aws_autoscaling_group" "this" {
     }
   }
 }
-
+*/
 ################################################################################
 ## ecs
 ################################################################################
@@ -111,22 +113,22 @@ module "ecs" {
   fargate_capacity_providers = var.fargate_capacity_providers
   // TODO - remove autoscaling one?? make one optional??
   autoscaling_capacity_providers = merge({
-    one = {
-      auto_scaling_group_arn         = aws_autoscaling_group.this.arn
-      managed_termination_protection = "DISABLED" //"ENABLED"
-
-      managed_scaling = {
-        maximum_scaling_step_size = 5
-        minimum_scaling_step_size = 1
-        status                    = "ENABLED"
-        target_capacity           = 60
-      }
-
-      default_capacity_provider_strategy = {
-        weight = 60
-        base   = 20
-      }
-    }
+    #    one = {
+    #      auto_scaling_group_arn         = aws_autoscaling_group.this.arn
+    #      managed_termination_protection = "DISABLED" //"ENABLED"
+    #
+    #      managed_scaling = {
+    #        maximum_scaling_step_size = 5
+    #        minimum_scaling_step_size = 1
+    #        status                    = "ENABLED"
+    #        target_capacity           = 60
+    #      }
+    #
+    #      default_capacity_provider_strategy = {
+    #        weight = 60
+    #        base   = 20
+    #      }
+    #    }
   }, var.autoscaling_capacity_providers)
 
   cluster_configuration = {

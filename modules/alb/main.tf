@@ -2,7 +2,7 @@
 ## defaults
 ################################################################################
 terraform {
-  required_version = "~> 1.2"
+  required_version = "~> 1.3"
 
   required_providers {
     aws = {
@@ -10,10 +10,6 @@ terraform {
       version = "~> 4.30"
     }
   }
-
-  experiments = [
-    module_variable_optional_attrs
-  ]
 }
 
 ################################################################################

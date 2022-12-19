@@ -45,6 +45,24 @@ variable "web_security_group_names" {
 }
 
 ################################################################################
+## acm
+################################################################################
+variable "acm_domain_name" {
+  description = "Domain name the ACM Certificate belongs to"
+  type        = string
+  default     = "*.arc-demo.io"
+}
+
+variable "acm_subject_alternative_names" {
+  description = "Subject alternative names for the ACM Certificate"
+  type        = list(string)
+  default = [
+    "*.ecs-dev.arc-demo.io",
+    "*.ecs-test.arc-demo.io"
+  ]
+}
+
+################################################################################
 ## kms
 ################################################################################
 variable "kms_admin_iam_role_identifier_arns" {
