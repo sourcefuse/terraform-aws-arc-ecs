@@ -31,19 +31,71 @@ provider "aws" {
 ################################################################################
 ## lookups
 ################################################################################
-#data "aws_ami" "this" {
-#  owners      = var.ami_owners
-#  most_recent = "true"
+data "aws_vpc" "vpc" {
+  filter {
+    name   = "tag:Name"
+    values = var.vpc_names
+  }
+}
+
+## private
+// TODO - remove if not needed in future
+#data "aws_subnets" "private" {
+#  filter {
+#    name = "tag:Name"
 #
-#  dynamic "filter" {
-#    for_each = var.ami_filter
-#
-#    content {
-#      name   = filter.key
-#      values = filter.value
-#    }
+#    values = var.alb_private_subnet_names
 #  }
 #}
+
+// TODO - remove if not needed in future
+#data "aws_subnet" "private" {
+#  for_each = toset(data.aws_subnets.private.ids)
+#  id       = each.value
+#}
+
+## public
+data "aws_subnets" "public" {
+  filter {
+    name = "tag:Name"
+
+    values = var.public_subnet_names
+  }
+}
+
+// TODO - remove if not needed in future
+#data "aws_subnet" "public" {
+#  for_each = toset(data.aws_subnets.public.ids)
+#  id       = each.value
+#}
+
+## security group
+data "aws_security_groups" "web_sg" {
+  filter {
+    name   = "group-name"
+    values = var.web_security_group_names
+  }
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.vpc.id]
+  }
+}
+
+## cluster ami
+data "aws_ami" "this" {
+  owners      = var.ami_owners
+  most_recent = "true"
+
+  dynamic "filter" {
+    for_each = var.ami_filter
+
+    content {
+      name   = filter.key
+      values = filter.value
+    }
+  }
+}
 
 ################################################################################
 ## ecs
@@ -55,6 +107,11 @@ module "ecs" {
   namespace   = var.namespace
   region      = var.region
 
+  vpc_id                             = data.aws_vpc.vpc.id
+  alb_subnets_ids                    = data.aws_subnets.public.ids
+  alb_security_group_ids             = data.aws_security_groups.web_sg.ids
+  autoscaling_subnet_names           = var.private_subnet_names
+  cluster_image_id                   = data.aws_ami.this.image_id
   kms_admin_iam_role_identifier_arns = var.kms_admin_iam_role_identifier_arns
 
   fargate_capacity_providers = {
@@ -70,24 +127,7 @@ module "ecs" {
     }
   }
 
-  autoscaling_capacity_providers = {
-    one = {
-      auto_scaling_group_arn         = aws_autoscaling_group.this.arn
-      managed_termination_protection = "DISABLED" //"ENABLED"
-
-      managed_scaling = {
-        maximum_scaling_step_size = 5
-        minimum_scaling_step_size = 1
-        status                    = "ENABLED"
-        target_capacity           = 60
-      }
-
-      default_capacity_provider_strategy = {
-        weight = 60
-        base   = 20
-      }
-    }
-  }
+  autoscaling_capacity_providers = {}
 
   tags = module.tags.tags
 }

@@ -83,11 +83,6 @@ variable "alb_security_group_ids" {
   type        = list(string)
 }
 
-variable "alb_private_subnet_names" {
-  description = "Names of the private subnet in the VPC"
-  type        = list(string)
-}
-
 ################################################################################
 ## kms
 ################################################################################
@@ -105,10 +100,26 @@ variable "cluster_name_override" {
   default     = null
 }
 
+variable "cluster_image_id" {
+  description = "Image ID for the instances in the cluster"
+  type        = string
+}
+
+variable "cluster_instance_type" {
+  description = "Instance type for the "
+  type        = string
+  default     = "t3.medium"
+}
+
 variable "autoscaling_capacity_providers" {
   description = "Map of autoscaling capacity provider definitions to create for the cluster"
   type        = any
   default     = {}
+}
+
+variable "autoscaling_subnet_names" {
+  description = "Names of the subnets to place the instances created by the autoscaling group. Recommended use is private subnets."
+  type        = list(string)
 }
 
 ################################################################################

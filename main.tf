@@ -15,11 +15,11 @@ terraform {
 ################################################################################
 ## lookups
 ################################################################################
-data "aws_subnets" "private" {
+data "aws_subnets" "this" {
   filter {
     name = "tag:Name"
 
-    values = var.alb_private_subnet_names
+    values = var.autoscaling_subnet_names
   }
 }
 
@@ -62,7 +62,7 @@ module "alb" {
 resource "aws_launch_template" "this" {
   name_prefix   = local.cluster_name
   image_id      = var.cluster_image_id
-  instance_type = "t3.medium"
+  instance_type = var.cluster_instance_type
 
   tags = merge(var.tags, tomap({
     NamePrefix = local.cluster_name
@@ -74,7 +74,7 @@ resource "aws_autoscaling_group" "this" {
   desired_capacity    = 1
   max_size            = 3
   min_size            = 1
-  vpc_zone_identifier = data.aws_subnets.private.ids
+  vpc_zone_identifier = data.aws_subnets.this.ids
 
   health_check_grace_period = 300
   health_check_type         = "ELB"
@@ -108,8 +108,26 @@ module "ecs" {
 
   cluster_name = local.cluster_name
 
-  fargate_capacity_providers     = var.fargate_capacity_providers
-  autoscaling_capacity_providers = var.autoscaling_capacity_providers
+  fargate_capacity_providers = var.fargate_capacity_providers
+  // TODO - remove autoscaling one?? make one optional??
+  autoscaling_capacity_providers = merge({
+    one = {
+      auto_scaling_group_arn         = aws_autoscaling_group.this.arn
+      managed_termination_protection = "DISABLED" //"ENABLED"
+
+      managed_scaling = {
+        maximum_scaling_step_size = 5
+        minimum_scaling_step_size = 1
+        status                    = "ENABLED"
+        target_capacity           = 60
+      }
+
+      default_capacity_provider_strategy = {
+        weight = 60
+        base   = 20
+      }
+    }
+  }, var.autoscaling_capacity_providers)
 
   cluster_configuration = {
     execute_command_configuration = {
