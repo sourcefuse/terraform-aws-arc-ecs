@@ -138,16 +138,17 @@ resource "aws_security_group" "ecs_task_sg" {
   vpc_id = var.vpc_id
   name   = "ecs_task_sg"
   ingress {
-    from_port   = 0
-    protocol    = "TCP"
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port        = 0
+    protocol         = "-1"
+    to_port          = 0
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
   }
   egress {
-    from_port   = 0
-    protocol    = "-1"
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port        = 0
+    protocol         = "-1"
+    to_port          = 0
+    cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
 }
