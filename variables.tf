@@ -118,12 +118,12 @@ variable "fargate_capacity_providers" {
   default = {
     FARGATE = {
       default_capacity_provider_strategy = {
-        weight = 50
+        weight = 100
       }
     }
     FARGATE_SPOT = {
       default_capacity_provider_strategy = {
-        weight = 50
+        weight = 0
       }
     }
   }

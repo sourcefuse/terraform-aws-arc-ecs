@@ -26,7 +26,7 @@ module "alb" {
   environment        = var.environment
   vpc_id             = var.vpc_id
   subnet_ids         = var.alb_subnets_ids
-  security_group_ids = [aws_security_group.get_it_working.id]
+  security_group_ids = [aws_security_group.ecs_task_sg.id]
 
   access_logs_enabled = true
   // TODO - change to variable
@@ -58,7 +58,7 @@ module "ecs" {
   source       = "git@github.com:terraform-aws-modules/terraform-aws-ecs?ref=v4.1.2"
   cluster_name = local.cluster_name
 
-  fargate_capacity_providers = var.fargate_capacity_providers
+  #  fargate_capacity_providers = var.fargate_capacity_providers
 
 
   tags = merge(var.tags, tomap({
@@ -134,8 +134,9 @@ resource "aws_ecs_task_definition" "health_check_task_definition" {
   ])
 }
 
-resource "aws_security_group" "get_it_working" {
+resource "aws_security_group" "ecs_task_sg" {
   vpc_id = var.vpc_id
+  name   = "ecs_task_sg"
   ingress {
     from_port   = 0
     protocol    = "TCP"
@@ -157,12 +158,14 @@ resource "aws_ecs_service" "health_check_service" {
   name            = "health-check-service"
   cluster         = module.ecs.cluster_id
   task_definition = aws_ecs_task_definition.health_check_task_definition.arn
+  launch_type     = "FARGATE"
   desired_count   = 3
+
   network_configuration {
-    subnets         = var.task_subnet_ids
-    security_groups = [aws_security_group.get_it_working.id]
+    subnets          = var.task_subnet_ids
+    security_groups  = [aws_security_group.ecs_task_sg.id]
+    assign_public_ip = false
   }
-  #  iam_role        = aws_iam_role.health_check_ecs_role.arn
 
 
   load_balancer {
