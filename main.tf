@@ -103,7 +103,7 @@ resource "aws_iam_role" "health_check_ecs_role" {
 
 resource "aws_iam_role_policy_attachment" "aws_service_linked_role" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
-  role       = aws_iam_role.health_check_ecs_role.arn
+  role       = aws_iam_role.health_check_ecs_role.name
 }
 
 ################################################################################
@@ -166,7 +166,7 @@ resource "aws_ecs_service" "health_check_service" {
 
 
   load_balancer {
-    target_group_arn = module.alb.alb_arn
+    target_group_arn = aws_lb_target_group.health_check_target_group.arn
     container_name   = "nginx"
     container_port   = 80
   }
