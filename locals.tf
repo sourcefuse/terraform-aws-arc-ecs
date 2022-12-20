@@ -1,3 +1,11 @@
+resource "random_pet" "health_check" {
+  keepers = {
+    health_check_route53_zone = var.health_check_route53_zone
+  }
+}
+
+
+
 locals {
   ## cluster
   cluster_name = var.cluster_name_override != null ? var.cluster_name_override : "${var.namespace}-${var.environment}-ecs-fargate"

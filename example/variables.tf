@@ -34,15 +34,15 @@ variable "public_subnet_names" {
   default     = null
 }
 
-variable "vpc_names" {
+variable "vpc_name" {
   description = "List of VPC names to filter for"
-  type        = list(string)
+  type        = string
 }
-
-variable "web_security_group_names" {
-  description = "List of web security groups"
-  type        = list(string)
-}
+#
+#variable "web_security_group_names" {
+#  description = "List of web security groups"
+#  type        = list(string)
+#}
 
 ################################################################################
 ## acm
@@ -71,20 +71,7 @@ variable "kms_admin_iam_role_identifier_arns" {
   default     = []
 }
 
-################################################################################
-## autoscaling
-################################################################################
-variable "ami_owners" {
-  description = "The list of owners used to select the AMI for instances."
-  type        = list(string)
-  default     = ["amazon"]
-}
-
-variable "ami_filter" {
-  description = "List of maps used to create the AMI filter for AMI."
-  type        = map(list(string))
-
-  default = {
-    name = ["amzn2-ami-hvm-2.*-x86_64-ebs"]
-  }
+variable "health_check_route53_zone" {
+  type        = string
+  description = "Route 53 zone for health check"
 }

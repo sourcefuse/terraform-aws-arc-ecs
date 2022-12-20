@@ -55,92 +55,95 @@ module "alb" {
   access_logs_enabled       = var.access_logs_enabled
   enable_glacier_transition = true // TODO - make into variable.
 
+  security_group_enabled    = true
   http_ingress_cidr_blocks  = var.http_ingress_cidr_blocks
+  http_port                 = 80
+  https_port                = 443
   https_ingress_cidr_blocks = var.https_ingress_cidr_blocks
 
   tags = var.tags
 }
 
 ## create the http redirect listener
-resource "aws_lb_listener" "http" {
-  load_balancer_arn = module.alb.alb_arn
-  port              = "80"
-  protocol          = "HTTP"
-
-  default_action {
-    type = "redirect"
-
-    redirect {
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
-    }
-  }
-
-  tags = var.tags
-}
+#resource "aws_lb_listener" "http" {
+#  load_balancer_arn = module.alb.alb_arn
+#  port              = "80"
+#  protocol          = "HTTP"
+#
+#  default_action {
+#    type = "redirect"
+#
+#    redirect {
+#      port        = "443"
+#      protocol    = "HTTPS"
+#      status_code = "HTTP_301"
+#    }
+#  }
+#
+#  tags = var.tags
+#}
 
 ## set up https listener
-resource "aws_lb_listener" "https" {
-  load_balancer_arn = module.alb.alb_arn
-  port              = "443"
-  protocol          = "HTTPS"
-  ssl_policy        = var.lb_ssl_policy
-  certificate_arn   = var.acm_certificate_arn
-  default_action {
-    type = "fixed-response"
-
-    fixed_response {
-      content_type = "text/html"
-      message_body = "Forbidden"
-      status_code  = "403"
-    }
-  }
-
-  tags = var.tags
-}
+#resource "aws_lb_listener" "https" {
+#  load_balancer_arn = module.alb.alb_arn
+#  port              = "443"
+#  protocol          = "HTTPS"
+#  ssl_policy        = var.lb_ssl_policy
+#  certificate_arn   = var.acm_certificate_arn
+#  default_action {
+#    type = "fixed-response"
+#
+#    fixed_response {
+#      content_type = "text/html"
+#      message_body = "Forbidden"
+#      status_code  = "403"
+#    }
+#  }
+#
+#  tags = var.tags
+#}
 
 ## create the target groups
-resource "aws_lb_target_group" "this" {
-  for_each = { for x in var.alb_target_groups : x.name => x }
-
-  name        = each.value.name
-  port        = each.value.port
-  protocol    = each.value.protocol
-  target_type = try(each.value.target_type, "ip")
-  vpc_id      = var.vpc_id
-
-  stickiness {
-    enabled         = true
-    type            = "lb_cookie"
-    cookie_duration = 86400
-  }
-
-  tags = var.tags
-}
-
-## create the forward rule for the default
-resource "aws_lb_listener_rule" "forward" {
-  for_each = { for x in var.alb_target_groups : x.name => x }
-
-  listener_arn = aws_lb_listener.https.arn
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.this[each.value.name].arn
-  }
-
-  condition {
-    host_header {
-      values = try(each.value.host_headers, [])
-    }
-  }
-
-  condition {
-    path_pattern {
-      values = try(each.value.path_pattern, [])
-    }
-  }
-
-  tags = var.tags
-}
+#resource "aws_lb_target_group" "this" {
+#  for_each = { for x in var.alb_target_groups : x.name => x }
+#
+#  name        = each.value.name
+#  port        = each.value.port
+#  protocol    = each.value.protocol
+#  target_type = try(each.value.target_type, "ip")
+#  vpc_id      = var.vpc_id
+#
+#  stickiness {
+#    enabled         = true
+#    type            = "lb_cookie"
+#    cookie_duration = 86400
+#  }
+#
+#  tags = var.tags
+#}
+#
+### create the forward rule for the default
+#resource "aws_lb_listener_rule" "forward" {
+#  for_each = { for x in var.alb_target_groups : x.name => x }
+#
+#  listener_arn = aws_lb_listener.https.arn
+#
+#  action {
+#    type             = "forward"
+#    target_group_arn = aws_lb_target_group.this[each.value.name].arn
+#  }
+#
+#  condition {
+#    host_header {
+#      values = try(each.value.host_headers, [])
+#    }
+#  }
+#
+#  condition {
+#    path_pattern {
+#      values = try(each.value.path_pattern, [])
+#    }
+#  }
+#
+#  tags = var.tags
+#}

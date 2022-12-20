@@ -29,12 +29,12 @@ provider "aws" {
 }
 
 ################################################################################
-## certificates
+## certificates // TODO: this should get generated inside the module for convenience
 ################################################################################
 module "acm" {
   source = "git::https://github.com/cloudposse/terraform-aws-acm-request-certificate?ref=0.17.0"
 
-  name                              = "example"
+  name                              = "${var.environment}-${var.namespace}-acm-certificate"
   namespace                         = var.namespace
   environment                       = var.environment
   zone_name                         = trimprefix(var.acm_domain_name, "*.")
@@ -58,11 +58,11 @@ module "ecs" {
 
   vpc_id                             = data.aws_vpc.vpc.id
   alb_subnets_ids                    = data.aws_subnets.public.ids
-  alb_security_group_ids             = data.aws_security_groups.web_sg.ids
-  autoscaling_subnet_names           = var.private_subnet_names
-  cluster_image_id                   = data.aws_ami.this.image_id
+  alb_security_group_ids             = []
+  task_subnet_ids                    = data.aws_subnets.private.ids
   kms_admin_iam_role_identifier_arns = var.kms_admin_iam_role_identifier_arns
   alb_acm_certificate_arn            = module.acm.arn
+  health_check_route53_zone          = var.health_check_route53_zone
 
   fargate_capacity_providers = {
     FARGATE = {
@@ -77,16 +77,5 @@ module "ecs" {
     }
   }
 
-  autoscaling_capacity_providers = {}
-
   tags = module.tags.tags
 }
-
-################################################################################
-## alb
-################################################################################
-#resource "aws_lb_target_group_attachment" "example" {
-#  target_group_arn = module.ecs.target_group_arns["example"]
-#  target_id        = ""
-#  port             = 443
-#}

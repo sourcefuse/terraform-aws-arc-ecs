@@ -12,15 +12,8 @@ terraform {
   }
 }
 
-################################################################################
-## lookups
-################################################################################
-data "aws_subnets" "this" {
-  filter {
-    name = "tag:Name"
-
-    values = var.autoscaling_subnet_names
-  }
+data "aws_route53_zone" "health_check_zone" {
+  name = var.health_check_route53_zone
 }
 
 ################################################################################
@@ -33,15 +26,17 @@ module "alb" {
   environment        = var.environment
   vpc_id             = var.vpc_id
   subnet_ids         = var.alb_subnets_ids
-  security_group_ids = var.alb_security_group_ids
+  security_group_ids = [aws_security_group.get_it_working.id]
 
-  access_logs_enabled                             = true  // TODO - change to variable
-  alb_access_logs_s3_bucket_force_destroy         = false // TODO - change to variable
-  alb_access_logs_s3_bucket_force_destroy_enabled = false // TODO - change to variable
-  acm_certificate_arn                             = var.alb_acm_certificate_arn
-  alb_target_groups                               = var.alb_target_groups
-  internal                                        = var.alb_internal
-  idle_timeout                                    = var.alb_idle_timeout
+  access_logs_enabled = true
+  // TODO - change to variable
+  alb_access_logs_s3_bucket_force_destroy = false
+  // TODO - change to variable
+  alb_access_logs_s3_bucket_force_destroy_enabled = false
+  // TODO - change to variable
+  acm_certificate_arn = var.alb_acm_certificate_arn
+  internal            = var.alb_internal
+  idle_timeout        = var.alb_idle_timeout
 
   // TODO - change to variable
   http_ingress_cidr_blocks = [
@@ -56,172 +51,252 @@ module "alb" {
   tags = var.tags
 }
 
-// TODO - remove autoscaling?? make optional??
-/*
 ################################################################################
-## autoscaling
-################################################################################
-resource "aws_launch_template" "this" {
-  name_prefix   = local.cluster_name
-  image_id      = var.cluster_image_id
-  instance_type = var.cluster_instance_type
-
-  tags = merge(var.tags, tomap({
-    NamePrefix = local.cluster_name
-  }))
-}
-
-resource "aws_autoscaling_group" "this" {
-  name_prefix         = local.cluster_name
-  desired_capacity    = 1
-  max_size            = 3
-  min_size            = 1
-  vpc_zone_identifier = data.aws_subnets.this.ids
-
-  health_check_grace_period = 300
-  health_check_type         = "ELB"
-  force_delete              = true
-  protect_from_scale_in     = true
-  target_group_arns         = []
-
-  launch_template {
-    id      = aws_launch_template.this.id
-    version = "$Latest"
-  }
-
-  dynamic "tag" {
-    for_each = merge(var.tags, tomap({
-      NamePrefix = local.cluster_name
-    }))
-
-    content {
-      key                 = tag.key
-      value               = tag.value
-      propagate_at_launch = true
-    }
-  }
-}
-*/
-################################################################################
-## ecs
+## ecs cluster
 ################################################################################
 module "ecs" {
-  source = "git@github.com:terraform-aws-modules/terraform-aws-ecs?ref=v4.1.2"
-
+  source       = "git@github.com:terraform-aws-modules/terraform-aws-ecs?ref=v4.1.2"
   cluster_name = local.cluster_name
 
   fargate_capacity_providers = var.fargate_capacity_providers
-  // TODO - remove autoscaling one?? make one optional??
-  autoscaling_capacity_providers = merge({
-    #    one = {
-    #      auto_scaling_group_arn         = aws_autoscaling_group.this.arn
-    #      managed_termination_protection = "DISABLED" //"ENABLED"
-    #
-    #      managed_scaling = {
-    #        maximum_scaling_step_size = 5
-    #        minimum_scaling_step_size = 1
-    #        status                    = "ENABLED"
-    #        target_capacity           = 60
-    #      }
-    #
-    #      default_capacity_provider_strategy = {
-    #        weight = 60
-    #        base   = 20
-    #      }
-    #    }
-  }, var.autoscaling_capacity_providers)
 
-  cluster_configuration = {
-    execute_command_configuration = {
-      kms_key_id = data.aws_iam_policy_document.cloudwatch_loggroup_kms.json
-      logging    = "OVERRIDE"
-
-      log_configuration = {
-        cloud_watch_log_group_name = aws_cloudwatch_log_group.this.name
-      }
-    }
-  }
 
   tags = merge(var.tags, tomap({
     Name = local.cluster_name
   }))
 }
 
-################################################################################
-## cloudwatch
-################################################################################
-## iam policy
-data "aws_iam_policy_document" "cloudwatch_loggroup_kms" {
-  version = "2012-10-17"
-
-  ## allow ec2 access to the key
+data "aws_iam_policy_document" "assume_role_policy" {
   statement {
-    effect = "Allow"
-
-    actions = [
-      "kms:Encrypt*",
-      "kms:Decrypt*",
-      "kms:ReEncrypt*",
-      "kms:GenerateDataKey*",
-      "kms:Describe*"
-    ]
-
-    resources = ["*"]
-
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
     principals {
       type = "Service"
       identifiers = [
-        "cloudwatch.amazonaws.com",
-        "ec2.amazonaws.com",
-        "logs.${var.region}.amazonaws.com"
+        "ecs-tasks.amazonaws.com"
       ]
-    }
-  }
-
-  ## allow administration of the key
-  dynamic "statement" {
-    for_each = toset(sort(var.kms_admin_iam_role_identifier_arns))
-
-    content {
-      effect = "Allow"
-
-      // * is required to avoid this error from the API - MalformedPolicyDocumentException: The new key policy will not allow you to update the key policy in the future.
-      actions = ["kms:*"]
-
-      // * is required to avoid this error from the API - MalformedPolicyDocumentException: The new key policy will not allow you to update the key policy in the future.
-      resources = ["*"]
-
-      principals {
-        type        = "AWS"
-        identifiers = [statement.value]
-      }
     }
   }
 }
 
-## kms
-module "cloudwatch_kms" {
-  source = "git::https://github.com/cloudposse/terraform-aws-kms-key?ref=0.12.1"
+// TODO: clean up and split task execution role from task role
+resource "aws_iam_role" "health_check_ecs_role" {
+  name = "${module.ecs.cluster_name}-hc"
 
-  name                    = local.cloudwatch_kms_key_name
-  description             = "KMS key for CloudWatch Log Group."
-  label_key_case          = "lower"
-  multi_region            = false
-  deletion_window_in_days = 7
-  enable_key_rotation     = true
-  alias                   = "alias/${var.namespace}/${var.environment}/${local.cloudwatch_kms_key_name}"
-  policy                  = data.aws_iam_policy_document.cloudwatch_loggroup_kms.json
+  assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
+
+  inline_policy {
+    name = "admin_policy_that_needs_to_go"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action   = "*"
+          Effect   = "Allow"
+          Resource = "*"
+        },
+      ]
+    })
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "aws_service_linked_role" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
+  role       = aws_iam_role.health_check_ecs_role.arn
+}
+
+################################################################################
+## ecs task definition
+################################################################################
+resource "aws_ecs_task_definition" "health_check_task_definition" {
+  family                   = "health-check-task-definition"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = 1024
+  memory                   = 2048
+  task_role_arn            = aws_iam_role.health_check_ecs_role.arn
+  execution_role_arn       = aws_iam_role.health_check_ecs_role.arn
+  container_definitions = jsonencode([
+    {
+      name      = "nginx"
+      image     = "nginx"
+      cpu       = 10
+      memory    = 512
+      essential = true
+      portMappings = [
+        {
+          containerPort = 80
+          hostPort      = 80
+        }
+      ]
+    }
+  ])
+}
+
+resource "aws_security_group" "get_it_working" {
+  vpc_id = var.vpc_id
+  ingress {
+    from_port   = 0
+    protocol    = "TCP"
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    protocol    = "TCP"
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+################################################################################
+## ecs service
+################################################################################
+resource "aws_ecs_service" "health_check_service" {
+  name            = "health-check-service"
+  cluster         = module.ecs.cluster_id
+  task_definition = aws_ecs_task_definition.health_check_task_definition.arn
+  desired_count   = 3
+  network_configuration {
+    subnets         = var.task_subnet_ids
+    security_groups = [aws_security_group.get_it_working.id]
+  }
+  #  iam_role        = aws_iam_role.health_check_ecs_role.arn
+
+
+  load_balancer {
+    target_group_arn = module.alb.alb_arn
+    container_name   = "nginx"
+    container_port   = 80
+  }
+}
+
+
+resource "aws_lb_target_group" "health_check_target_group" {
+  name        = "health-check-target-group"
+  port        = 80
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = var.vpc_id
+  health_check {
+    healthy_threshold   = "3"
+    interval            = "30"
+    protocol            = "HTTP"
+    timeout             = "3"
+    path                = "/"
+    unhealthy_threshold = "2"
+  }
+}
+
+resource "aws_lb_listener" "https_default" {
+  load_balancer_arn = module.alb.alb_arn
+  port              = "443"
+  protocol          = "HTTPS"
+  // TODO: update to stricter policy
+  ssl_policy      = "ELBSecurityPolicy-2016-08"
+  certificate_arn = var.alb_acm_certificate_arn
+
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.health_check_target_group.arn
+  }
+}
+
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = module.alb.alb_arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
 
   tags = var.tags
 }
 
-## log group
-resource "aws_cloudwatch_log_group" "this" {
-  name              = local.cloudwatch_log_group_name
-  kms_key_id        = module.cloudwatch_kms.key_arn
-  retention_in_days = var.cloudwatch_log_group_retention_days
+################################################################################
+## cloudwatch
+################################################################################
+## iam policy
+#data "aws_iam_policy_document" "cloudwatch_loggroup_kms" {
+#  version = "2012-10-17"
+#
+#  ## allow ec2 access to the key
+#  statement {
+#    effect = "Allow"
+#
+#    actions = [
+#      "kms:Encrypt*",
+#      "kms:Decrypt*",
+#      "kms:ReEncrypt*",
+#      "kms:GenerateDataKey*",
+#      "kms:Describe*"
+#    ]
+#
+#    resources = ["*"]
+#
+#    principals {
+#      type        = "Service"
+#      identifiers = [
+#        "cloudwatch.amazonaws.com",
+#        "ec2.amazonaws.com",
+#        "logs.${var.region}.amazonaws.com"
+#      ]
+#    }
+#  }
+#
+#  ## allow administration of the key
+#  dynamic "statement" {
+#    for_each = toset(sort(var.kms_admin_iam_role_identifier_arns))
+#
+#    content {
+#      effect = "Allow"
+#
+#      // * is required to avoid this error from the API - MalformedPolicyDocumentException: The new key policy will not allow you to update the key policy in the future.
+#      actions = ["kms:*"]
+#
+#      // * is required to avoid this error from the API - MalformedPolicyDocumentException: The new key policy will not allow you to update the key policy in the future.
+#      resources = ["*"]
+#
+#      principals {
+#        type        = "AWS"
+#        identifiers = [statement.value]
+#      }
+#    }
+#  }
+#}
 
-  tags = merge(var.tags, tomap({
-    Name = local.cloudwatch_log_group_name
-  }))
-}
+## kms
+#module "cloudwatch_kms" {
+#  source = "git::https://github.com/cloudposse/terraform-aws-kms-key?ref=0.12.1"
+#
+#  name                    = local.cloudwatch_kms_key_name
+#  description             = "KMS key for CloudWatch Log Group."
+#  label_key_case          = "lower"
+#  multi_region            = false
+#  deletion_window_in_days = 7
+#  enable_key_rotation     = true
+#  alias                   = "alias/${var.namespace}/${var.environment}/${local.cloudwatch_kms_key_name}"
+#  policy                  = data.aws_iam_policy_document.cloudwatch_loggroup_kms.json
+#
+#  tags = var.tags
+#}
+#
+### log group
+#resource "aws_cloudwatch_log_group" "this" {
+#  name              = local.cloudwatch_log_group_name
+#  kms_key_id        = module.cloudwatch_kms.key_arn
+#  retention_in_days = var.cloudwatch_log_group_retention_days
+#
+#  tags = merge(var.tags, tomap({
+#    Name = local.cloudwatch_log_group_name
+#  }))
+#}

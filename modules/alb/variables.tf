@@ -31,18 +31,18 @@ variable "tags" {
 ################################################################################
 ## alb
 ################################################################################
-variable "alb_target_groups" {
-  description = "Target group configuration for downstream application communication."
-  type = list(object({
-    name         = string
-    port         = number
-    protocol     = string
-    target_type  = optional(string)
-    host_headers = optional(list(string))
-    path_pattern = optional(list(string))
-  }))
-  default = []
-}
+#variable "alb_target_groups" {
+#  description = "Target group configuration for downstream application communication."
+#  type = list(object({
+#    name         = string
+#    port         = number
+#    protocol     = string
+#    target_type  = optional(string)
+#    host_headers = optional(list(string))
+#    path_pattern = optional(list(string))
+#  }))
+#  default = []
+#}
 
 variable "cross_zone_load_balancing_enabled" {
   description = "A boolean flag to enable/disable cross zone load balancing"

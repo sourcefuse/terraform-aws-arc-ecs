@@ -27,6 +27,11 @@ variable "vpc_id" {
   type        = string
 }
 
+variable "health_check_route53_zone" {
+  type        = string
+  description = "Route 53 zone for health check"
+}
+
 ################################################################################
 ## alb
 ################################################################################
@@ -35,30 +40,30 @@ variable "alb_acm_certificate_arn" {
   type        = string
 }
 
-variable "alb_target_groups" {
-  description = "Target groups to add to the ALB"
-  type = list(object({
-    name         = string
-    port         = number
-    protocol     = string
-    target_type  = string
-    host_headers = list(string)
-    path_pattern = list(string)
-  }))
-  default = [
-    {
-      name         = "example"
-      port         = 443
-      protocol     = "HTTPS"
-      target_type  = "ip"
-      host_headers = ["example.arc-demo.io"]
-      path_pattern = [
-        "/",
-        "/*"
-      ]
-    }
-  ]
-}
+#variable "alb_target_groups" {
+#  description = "Target groups to add to the ALB"
+#  type = list(object({
+#    name         = string
+#    port         = number
+#    protocol     = string
+#    target_type  = string
+#    host_headers = list(string)
+#    path_pattern = list(string)
+#  }))
+#  default = [
+#    {
+#      name         = "example"
+#      port         = 443
+#      protocol     = "HTTPS"
+#      target_type  = "ip"
+#      host_headers = ["example.arc-demo.io"]
+#      path_pattern = [
+#        "/",
+#        "/*"
+#      ]
+#    }
+#  ]
+#}
 
 variable "alb_internal" {
   description = "Determines if this load balancer is internally or externally facing."
@@ -82,6 +87,11 @@ variable "alb_security_group_ids" {
   type        = list(string)
 }
 
+variable "task_subnet_ids" {
+  description = "Subnet Ids to run tasks in"
+  type        = list(string)
+}
+
 ################################################################################
 ## kms
 ################################################################################
@@ -99,35 +109,24 @@ variable "cluster_name_override" {
   default     = null
 }
 
-variable "cluster_image_id" {
-  description = "Image ID for the instances in the cluster"
-  type        = string
-}
-
-variable "cluster_instance_type" {
-  description = "Instance type for the "
-  type        = string
-  default     = "t3.medium"
-}
-
-variable "autoscaling_capacity_providers" {
-  description = "Map of autoscaling capacity provider definitions to create for the cluster"
-  type        = any
-  default     = {}
-}
-
-variable "autoscaling_subnet_names" {
-  description = "Names of the subnets to place the instances created by the autoscaling group. Recommended use is private subnets."
-  type        = list(string)
-}
-
 ################################################################################
 ## fargate
 ################################################################################
 variable "fargate_capacity_providers" {
   description = "Map of Fargate capacity provider definitions to use for the cluster"
   type        = any
-  default     = {}
+  default = {
+    FARGATE = {
+      default_capacity_provider_strategy = {
+        weight = 50
+      }
+    }
+    FARGATE_SPOT = {
+      default_capacity_provider_strategy = {
+        weight = 50
+      }
+    }
+  }
 }
 
 ################################################################################
