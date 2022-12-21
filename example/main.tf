@@ -13,7 +13,7 @@ terraform {
 }
 
 module "tags" {
-  source = "git@github.com:sourcefuse/terraform-aws-refarch-tags?ref=1.0.2"
+  source = "git::https://github.com/sourcefuse/terraform-aws-refarch-tags?ref=1.0.2"
 
   environment = var.environment
   project     = "Example"
