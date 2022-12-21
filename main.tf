@@ -16,7 +16,7 @@ terraform {
 ## ecs cluster
 ################################################################################
 module "ecs" {
-  source       = "git@github.com:terraform-aws-modules/terraform-aws-ecs?ref=v4.1.2"
+  source       = "git::https://github.com/terraform-aws-modules/terraform-aws-ecs?ref=v4.1.2"
   cluster_name = local.cluster_name
 
   tags = merge(var.tags, tomap({
@@ -24,6 +24,9 @@ module "ecs" {
   }))
 }
 
+################################################################################
+## iam
+################################################################################
 data "aws_iam_policy_document" "assume_role_policy" {
   statement {
     effect  = "Allow"
@@ -58,6 +61,10 @@ resource "aws_iam_role" "health_check_ecs_role" {
       ]
     })
   }
+
+  tags = merge(var.tags, tomap({
+    Name = "${module.ecs.cluster_name}-health-check"
+  }))
 }
 
 resource "aws_iam_role_policy_attachment" "aws_service_linked_role" {
@@ -69,7 +76,7 @@ resource "aws_iam_role_policy_attachment" "aws_service_linked_role" {
 ## ecs task definition
 ################################################################################
 resource "aws_ecs_task_definition" "health_check_task_definition" {
-  family                   = "${var.namespace}-${var.environment}-health-check"
+  family                   = "${module.ecs.cluster_name}-health-check"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = 1024 // TODO - change to variable
@@ -79,7 +86,7 @@ resource "aws_ecs_task_definition" "health_check_task_definition" {
 
   container_definitions = jsonencode([
     {
-      name      = "${var.namespace}-${var.environment}-health-check-nginx"
+      name      = "${module.ecs.cluster_name}-health-check-nginx"
       image     = "nginx"
       cpu       = 100
       memory    = 512
@@ -92,11 +99,18 @@ resource "aws_ecs_task_definition" "health_check_task_definition" {
       ]
     }
   ])
+
+  tags = merge(var.tags, tomap({
+    Name = "${module.ecs.cluster_name}-health-check"
+  }))
 }
 
+################################################################################
+## security
+################################################################################
 resource "aws_security_group" "ecs_task_sg" {
   vpc_id = var.vpc_id
-  name   = "${var.namespace}-${var.environment}-ecs-task-sg"
+  name   = "${module.ecs.cluster_name}-ecs-task-sg"
 
   ingress {
     from_port        = 0
@@ -113,13 +127,17 @@ resource "aws_security_group" "ecs_task_sg" {
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
+
+  tags = merge(var.tags, tomap({
+    Name = "${module.ecs.cluster_name}-ecs-task-sg"
+  }))
 }
 
 ################################################################################
 ## ecs service
 ################################################################################
 resource "aws_ecs_service" "health_check_service" {
-  name            = "${var.namespace}-${var.environment}-health-check"
+  name            = "${module.ecs.cluster_name}-health-check"
   cluster         = module.ecs.cluster_id
   task_definition = aws_ecs_task_definition.health_check_task_definition.arn
   launch_type     = "FARGATE"
@@ -133,9 +151,13 @@ resource "aws_ecs_service" "health_check_service" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.health_check_target_group.arn
-    container_name   = "${var.namespace}-${var.environment}-health-check-nginx"
+    container_name   = "${module.ecs.cluster_name}-health-check-nginx"
     container_port   = 80
   }
+
+  tags = merge(var.tags, tomap({
+    Name = "${module.ecs.cluster_name}-health-check"
+  }))
 }
 
 ################################################################################
@@ -169,8 +191,9 @@ module "alb" {
   tags = var.tags
 }
 
+## target group
 resource "aws_lb_target_group" "health_check_target_group" {
-  name        = "${var.namespace}-${var.environment}-hc"
+  name        = "${module.ecs.cluster_name}-hc"
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
@@ -184,6 +207,10 @@ resource "aws_lb_target_group" "health_check_target_group" {
     path                = "/"
     unhealthy_threshold = "2"
   }
+
+  tags = merge(var.tags, tomap({
+    Name = "${module.ecs.cluster_name}-hc"
+  }))
 }
 
 ## https forward
@@ -198,6 +225,10 @@ resource "aws_lb_listener" "https_default" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.health_check_target_group.arn
   }
+
+  tags = merge(var.tags, tomap({
+    Name = "${module.ecs.cluster_name}-https-forward"
+  }))
 }
 
 ## http redirect
@@ -216,5 +247,7 @@ resource "aws_lb_listener" "http" {
     }
   }
 
-  tags = var.tags
+  tags = merge(var.tags, tomap({
+    Name = "${module.ecs.cluster_name}-http-redirect"
+  }))
 }

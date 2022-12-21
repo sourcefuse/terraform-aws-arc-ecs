@@ -31,7 +31,7 @@ module "ecs" {
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_alb"></a> [alb](#module\_alb) | ./modules/alb | n/a |
-| <a name="module_ecs"></a> [ecs](#module\_ecs) | git@github.com:terraform-aws-modules/terraform-aws-ecs | v4.1.2 |
+| <a name="module_ecs"></a> [ecs](#module\_ecs) | git::https://github.com/terraform-aws-modules/terraform-aws-ecs | v4.1.2 |
 
 ## Resources
 
