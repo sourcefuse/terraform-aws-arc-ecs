@@ -10,4 +10,3 @@ public_subnet_names = [
 ]
 acm_domain_name               = "*.sfrefarch.com"
 acm_subject_alternative_names = []
-health_check_route53_zone     = "sfrefarch.com"

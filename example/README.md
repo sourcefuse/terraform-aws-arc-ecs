@@ -42,8 +42,6 @@ Example demonstrating how to use terraform-aws-refarch-ecs.
 | <a name="input_acm_domain_name"></a> [acm\_domain\_name](#input\_acm\_domain\_name) | Domain name the ACM Certificate belongs to | `string` | `"*.arc-demo.io"` | no |
 | <a name="input_acm_subject_alternative_names"></a> [acm\_subject\_alternative\_names](#input\_acm\_subject\_alternative\_names) | Subject alternative names for the ACM Certificate | `list(string)` | <pre>[<br>  "*.ecs-dev.arc-demo.io",<br>  "*.ecs-test.arc-demo.io"<br>]</pre> | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT' | `string` | `"dev"` | no |
-| <a name="input_health_check_route53_zone"></a> [health\_check\_route53\_zone](#input\_health\_check\_route53\_zone) | Route 53 zone for health check | `string` | n/a | yes |
-| <a name="input_kms_admin_iam_role_identifier_arns"></a> [kms\_admin\_iam\_role\_identifier\_arns](#input\_kms\_admin\_iam\_role\_identifier\_arns) | IAM Role ARN to add to the KMS key for management | `list(string)` | `[]` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for the resources. | `string` | `"arc"` | no |
 | <a name="input_private_subnet_names"></a> [private\_subnet\_names](#input\_private\_subnet\_names) | List of private subnet names for the autoscaling group to launch instances in. | `list(string)` | `null` | no |
 | <a name="input_public_subnet_names"></a> [public\_subnet\_names](#input\_public\_subnet\_names) | List of public subnet names for the ALB | `list(string)` | `null` | no |

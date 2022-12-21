@@ -21,11 +21,6 @@ output "alb_arn" {
   value       = module.alb.alb_arn
 }
 
-#output "target_group_arns" {
-#  description = "Target group ARNs"
-#  value       = module.alb.target_group_arns
-#}
-
 output "alb_dns_name" {
   description = "External DNS name to the ALB"
   value       = module.alb.alb_dns_name

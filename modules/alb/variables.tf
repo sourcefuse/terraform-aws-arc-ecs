@@ -31,19 +31,6 @@ variable "tags" {
 ################################################################################
 ## alb
 ################################################################################
-#variable "alb_target_groups" {
-#  description = "Target group configuration for downstream application communication."
-#  type = list(object({
-#    name         = string
-#    port         = number
-#    protocol     = string
-#    target_type  = optional(string)
-#    host_headers = optional(list(string))
-#    path_pattern = optional(list(string))
-#  }))
-#  default = []
-#}
-
 variable "cross_zone_load_balancing_enabled" {
   description = "A boolean flag to enable/disable cross zone load balancing"
   type        = bool
@@ -104,17 +91,6 @@ variable "https_ingress_cidr_blocks" {
   default = [
     "0.0.0.0/0"
   ]
-}
-
-variable "acm_certificate_arn" {
-  description = "ACM Certificate ARN for the ALB"
-  type        = string
-}
-
-variable "lb_ssl_policy" {
-  description = "SSL policy for the ALB."
-  type        = string
-  default     = "ELBSecurityPolicy-FS-1-2-Res-2020-10"
 }
 
 ################################################################################

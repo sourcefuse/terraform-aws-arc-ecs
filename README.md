@@ -25,7 +25,6 @@ module "ecs" {
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 4.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | n/a |
 
 ## Modules
 
@@ -46,29 +45,20 @@ module "ecs" {
 | [aws_lb_listener.https_default](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
 | [aws_lb_target_group.health_check_target_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group) | resource |
 | [aws_security_group.ecs_task_sg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
-| [random_pet.health_check](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/pet) | resource |
 | [aws_iam_policy_document.assume_role_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_route53_zone.health_check_zone](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_alb_acm_certificate_arn"></a> [alb\_acm\_certificate\_arn](#input\_alb\_acm\_certificate\_arn) | ARN to the certificate that will be used on the ALB. | `string` | n/a | yes |
+| <a name="input_alb_acm_certificate_arn"></a> [alb\_acm\_certificate\_arn](#input\_alb\_acm\_certificate\_arn) | ACM Certificate ARN for the ALB | `string` | n/a | yes |
 | <a name="input_alb_idle_timeout"></a> [alb\_idle\_timeout](#input\_alb\_idle\_timeout) | The time that the connection is allowed to be idle. | `number` | `300` | no |
 | <a name="input_alb_internal"></a> [alb\_internal](#input\_alb\_internal) | Determines if this load balancer is internally or externally facing. | `bool` | `false` | no |
-| <a name="input_alb_security_group_ids"></a> [alb\_security\_group\_ids](#input\_alb\_security\_group\_ids) | Security group Ids for access | `list(string)` | n/a | yes |
+| <a name="input_alb_ssl_policy"></a> [alb\_ssl\_policy](#input\_alb\_ssl\_policy) | SSL policy for the ALB. | `string` | `"ELBSecurityPolicy-FS-1-2-Res-2020-10"` | no |
 | <a name="input_alb_subnets_ids"></a> [alb\_subnets\_ids](#input\_alb\_subnets\_ids) | Subnet Ids assigned to the LB | `list(string)` | n/a | yes |
-| <a name="input_cloudwatch_kms_key_name_override"></a> [cloudwatch\_kms\_key\_name\_override](#input\_cloudwatch\_kms\_key\_name\_override) | Cloudwatch. If null, the default will be `/aws/ecs/namespace-environment-ecs-fargate` | `string` | `null` | no |
-| <a name="input_cloudwatch_log_group_name_override"></a> [cloudwatch\_log\_group\_name\_override](#input\_cloudwatch\_log\_group\_name\_override) | Log group name override. If null, the default will be `/aws/ecs/namespace-environment-ecs-fargate` | `string` | `null` | no |
-| <a name="input_cloudwatch_log_group_retention_days"></a> [cloudwatch\_log\_group\_retention\_days](#input\_cloudwatch\_log\_group\_retention\_days) | Days to retain logs in the log group | `number` | `7` | no |
 | <a name="input_cluster_name_override"></a> [cluster\_name\_override](#input\_cluster\_name\_override) | Name to assign the cluster. If null, the default will be `namespace-environment-ecs-fargate` | `string` | `null` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT' | `string` | n/a | yes |
-| <a name="input_fargate_capacity_providers"></a> [fargate\_capacity\_providers](#input\_fargate\_capacity\_providers) | Map of Fargate capacity provider definitions to use for the cluster | `any` | <pre>{<br>  "FARGATE": {<br>    "default_capacity_provider_strategy": {<br>      "weight": 100<br>    }<br>  },<br>  "FARGATE_SPOT": {<br>    "default_capacity_provider_strategy": {<br>      "weight": 0<br>    }<br>  }<br>}</pre> | no |
-| <a name="input_health_check_route53_zone"></a> [health\_check\_route53\_zone](#input\_health\_check\_route53\_zone) | Route 53 zone for health check | `string` | n/a | yes |
-| <a name="input_kms_admin_iam_role_identifier_arns"></a> [kms\_admin\_iam\_role\_identifier\_arns](#input\_kms\_admin\_iam\_role\_identifier\_arns) | IAM Role ARN to add to the KMS key for management | `list(string)` | n/a | yes |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for the resources. | `string` | n/a | yes |
-| <a name="input_region"></a> [region](#input\_region) | AWS region | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to assign the resources. | `map(string)` | `{}` | no |
 | <a name="input_task_subnet_ids"></a> [task\_subnet\_ids](#input\_task\_subnet\_ids) | Subnet Ids to run tasks in | `list(string)` | n/a | yes |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | Id of the VPC where the resources will live | `string` | n/a | yes |

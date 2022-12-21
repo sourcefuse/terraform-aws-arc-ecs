@@ -54,28 +54,11 @@ module "ecs" {
 
   environment = var.environment
   namespace   = var.namespace
-  region      = var.region
 
-  vpc_id                             = data.aws_vpc.vpc.id
-  alb_subnets_ids                    = data.aws_subnets.public.ids
-  alb_security_group_ids             = []
-  task_subnet_ids                    = data.aws_subnets.private.ids
-  kms_admin_iam_role_identifier_arns = var.kms_admin_iam_role_identifier_arns
-  alb_acm_certificate_arn            = module.acm.arn
-  health_check_route53_zone          = var.health_check_route53_zone
-
-  fargate_capacity_providers = {
-    FARGATE = {
-      default_capacity_provider_strategy = {
-        weight = 50
-      }
-    }
-    FARGATE_SPOT = {
-      default_capacity_provider_strategy = {
-        weight = 50
-      }
-    }
-  }
+  vpc_id                  = data.aws_vpc.vpc.id
+  alb_subnets_ids         = data.aws_subnets.public.ids
+  task_subnet_ids         = data.aws_subnets.private.ids
+  alb_acm_certificate_arn = module.acm.arn
 
   tags = module.tags.tags
 }

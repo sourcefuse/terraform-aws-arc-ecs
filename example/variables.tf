@@ -38,11 +38,6 @@ variable "vpc_name" {
   description = "List of VPC names to filter for"
   type        = string
 }
-#
-#variable "web_security_group_names" {
-#  description = "List of web security groups"
-#  type        = list(string)
-#}
 
 ################################################################################
 ## acm
@@ -60,18 +55,4 @@ variable "acm_subject_alternative_names" {
     "*.ecs-dev.arc-demo.io",
     "*.ecs-test.arc-demo.io"
   ]
-}
-
-################################################################################
-## kms
-################################################################################
-variable "kms_admin_iam_role_identifier_arns" {
-  description = "IAM Role ARN to add to the KMS key for management"
-  type        = list(string)
-  default     = []
-}
-
-variable "health_check_route53_zone" {
-  type        = string
-  description = "Route 53 zone for health check"
 }
