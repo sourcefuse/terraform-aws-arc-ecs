@@ -16,7 +16,7 @@ variable "environment" {
 variable "namespace" {
   type        = string
   description = "Namespace for the resources."
-  default     = "arc"
+  default     = "example"
 }
 
 ################################################################################
@@ -25,18 +25,19 @@ variable "namespace" {
 variable "private_subnet_names" {
   description = "List of private subnet names for the autoscaling group to launch instances in."
   type        = list(string)
-  default     = null
+  default     = []
 }
 
 variable "public_subnet_names" {
   description = "List of public subnet names for the ALB"
   type        = list(string)
-  default     = null
+  default     = []
 }
 
 variable "vpc_name" {
   description = "List of VPC names to filter for"
   type        = string
+  default     = null
 }
 
 ################################################################################
@@ -45,14 +46,10 @@ variable "vpc_name" {
 variable "acm_domain_name" {
   description = "Domain name the ACM Certificate belongs to"
   type        = string
-  default     = "*.arc-demo.io"
 }
 
 variable "acm_subject_alternative_names" {
   description = "Subject alternative names for the ACM Certificate"
   type        = list(string)
-  default = [
-    "*.ecs-dev.arc-demo.io",
-    "*.ecs-test.arc-demo.io"
-  ]
+  default     = []
 }

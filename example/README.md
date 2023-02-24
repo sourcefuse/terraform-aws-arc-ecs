@@ -39,16 +39,18 @@ Example demonstrating how to use terraform-aws-refarch-ecs.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_acm_domain_name"></a> [acm\_domain\_name](#input\_acm\_domain\_name) | Domain name the ACM Certificate belongs to | `string` | `"*.arc-demo.io"` | no |
-| <a name="input_acm_subject_alternative_names"></a> [acm\_subject\_alternative\_names](#input\_acm\_subject\_alternative\_names) | Subject alternative names for the ACM Certificate | `list(string)` | <pre>[<br>  "*.ecs-dev.arc-demo.io",<br>  "*.ecs-test.arc-demo.io"<br>]</pre> | no |
+| <a name="input_acm_domain_name"></a> [acm\_domain\_name](#input\_acm\_domain\_name) | Domain name the ACM Certificate belongs to | `string` | n/a | yes |
+| <a name="input_acm_subject_alternative_names"></a> [acm\_subject\_alternative\_names](#input\_acm\_subject\_alternative\_names) | Subject alternative names for the ACM Certificate | `list(string)` | `[]` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT' | `string` | `"dev"` | no |
-| <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for the resources. | `string` | `"arc"` | no |
-| <a name="input_private_subnet_names"></a> [private\_subnet\_names](#input\_private\_subnet\_names) | List of private subnet names for the autoscaling group to launch instances in. | `list(string)` | `null` | no |
-| <a name="input_public_subnet_names"></a> [public\_subnet\_names](#input\_public\_subnet\_names) | List of public subnet names for the ALB | `list(string)` | `null` | no |
+| <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for the resources. | `string` | `"example"` | no |
+| <a name="input_private_subnet_names"></a> [private\_subnet\_names](#input\_private\_subnet\_names) | List of private subnet names for the autoscaling group to launch instances in. | `list(string)` | `[]` | no |
+| <a name="input_public_subnet_names"></a> [public\_subnet\_names](#input\_public\_subnet\_names) | List of public subnet names for the ALB | `list(string)` | `[]` | no |
 | <a name="input_region"></a> [region](#input\_region) | AWS region | `string` | `"us-east-1"` | no |
-| <a name="input_vpc_name"></a> [vpc\_name](#input\_vpc\_name) | List of VPC names to filter for | `string` | n/a | yes |
+| <a name="input_vpc_name"></a> [vpc\_name](#input\_vpc\_name) | List of VPC names to filter for | `string` | `null` | no |
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | n/a |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
