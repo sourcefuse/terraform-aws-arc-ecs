@@ -24,55 +24,24 @@ resource "aws_security_group" "health_check" {
     protocol        = "tcp"
     to_port         = 80
     security_groups = var.lb_security_group_ids
+    // TODO - remove if not needed
     #    cidr_blocks      = ["0.0.0.0/0"]
     #    ipv6_cidr_blocks = ["::/0"]
   }
 
   // TODO - remove if not needed
-  #  egress {
-  #    from_port        = 0
-  #    protocol         = "-1"
-  #    to_port          = 0
-  #    cidr_blocks      = ["0.0.0.0/0"]
-  #    ipv6_cidr_blocks = ["::/0"]
-  #  }
-
-  tags = merge(var.tags, tomap({
-    Name = "${var.cluster_name}-health-check"
-  }))
-}
-
-################################################################################
-## iam
-################################################################################
-data "aws_iam_policy_document" "assume" {
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type = "Service"
-      identifiers = [
-        "ecs-tasks.amazonaws.com"
-      ]
-    }
+  egress {
+    from_port   = 80
+    protocol    = "tcp"
+    to_port     = 80
+    cidr_blocks = var.subnet_ids
+    #      ipv6_cidr_blocks = ["::/0"]
   }
-}
-
-resource "aws_iam_role" "health_check" {
-  name               = "${var.cluster_name}-health-check"
-  assume_role_policy = data.aws_iam_policy_document.assume.json
 
   tags = merge(var.tags, tomap({
     Name = "${var.cluster_name}-health-check"
   }))
 }
-
-// TODO - remove if not needed
-#resource "aws_iam_role_policy_attachment" "aws_service_linked_role" {
-#  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
-#  role       = aws_iam_role.health_check.name
-#}
 
 ################################################################################
 ## task definition
@@ -83,8 +52,8 @@ resource "aws_ecs_task_definition" "health_check" {
   network_mode             = var.task_definition_network_mode
   cpu                      = var.task_definition_cpu
   memory                   = var.task_definition_memory
-  task_role_arn            = aws_iam_role.health_check.arn
-  execution_role_arn       = aws_iam_role.health_check.arn
+  task_role_arn            = var.health_check_task_role_arn
+  execution_role_arn       = var.task_execution_role_arn
 
   container_definitions = jsonencode([
     {
