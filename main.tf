@@ -130,7 +130,7 @@ resource "aws_security_group" "alb" {
   // TODO - make dynamic
   ingress {
     from_port        = 80
-    protocol         = "-1"
+    protocol         = "tcp"
     to_port          = 80
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
@@ -138,7 +138,7 @@ resource "aws_security_group" "alb" {
 
   ingress {
     from_port        = 443
-    protocol         = "-1"
+    protocol         = "tcp"
     to_port          = 443
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
@@ -165,7 +165,7 @@ module "alb" {
   namespace          = var.namespace
   environment        = var.environment
   vpc_id             = var.vpc_id
-  subnet_ids         = var.alb_subnets_ids
+  subnet_ids         = var.alb_subnet_ids
   security_group_ids = [aws_security_group.alb.id]
 
   access_logs_enabled                             = true  // TODO - change to variable
@@ -192,18 +192,66 @@ module "health_check" {
   source = "./modules/health-check"
 
   vpc_id     = var.vpc_id
-  subnet_ids = length(var.health_check_subnet_ids) > 0 ? var.health_check_subnet_ids : var.alb_subnets_ids
+  subnet_ids = length(var.health_check_subnet_ids) > 0 ? var.health_check_subnet_ids : var.alb_subnet_ids
 
   task_execution_role_arn = aws_iam_role.execution.arn
 
   cluster_id   = module.ecs.cluster_id
   cluster_name = local.cluster_name
 
-  lb_arn                 = module.alb.alb_arn
-  lb_acm_certificate_arn = var.alb_acm_certificate_arn
-  lb_security_group_ids  = [aws_security_group.alb.id]
+  lb_listener_arn       = aws_lb_listener.https.arn
+  lb_security_group_ids = [aws_security_group.alb.id]
+
+  tags = var.tags
 
   depends_on = [
     module.alb
   ]
+}
+
+################################################################################
+## listeners
+################################################################################
+## http
+resource "aws_lb_listener" "http" {
+  load_balancer_arn = module.alb.alb_arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+
+  tags = merge(var.tags, tomap({
+    Name = "${local.cluster_name}-http-redirect"
+  }))
+}
+
+## https
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = module.alb.alb_arn
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = var.alb_ssl_policy
+  certificate_arn   = var.alb_acm_certificate_arn
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/html"
+      message_body = "Forbidden"
+      status_code  = "403"
+    }
+  }
+
+  tags = merge(var.tags, tomap({
+    Name = "${local.cluster_name}-https-forward"
+  }))
 }
