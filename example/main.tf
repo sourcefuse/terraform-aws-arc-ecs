@@ -56,7 +56,7 @@ module "ecs" {
   namespace   = var.namespace
 
   vpc_id                  = data.aws_vpc.vpc.id
-  alb_subnets_ids         = data.aws_subnets.public.ids
+  alb_subnet_ids          = data.aws_subnets.public.ids
   health_check_subnet_ids = data.aws_subnets.private.ids
   alb_acm_certificate_arn = module.acm.arn
 
