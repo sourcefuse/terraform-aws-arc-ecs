@@ -13,20 +13,6 @@ terraform {
 }
 
 ################################################################################
-## lookups
-################################################################################
-// TODO - remove if not needed
-#data "aws_subnet" "this" {
-#  for_each = toset(var.subnet_ids)
-#  vpc_id   = var.vpc_id
-#
-#  filter {
-#    name   = "subnet-id"
-#    values = [each.value]
-#  }
-#}
-
-################################################################################
 ## security
 ################################################################################
 resource "aws_security_group" "health_check" {
@@ -92,8 +78,8 @@ resource "aws_ecs_service" "health_check" {
   name            = "${var.cluster_name}-health-check"
   cluster         = var.cluster_id
   task_definition = aws_ecs_task_definition.health_check.arn
-  launch_type     = "FARGATE"
-  desired_count   = 3
+  launch_type     = "FARGATE" # TODO - change this
+  desired_count   = 3         # TODO - change this
 
   network_configuration {
     subnets          = var.subnet_ids
@@ -127,7 +113,7 @@ resource "aws_lb_target_group" "health_check" {
     interval            = "30"
     protocol            = "HTTP"
     timeout             = "3"
-    path                = "/"
+    path                = var.health_check_path_pattern
     unhealthy_threshold = "2"
   }
 
@@ -146,14 +132,8 @@ resource "aws_lb_listener_rule" "forward" {
   }
 
   condition {
-    host_header {
-      values = var.health_check_host_headers
-    }
-  }
-
-  condition {
     path_pattern {
-      values = var.health_check_path_patterns
+      values = [var.health_check_path_pattern]
     }
   }
 

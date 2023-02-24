@@ -68,38 +68,15 @@ variable "health_check_task_role_arn" {
   default     = null
 }
 
-variable "health_check_host_headers" {
-  type        = list(string)
-  description = <<-EOT
-    A list of host header patterns to match. The maximum size of each pattern is 128 characters. Comparison is case insensitive.
-    Wildcard characters supported: * (matches 0 or more characters) and ? (matches exactly 1 character).
-    Only one pattern needs to match for the condition to be satisfied.
-  EOT
-  default     = ["*"]
-}
-
-variable "health_check_path_patterns" {
-  type        = list(string)
-  description = <<-EOT
-    A list of path patterns to match against the request URL. Maximum size of each pattern is 128 characters.
-    Comparison is case sensitive. Wildcard characters supported: * (matches 0 or more characters) and ? (matches exactly 1 character).
-    Only one pattern needs to match for the condition to be satisfied. Path pattern is compared only to the path of the URL, not to
-    its query string. To compare against the query string, use a query_string condition.
-  EOT
-  default = [
-    "/"
-  ]
+variable "health_check_path_pattern" {
+  type        = string
+  description = "Path pattern to match against the request URL."
+  default     = "/"
 }
 
 ################################################################################
 ## alb
 ################################################################################
-// TODO - remove if not needed
-#variable "lb_arn" {
-#  type        = string
-#  description = "ARN of the load balancer."
-#}
-
 variable "lb_security_group_ids" {
   type        = list(string)
   description = "LB Security Group IDs for ingress access to the health check task definition."
