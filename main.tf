@@ -39,13 +39,13 @@ module "ecs" {
 ## logging
 ################################################################################
 resource "aws_cloudwatch_log_group" "this" {
-  name = "/aws/ecs/${module.ecs.cluster_name}"
+  name = "/aws/ecs/${local.cluster_name}"
 
   retention_in_days = var.log_group_retention_days
   skip_destroy      = var.log_group_skip_destroy
 
   tags = merge(var.tags, tomap({
-    Name = "/aws/ecs/${module.ecs.cluster_name}"
+    Name = "/aws/ecs/${local.cluster_name}"
   }))
 }
 
@@ -55,24 +55,16 @@ resource "aws_cloudwatch_log_group" "this" {
 resource "aws_service_discovery_private_dns_namespace" "this" {
   for_each = toset(var.service_discovery_private_dns_namespace)
 
-  name        = "${each.key}.${module.ecs.cluster_name}.local"
-  description = "Service discovery for ${each.key}.${module.ecs.cluster_name}.local"
+  name        = "${each.key}.${local.cluster_name}.local"
+  description = "Service discovery for ${each.key}.${local.cluster_name}.local" # TODO - update this if needed
   vpc         = var.vpc_id
 }
 
 ################################################################################
 ## task execution role
 ################################################################################
-resource "aws_iam_role" "execution" {
-  name_prefix        = "${module.ecs.cluster_name}-execution-"
-  assume_role_policy = data.aws_iam_policy_document.execution.json
-
-  tags = merge(var.tags, tomap({
-    NamePrefix = "${module.ecs.cluster_name}-execution-"
-  }))
-}
-
-data "aws_iam_policy_document" "execution" {
+## execution
+data "aws_iam_policy_document" "assume" {
   statement {
     actions = ["sts:AssumeRole"]
 
@@ -83,16 +75,27 @@ data "aws_iam_policy_document" "execution" {
   }
 }
 
+resource "aws_iam_role" "execution" {
+  name_prefix        = "${local.cluster_name}-execution-"
+  assume_role_policy = data.aws_iam_policy_document.assume.json
+
+  tags = merge(var.tags, tomap({
+    NamePrefix = "${local.cluster_name}-execution-"
+  }))
+}
+
 resource "aws_iam_policy_attachment" "execution" {
   for_each = toset(var.execution_policy_attachment_arns)
 
-  name       = "${module.ecs.cluster_name}-execution"
-  roles      = [aws_iam_role.execution.name]
+  name       = "${local.cluster_name}-execution"
   policy_arn = each.value
+  roles      = [aws_iam_role.execution.name]
 }
 
+## secrets manager
 resource "aws_iam_policy" "secrets_manager_read_policy" {
-  name = "ECSTaskExecutionReadSecretsManager"
+  name = "${local.cluster_name}-secrets-manager-ro"
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -107,12 +110,12 @@ resource "aws_iam_policy" "secrets_manager_read_policy" {
   })
 
   tags = merge(var.tags, tomap({
-    Name = "ECSTaskExecutionReadSecretsManager"
+    Name = "${local.cluster_name}-secrets-manager-ro"
   }))
 }
 
-resource "aws_iam_policy_attachment" "secret_manager_read" {
-  name       = "${module.ecs.cluster_name}-execution-policy"
+resource "aws_iam_policy_attachment" "secrets_manager_read" {
+  name       = "${local.cluster_name}-secrets-manager-ro"
   roles      = [aws_iam_role.execution.name]
   policy_arn = aws_iam_policy.secrets_manager_read_policy.arn
 }
@@ -121,7 +124,7 @@ resource "aws_iam_policy_attachment" "secret_manager_read" {
 ## load balancer
 ################################################################################
 resource "aws_security_group" "alb" {
-  name   = "${module.ecs.cluster_name}-alb"
+  name   = "${local.cluster_name}-alb"
   vpc_id = var.vpc_id
 
   // TODO - make dynamic
@@ -151,7 +154,7 @@ resource "aws_security_group" "alb" {
   }
 
   tags = merge(var.tags, tomap({
-    Name = "${module.ecs.cluster_name}-alb"
+    Name = "${local.cluster_name}-alb"
   }))
 }
 
@@ -191,15 +194,14 @@ module "health_check" {
   vpc_id     = var.vpc_id
   subnet_ids = length(var.health_check_subnet_ids) > 0 ? var.health_check_subnet_ids : var.alb_subnets_ids
 
+  task_execution_role_arn = aws_iam_role.execution.arn
+
   cluster_id   = module.ecs.cluster_id
-  cluster_name = module.ecs.cluster_name
+  cluster_name = local.cluster_name
 
   lb_arn                 = module.alb.alb_arn
   lb_acm_certificate_arn = var.alb_acm_certificate_arn
-
-  lb_security_group_ids = [
-    aws_security_group.alb.id
-  ]
+  lb_security_group_ids  = [aws_security_group.alb.id]
 
   depends_on = [
     module.alb
