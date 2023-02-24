@@ -13,6 +13,20 @@ terraform {
 }
 
 ################################################################################
+## lookups
+################################################################################
+// TODO - remove if not needed
+#data "aws_subnet" "this" {
+#  for_each = toset(var.subnet_ids)
+#  vpc_id   = var.vpc_id
+#
+#  filter {
+#    name   = "subnet-id"
+#    values = [each.value]
+#  }
+#}
+
+################################################################################
 ## security
 ################################################################################
 resource "aws_security_group" "health_check" {
@@ -24,18 +38,13 @@ resource "aws_security_group" "health_check" {
     protocol        = "tcp"
     to_port         = 80
     security_groups = var.lb_security_group_ids
-    // TODO - remove if not needed
-    #    cidr_blocks      = ["0.0.0.0/0"]
-    #    ipv6_cidr_blocks = ["::/0"]
   }
 
-  // TODO - remove if not needed
   egress {
-    from_port   = 80
-    protocol    = "tcp"
-    to_port     = 80
-    cidr_blocks = var.subnet_ids
-    #      ipv6_cidr_blocks = ["::/0"]
+    from_port   = 0
+    protocol    = "-1"
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = merge(var.tags, tomap({
@@ -127,44 +136,26 @@ resource "aws_lb_target_group" "health_check" {
   }))
 }
 
-################################################################################
-## listeners
-################################################################################
-## http redirect
-resource "aws_lb_listener" "http" {
-  load_balancer_arn = var.lb_arn
-  port              = "80"
-  protocol          = "HTTP"
+## create the forward rule
+resource "aws_lb_listener_rule" "forward" {
+  listener_arn = var.lb_listener_arn
 
-  default_action {
-    type = "redirect"
-
-    redirect {
-      port        = "443"
-      protocol    = "HTTPS"
-      status_code = "HTTP_301"
-    }
-  }
-
-  tags = merge(var.tags, tomap({
-    Name = "${var.cluster_name}-http-redirect"
-  }))
-}
-
-## https forward
-resource "aws_lb_listener" "https" {
-  load_balancer_arn = var.lb_arn
-  port              = "443"
-  protocol          = "HTTPS"
-  ssl_policy        = var.lb_ssl_policy
-  certificate_arn   = var.lb_acm_certificate_arn
-
-  default_action {
+  action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.health_check.arn
   }
 
-  tags = merge(var.tags, tomap({
-    Name = "${var.cluster_name}-https-forward"
-  }))
+  condition {
+    host_header {
+      values = var.health_check_host_headers
+    }
+  }
+
+  condition {
+    path_pattern {
+      values = var.health_check_path_patterns
+    }
+  }
+
+  tags = var.tags
 }

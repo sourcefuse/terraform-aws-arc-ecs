@@ -28,8 +28,7 @@ No modules.
 |------|------|
 | [aws_ecs_service.health_check](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
 | [aws_ecs_task_definition.health_check](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
-| [aws_lb_listener.http](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
-| [aws_lb_listener.https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
+| [aws_lb_listener_rule.forward](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener_rule) | resource |
 | [aws_lb_target_group.health_check](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group) | resource |
 | [aws_security_group.health_check](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 
@@ -39,11 +38,11 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_cluster_id"></a> [cluster\_id](#input\_cluster\_id) | ID of the ECS cluster. | `string` | n/a | yes |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the ECS cluster. | `string` | n/a | yes |
+| <a name="input_health_check_host_headers"></a> [health\_check\_host\_headers](#input\_health\_check\_host\_headers) | A list of host header patterns to match. The maximum size of each pattern is 128 characters. Comparison is case insensitive.<br>Wildcard characters supported: * (matches 0 or more characters) and ? (matches exactly 1 character).<br>Only one pattern needs to match for the condition to be satisfied. | `list(string)` | <pre>[<br>  "*"<br>]</pre> | no |
+| <a name="input_health_check_path_patterns"></a> [health\_check\_path\_patterns](#input\_health\_check\_path\_patterns) | A list of path patterns to match against the request URL. Maximum size of each pattern is 128 characters.<br>Comparison is case sensitive. Wildcard characters supported: * (matches 0 or more characters) and ? (matches exactly 1 character).<br>Only one pattern needs to match for the condition to be satisfied. Path pattern is compared only to the path of the URL, not to<br>its query string. To compare against the query string, use a query\_string condition. | `list(string)` | <pre>[<br>  "/"<br>]</pre> | no |
 | <a name="input_health_check_task_role_arn"></a> [health\_check\_task\_role\_arn](#input\_health\_check\_task\_role\_arn) | ARN of IAM role that allows the health check container task to make calls to other AWS services. | `string` | `null` | no |
-| <a name="input_lb_acm_certificate_arn"></a> [lb\_acm\_certificate\_arn](#input\_lb\_acm\_certificate\_arn) | Load Balancer ACM Certificate ARN. | `string` | n/a | yes |
-| <a name="input_lb_arn"></a> [lb\_arn](#input\_lb\_arn) | ARN of the load balancer. | `string` | n/a | yes |
+| <a name="input_lb_listener_arn"></a> [lb\_listener\_arn](#input\_lb\_listener\_arn) | ARN of the load balancer listener. | `string` | n/a | yes |
 | <a name="input_lb_security_group_ids"></a> [lb\_security\_group\_ids](#input\_lb\_security\_group\_ids) | LB Security Group IDs for ingress access to the health check task definition. | `list(string)` | n/a | yes |
-| <a name="input_lb_ssl_policy"></a> [lb\_ssl\_policy](#input\_lb\_ssl\_policy) | Load Balancer SSL policy. | `string` | `"ELBSecurityPolicy-FS-1-2-Res-2020-10"` | no |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | Subnet IDs to run health check task in | `list(string)` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to assign the resources. | `map(string)` | `{}` | no |
 | <a name="input_task_definition_cpu"></a> [task\_definition\_cpu](#input\_task\_definition\_cpu) | Number of cpu units used by the task. If the requires\_compatibilities is FARGATE this field is required. | `number` | `1024` | no |
