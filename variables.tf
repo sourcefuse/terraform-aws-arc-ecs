@@ -80,7 +80,7 @@ variable "alb_acm_certificate_arn" {
   type        = string
 }
 
-variable "alb_subnets_ids" {
+variable "alb_subnet_ids" {
   description = "Subnet Ids assigned to the LB"
   type        = list(string)
 }
@@ -95,6 +95,12 @@ variable "alb_idle_timeout" {
   description = "The time that the connection is allowed to be idle."
   type        = number
   default     = 300
+}
+
+variable "alb_ssl_policy" {
+  type        = string
+  description = "Load Balancer SSL policy."
+  default     = "ELBSecurityPolicy-FS-1-2-Res-2020-10"
 }
 
 ################################################################################
