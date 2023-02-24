@@ -1,7 +1,7 @@
 ---
 name: Test
 
-on:
+on:  # yamllint disable-line rule:truthy
   push:
     branches:
       - '**'     # matches every branch
@@ -13,8 +13,8 @@ on:
 jobs:
   tflint:
     runs-on:
-      - self-hosted
       - refarch
+      - dev
     name: tflint
     steps:
       - uses: actions/checkout@master
@@ -33,7 +33,9 @@ jobs:
         run: tflint -f compact
 
   checkov:
-    runs-on: self-hosted
+    runs-on:
+      - refarch
+      - dev
     name: checkov
     steps:
       - uses: actions/checkout@master
@@ -43,10 +45,15 @@ jobs:
         uses: bridgecrewio/checkov-action@master
         with:
           directory: .
-          quiet: true # optional: display only failed checks
-          soft_fail: false # optional: do not return an error code if there are failed checks.
-          framework: terraform # optional: run only on a specific infrastructure {cloudformation,terraform,kubernetes,all}
-          output_format: github_failed_only # optional: the output format, one of: cli, json, junitxml, github_failed_only
+          # yamllint disable-line rule:truthy # optional: display only failed checks
+          quiet: true
+          # optional: do not return an error code if there are failed checks.
+          soft_fail: true
+          # optional: run only on a specific infrastructure {cloudformation,terraform,kubernetes,all}
+          framework: terraform
+          # optional: the output format, one of: cli, json, junitxml, github_failed_only
+          output_format: github_failed_only
           download_external_modules: false
           log_level: WARNING
-          container_user: 1000 # optional: Define what UID and / or what GID to run the container under to prevent permission issues
+          # optional: Define what UID and / or what GID to run the container under to prevent permission issues
+          container_user: 1000
