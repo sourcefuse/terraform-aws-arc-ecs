@@ -43,14 +43,14 @@ Example demonstrating how to use terraform-aws-refarch-ecs.
 | <a name="input_acm_subject_alternative_names"></a> [acm\_subject\_alternative\_names](#input\_acm\_subject\_alternative\_names) | Subject alternative names for the ACM Certificate | `list(string)` | `[]` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT' | `string` | `"dev"` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for the resources. | `string` | `"example"` | no |
-| <a name="input_private_subnet_names"></a> [private\_subnet\_names](#input\_private\_subnet\_names) | List of private subnet names for the autoscaling group to launch instances in. | `list(string)` | `[]` | no |
-| <a name="input_public_subnet_names"></a> [public\_subnet\_names](#input\_public\_subnet\_names) | List of public subnet names for the ALB | `list(string)` | `[]` | no |
+| <a name="input_private_subnet_names"></a> [private\_subnet\_names](#input\_private\_subnet\_names) | List of Private Subnet names in the VPC where the network resources currently exist.<br>If not defined, the default value from `terraform-aws-ref-arch-network` will be used.<br>From that module's example, the value is: [`example-dev-private-us-east-1a`, `example-dev-private-us-east-1b`] | `list(string)` | `[]` | no |
+| <a name="input_public_subnet_names"></a> [public\_subnet\_names](#input\_public\_subnet\_names) | List of Public Subnet names in the VPC where the network resources currently exist.<br>If not defined, the default value from `terraform-aws-ref-arch-network` will be used.<br>From that module's example, the value is: [`example-dev-public-us-east-1a`, `example-dev-public-us-east-1b`] | `list(string)` | `[]` | no |
 | <a name="input_region"></a> [region](#input\_region) | AWS region | `string` | `"us-east-1"` | no |
-| <a name="input_vpc_name"></a> [vpc\_name](#input\_vpc\_name) | List of VPC names to filter for | `string` | `null` | no |
+| <a name="input_vpc_name"></a> [vpc\_name](#input\_vpc\_name) | Name of the VPC where the network resources currently exist.<br>If not defined, the default value from `terraform-aws-ref-arch-network` will be used.<br>From that module's example, the name `example-dev-vpc` is used. | `string` | `null` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | n/a |
+| <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | Name of the ECS Cluster |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
