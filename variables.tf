@@ -129,7 +129,6 @@ variable "alb_access_logs_s3_bucket_force_destroy_enabled" {
     EOT
 }
 
-
 ################################################################################
 ## cluster
 ################################################################################
@@ -137,4 +136,25 @@ variable "cluster_name_override" {
   description = "Name to assign the cluster. If null, the default will be `namespace-environment-cluster`"
   type        = string
   default     = null
+}
+
+################################################################################
+## cluster
+################################################################################
+variable "additional_ssm_params" {
+  type = list(object({
+    name        = string
+    value       = string
+    description = optional(string)
+    type        = optional(string)
+    overwrite   = optional(bool)
+  }))
+  description = <<-EOF
+    Additional SSM Parameters you would like to add for your ECS configuration.
+    The optional value defaults are:
+      description = "Managed by Terraform"
+      type = "SecureString"
+      overwrite = true
+  EOF
+  default     = []
 }
