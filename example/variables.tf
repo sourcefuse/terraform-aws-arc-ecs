@@ -23,19 +23,31 @@ variable "namespace" {
 ## network / security
 ################################################################################
 variable "private_subnet_names" {
-  description = "List of private subnet names for the autoscaling group to launch instances in."
+  description = <<-EOF
+    List of Private Subnet names in the VPC where the network resources currently exist.
+    If not defined, the default value from `terraform-aws-ref-arch-network` will be used.
+    From that module's example, the value is: [`example-dev-private-us-east-1a`, `example-dev-private-us-east-1b`]
+  EOF
   type        = list(string)
   default     = []
 }
 
 variable "public_subnet_names" {
-  description = "List of public subnet names for the ALB"
+  description = <<-EOF
+    List of Public Subnet names in the VPC where the network resources currently exist.
+    If not defined, the default value from `terraform-aws-ref-arch-network` will be used.
+    From that module's example, the value is: [`example-dev-public-us-east-1a`, `example-dev-public-us-east-1b`]
+  EOF
   type        = list(string)
   default     = []
 }
 
 variable "vpc_name" {
-  description = "List of VPC names to filter for"
+  description = <<-EOF
+    Name of the VPC where the network resources currently exist.
+    If not defined, the default value from `terraform-aws-ref-arch-network` will be used.
+    From that module's example, the name `example-dev-vpc` is used.
+  EOF
   type        = string
   default     = null
 }
