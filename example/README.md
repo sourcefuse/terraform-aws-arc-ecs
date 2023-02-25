@@ -25,7 +25,7 @@ Example demonstrating how to use terraform-aws-refarch-ecs.
 |------|--------|---------|
 | <a name="module_acm"></a> [acm](#module\_acm) | git::https://github.com/cloudposse/terraform-aws-acm-request-certificate | 0.17.0 |
 | <a name="module_ecs"></a> [ecs](#module\_ecs) | ../ | n/a |
-| <a name="module_tags"></a> [tags](#module\_tags) | git::https://github.com/sourcefuse/terraform-aws-refarch-tags | 1.0.2 |
+| <a name="module_tags"></a> [tags](#module\_tags) | git::https://github.com/sourcefuse/terraform-aws-refarch-tags | 1.1.0 |
 
 ## Resources
 
