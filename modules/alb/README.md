@@ -55,4 +55,5 @@ No resources.
 |------|-------------|
 | <a name="output_alb_arn"></a> [alb\_arn](#output\_alb\_arn) | ARN to the ALB |
 | <a name="output_alb_dns_name"></a> [alb\_dns\_name](#output\_alb\_dns\_name) | External DNS name to the ALB |
+| <a name="output_alb_name"></a> [alb\_name](#output\_alb\_name) | Name of the ALB |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

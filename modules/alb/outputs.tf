@@ -1,6 +1,11 @@
 ################################################################################
 ## alb
 ################################################################################
+output "alb_name" {
+  description = "Name of the ALB"
+  value       = module.alb.alb_name
+}
+
 output "alb_arn" {
   description = "ARN to the ALB"
   value       = module.alb.alb_arn
