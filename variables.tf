@@ -8,7 +8,10 @@ variable "environment" {
 
 variable "namespace" {
   type        = string
-  description = "Namespace for the resources."
+  description = <<-EOF
+    Namespace your resource belongs to.
+    Usually an abbreviation of your organization name, e.g. 'example' or 'arc', to help ensure generated IDs are globally unique"
+  EOF
 }
 
 variable "tags" {
