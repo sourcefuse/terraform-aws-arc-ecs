@@ -39,13 +39,13 @@ module "ecs" {
 ## logging
 ################################################################################
 resource "aws_cloudwatch_log_group" "this" {
-  name = "/aws/ecs/${local.cluster_name}"
+  name = "/${var.namespace}/${var.environment}/ecs/${local.cluster_name}"
 
   retention_in_days = var.log_group_retention_days
   skip_destroy      = var.log_group_skip_destroy
 
   tags = merge(var.tags, tomap({
-    Name = "/aws/ecs/${local.cluster_name}"
+    Name = "/${var.namespace}/${var.environment}/ecs/${local.cluster_name}"
   }))
 }
 
@@ -253,5 +253,22 @@ resource "aws_lb_listener" "https" {
 
   tags = merge(var.tags, tomap({
     Name = "${local.cluster_name}-https-forward"
+  }))
+}
+
+################################################################################
+## ssm parameters
+################################################################################
+resource "aws_ssm_parameter" "this" {
+  for_each = { for x in local.ssm_params : x.name => x }
+
+  name        = each.value.name
+  value       = each.value.value
+  description = try(each.value.description, "Managed by Terraform")
+  type        = try(each.value.type, "SecureString")
+  overwrite   = try(each.value.overwrite, true)
+
+  tags = merge(var.tags, tomap({
+    Name = each.value.name
   }))
 }
