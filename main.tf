@@ -168,9 +168,9 @@ module "alb" {
   subnet_ids         = var.alb_subnet_ids
   security_group_ids = [aws_security_group.alb.id]
 
-  access_logs_enabled                             = true  // TODO - change to variable
-  alb_access_logs_s3_bucket_force_destroy         = false // TODO - change to variable
-  alb_access_logs_s3_bucket_force_destroy_enabled = false // TODO - change to variable
+  access_logs_enabled                             = var.access_logs_enabled
+  alb_access_logs_s3_bucket_force_destroy         = var.alb_access_logs_s3_bucket_force_destroy
+  alb_access_logs_s3_bucket_force_destroy_enabled = var.alb_access_logs_s3_bucket_force_destroy_enabled
   internal                                        = var.alb_internal
   idle_timeout                                    = var.alb_idle_timeout
 
