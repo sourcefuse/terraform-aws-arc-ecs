@@ -41,6 +41,26 @@ resource "aws_security_group" "health_check" {
 ################################################################################
 ## task definition
 ################################################################################
+## container definition
+module "health_check" {
+  source = "git::https://github.com/cloudposse/terraform-aws-ecs-container-definition?ref=0.58.2"
+
+  container_name   = "${var.cluster_name}-health-check-nginx"
+  container_image  = "nginx"
+  container_memory = 100
+  container_cpu    = 100
+  essential        = true
+
+  port_mappings = [
+    {
+      containerPort = 80
+      hostPort      = 80
+      protocol      = "tcp"
+    }
+  ]
+}
+
+## task definition
 resource "aws_ecs_task_definition" "health_check" {
   family                   = "${var.cluster_name}-health-check"
   requires_compatibilities = var.task_definition_requires_compatibilities
@@ -50,21 +70,7 @@ resource "aws_ecs_task_definition" "health_check" {
   task_role_arn            = var.health_check_task_role_arn
   execution_role_arn       = var.task_execution_role_arn
 
-  container_definitions = jsonencode([
-    {
-      name      = "${var.cluster_name}-health-check-nginx"
-      image     = "nginx"
-      cpu       = 100
-      memory    = 100
-      essential = true
-      portMappings = [
-        {
-          containerPort = 80
-          hostPort      = 80
-        }
-      ]
-    }
-  ])
+  container_definitions = module.health_check.json_map_encoded_list
 
   tags = merge(var.tags, tomap({
     Name = "${var.cluster_name}-health-check"

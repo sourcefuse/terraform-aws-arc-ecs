@@ -20,7 +20,9 @@ AWS ALB Module Health Check
 
 ## Modules
 
-No modules.
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_health_check"></a> [health\_check](#module\_health\_check) | git::https://github.com/cloudposse/terraform-aws-ecs-container-definition | 0.58.2 |
 
 ## Resources
 
