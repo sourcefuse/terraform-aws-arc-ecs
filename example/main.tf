@@ -13,7 +13,7 @@ terraform {
 }
 
 module "tags" {
-  source = "git::https://github.com/sourcefuse/terraform-aws-refarch-tags?ref=1.0.2"
+  source = "git::https://github.com/sourcefuse/terraform-aws-refarch-tags?ref=1.1.0"
 
   environment = var.environment
   project     = "Example"
@@ -29,7 +29,7 @@ provider "aws" {
 }
 
 ################################################################################
-## certificates // TODO: this should get generated inside the module for convenience
+## certificates
 ################################################################################
 module "acm" {
   source = "git::https://github.com/cloudposse/terraform-aws-acm-request-certificate?ref=0.17.0"
@@ -59,6 +59,12 @@ module "ecs" {
   alb_subnet_ids          = data.aws_subnets.public.ids
   health_check_subnet_ids = data.aws_subnets.private.ids
   alb_acm_certificate_arn = module.acm.arn
+
+  // --- Devs: DO NOT override, otherwise tests will fail --- //
+  access_logs_enabled                             = false
+  alb_access_logs_s3_bucket_force_destroy         = true # do not override, otherwise the test will fail
+  alb_access_logs_s3_bucket_force_destroy_enabled = true # do not override, otherwise the test will fail
+  // -------------------------- END ------------------------- //
 
   tags = module.tags.tags
 }
