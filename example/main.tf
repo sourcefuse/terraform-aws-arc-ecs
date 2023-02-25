@@ -62,8 +62,8 @@ module "ecs" {
 
   // --- Devs: DO NOT override, otherwise tests will fail --- //
   access_logs_enabled                             = false
-  alb_access_logs_s3_bucket_force_destroy         = true # do not override, otherwise the test will fail
-  alb_access_logs_s3_bucket_force_destroy_enabled = true # do not override, otherwise the test will fail
+  alb_access_logs_s3_bucket_force_destroy         = true
+  alb_access_logs_s3_bucket_force_destroy_enabled = true
   // -------------------------- END ------------------------- //
 
   tags = module.tags.tags
