@@ -1,43 +1,67 @@
-#variable "profile" {
-#  description = "The aws profile to use"
-#}
-
-# variable "region" {
-#   description = "The aws region"
-# }
-
+################################################################################
+## shared
+################################################################################
 variable "environment" {
-  description = "the name of your environment, e.g. \"prod\""
-  type = string
+  description = "ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT'"
+  type        = string
+}
+
+variable "namespace" {
+  type        = string
+  description = "Namespace for the resources."
+}
+
+variable "tags" {
+  description = "Tags to assign the resources."
+  type        = map(string)
+  default     = {}
 }
 
 variable "vpc_id" {
-  description = "VPC ID"
-  type = string
+  description = "Id of the VPC where the resources will live"
+  type        = string
+}
+################################################################################
+## alb
+################################################################################
+variable "alb_acm_certificate_arn" {
+  description = "ACM Certificate ARN for the ALB"
+  type        = string
 }
 
-variable "alb_tls_cert_arn" {
-  description = "The ARN of the certificate that the ALB uses for https"
-  type = string
+variable "alb_ssl_policy" {
+  description = "SSL policy for the ALB."
+  type        = string
+  default     = "ELBSecurityPolicy-FS-1-2-Res-2020-10"
 }
 
-
-variable "name" {
-  description = "the name of your stack, e.g. \"demo\""
-  type = string
+variable "alb_internal" {
+  description = "Determines if this load balancer is internally or externally facing."
+  type        = bool
+  default     = false
 }
 
-variable "subnets" {
-  description = "List of subnet IDs"
-  type = list(string)
+variable "alb_idle_timeout" {
+  description = "The time that the connection is allowed to be idle."
+  type        = number
+  default     = 300
 }
 
-variable "dns_name" {
-  description = "Alias record created for LB"
-  type = string
+variable "alb_subnets_ids" {
+  description = "Subnet Ids assigned to the LB"
+  type        = list(string)
 }
 
-variable "zone_id" {
-  description = "Route53 zone for alias record"
-  type = string
+variable "task_subnet_ids" {
+  description = "Subnet Ids to run tasks in"
+  type        = list(string)
+}
+
+################################################################################
+## cluster
+################################################################################
+variable "cluster_name_override" {
+  description = "Name to assign the cluster. If null, the default will be `namespace-environment-ecs-fargate`"
+  type        = string
+  default     = null
 }

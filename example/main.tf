@@ -1,34 +1,64 @@
-module "ecs_fargate" {
-  source           = "../."
-  vpc_id           = var.vpc_id
-  environment      = var.environment
-  name             = var.name
-  subnets          = var.subnets
-  region           = var.region
-  alb_tls_cert_arn = var.alb_tls_cert_arn
-  dns_name         = var.dns_name
-  zone_id          = var.zone_id
+################################################################################
+## defaults
+################################################################################
+terraform {
+  required_version = "~> 1.3"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
+    }
+  }
 }
 
-module "ecs_service_fargate" {
-  source                = "../health-check-service"
-  environment           = var.environment
-  target_group_arn      = module.ecs_fargate.ecs_target_group_arn
-  name                  = var.name
-  health_check_path     = var.health_check_path
-  subnets               = var.subnets
-  service_desired_count = var.service_desired_count
-  container_port        = var.container_port
-  region                = var.region
-  container_image       = var.container_image
-  container_cpu         = var.container_cpu
-  container_memory      = var.container_memory
-  vpc_id                = var.vpc_id
+module "tags" {
+  source = "git::https://github.com/sourcefuse/terraform-aws-refarch-tags?ref=1.0.2"
 
+  environment = var.environment
+  project     = "Example"
 
-  depends_on = [
-    module.ecs_fargate.ecs_target_group_arn, module.ecs_fargate.alb
-  ]
+  extra_tags = {
+    RepoName = "terraform-aws-refarch-ecs"
+    Example  = "true"
+  }
+}
 
-  ecs_cluster_id = module.ecs_fargate.ecs_cluster_id
+provider "aws" {
+  region = var.region
+}
+
+################################################################################
+## certificates // TODO: this should get generated inside the module for convenience
+################################################################################
+module "acm" {
+  source = "git::https://github.com/cloudposse/terraform-aws-acm-request-certificate?ref=0.17.0"
+
+  name                              = "${var.environment}-${var.namespace}-acm-certificate"
+  namespace                         = var.namespace
+  environment                       = var.environment
+  zone_name                         = trimprefix(var.acm_domain_name, "*.")
+  domain_name                       = var.acm_domain_name
+  subject_alternative_names         = var.acm_subject_alternative_names
+  process_domain_validation_options = true
+  ttl                               = "300"
+
+  tags = module.tags.tags
+}
+
+################################################################################
+## ecs
+################################################################################
+module "ecs" {
+  source = "../"
+
+  environment = var.environment
+  namespace   = var.namespace
+
+  vpc_id                  = data.aws_vpc.vpc.id
+  alb_subnets_ids         = data.aws_subnets.public.ids
+  task_subnet_ids         = data.aws_subnets.private.ids
+  alb_acm_certificate_arn = module.acm.arn
+
+  tags = module.tags.tags
 }
