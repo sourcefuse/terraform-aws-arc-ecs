@@ -38,18 +38,20 @@ resource "aws_security_group" "health_check" {
   }))
 }
 
+/*
 ################################################################################
 ## task definition
 ################################################################################
 ## container definition
 module "health_check" {
-  source = "git::https://github.com/cloudposse/terraform-aws-ecs-container-definition?ref=0.58.2"
+  source = "git::https://github.com/aws-ia/ecs-blueprints.git//modules/ecs-container-definition?ref=5a80841ac6f2436941c45e7a9cd9b69407b9ab32"
 
-  container_name   = "${var.cluster_name}-health-check-nginx"
-  container_image  = "nginx"
-  container_memory = 100
-  container_cpu    = 100
-  essential        = true
+  name      = "${var.cluster_name}-health-check-nginx"
+  image     = "nginx"
+  service   = "health-check"
+  memory    = 100
+  cpu       = 100
+  essential = true
 
   port_mappings = [
     {
@@ -70,7 +72,7 @@ resource "aws_ecs_task_definition" "health_check" {
   task_role_arn            = var.health_check_task_role_arn
   execution_role_arn       = var.task_execution_role_arn
 
-  container_definitions = module.health_check.json_map_encoded_list
+  container_definitions = jsonencode([module.health_check.container_definition])
 
   tags = merge(var.tags, tomap({
     Name = "${var.cluster_name}-health-check"
@@ -83,7 +85,7 @@ resource "aws_ecs_task_definition" "health_check" {
 resource "aws_ecs_service" "health_check" {
   name            = "${var.cluster_name}-health-check"
   cluster         = var.cluster_id
-  task_definition = aws_ecs_task_definition.health_check.arn
+  task_definition = var.service_task_definition
   launch_type     = "FARGATE" # TODO - change this
   desired_count   = 3         # TODO - change this
 
@@ -103,6 +105,7 @@ resource "aws_ecs_service" "health_check" {
     Name = "${var.cluster_name}-health-check"
   }))
 }
+*/
 
 ################################################################################
 ## target group

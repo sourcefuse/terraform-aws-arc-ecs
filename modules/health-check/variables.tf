@@ -30,6 +30,12 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
+variable "service_task_definition" {
+  type        = string
+  description = "Family and revision (family:revision) or full ARN of the task definition that you want to run in your service."
+}
+
+/*
 ################################################################################
 ## task definitions
 ################################################################################
@@ -67,6 +73,7 @@ variable "health_check_task_role_arn" {
   description = "ARN of IAM role that allows the health check container task to make calls to other AWS services."
   default     = null
 }
+*/
 
 variable "health_check_path_pattern" {
   type        = string
