@@ -215,7 +215,7 @@ variable "cluster_name_override" {
 ## service
 ################################################################################
 variable "ecs_service_subnet_ids" {
-  type = list(string)
+  type        = list(string)
   description = "List of Subnets IDs to assign the ECS Service"
 }
 

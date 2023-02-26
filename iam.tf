@@ -16,7 +16,7 @@ data "aws_iam_policy_document" "task" {
 }
 
 resource "aws_iam_role" "task" {
-  name               = "${local.cluster_name}-task"
+  name_prefix        = "${local.cluster_name}-task"
   assume_role_policy = data.aws_iam_policy_document.task.json
 
   tags = merge(var.tags, tomap({
@@ -27,9 +27,9 @@ resource "aws_iam_role" "task" {
 resource "aws_iam_role_policy" "task" {
   count = var.attach_task_role_policy ? 1 : 0
 
-  name   = "${local.cluster_name}-task"
-  role   = aws_iam_role.task.id
-  policy = var.task_role_policy
+  name_prefix = "${local.cluster_name}-task"
+  role        = aws_iam_role.task.id
+  policy      = var.task_role_policy
 }
 
 ################################################################################

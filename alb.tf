@@ -76,7 +76,7 @@ module "health_check" {
   cluster_name            = module.ecs.cluster_name
   service_task_definition = aws_ecs_task_definition.this.arn
 
-  lb_listener_arn = aws_lb_listener.https.arn
+  lb_listener_arn       = aws_lb_listener.https.arn
   lb_security_group_ids = [aws_security_group.alb.id]
 
   tags = var.tags

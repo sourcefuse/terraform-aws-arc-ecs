@@ -59,8 +59,8 @@ resource "aws_ecs_service" "this" {
   health_check_grace_period_seconds = length(var.load_balancers) > 0 ? var.health_check_grace_period_seconds : null
 
   network_configuration {
-    subnets          = var.ecs_service_subnet_ids
-    security_groups  = concat(
+    subnets = var.ecs_service_subnet_ids
+    security_groups = concat(
       var.additional_service_security_group_ids,
       [aws_security_group.alb.id],
       [module.health_check.security_group_id]
@@ -116,7 +116,7 @@ resource "aws_ecs_task_definition" "this" {
   network_mode             = var.task_definition_network_mode
   cpu                      = var.task_definition_cpu
   memory                   = var.task_definition_memory
-  task_role_arn            = aws_iam_role.execution.arn
+  task_role_arn            = aws_iam_role.task.arn
   execution_role_arn       = aws_iam_role.execution.arn
 
   container_definitions = jsonencode([for x in module.container_definition : x.container_definition])
