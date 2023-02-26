@@ -57,6 +57,18 @@ variable "service_discovery_private_dns_namespace" {
 ################################################################################
 ## task execution
 ################################################################################
+variable "attach_task_role_policy" {
+  description = "Attach the task role policy to the task role"
+  type        = bool
+  default     = false
+}
+
+variable "task_role_policy" {
+  description = "The task's role policy"
+  type        = string
+  default     = null
+}
+
 variable "execution_policy_attachment_arns" {
   type        = list(string)
   description = "The ARNs of the policies you want to apply"
@@ -126,6 +138,7 @@ variable "container_definitions" {
 ################################################################################
 ## health check
 ################################################################################
+// TODO - consolidate to var.ecs_service_subnet_ids, if it seems appropriate
 variable "health_check_subnet_ids" {
   type        = list(string)
   description = "Subnet IDs for the health check tasks to run in. If not defined, this will use `var.alb_subnet_ids`."
@@ -201,10 +214,29 @@ variable "cluster_name_override" {
 ################################################################################
 ## service
 ################################################################################
+variable "ecs_service_subnet_ids" {
+  type = list(string)
+  description = "List of Subnets IDs to assign the ECS Service"
+}
+
 variable "service_desired_count" {
   type        = number
   description = "The desired number of instantiations of the task definition to keep running on the service."
   default     = 1
+}
+
+variable "service_registry_list" {
+  type = list(object({
+    registry_arn = string
+  }))
+  description = "A list of service discovery registry names for the ECS service"
+  default     = []
+}
+
+variable "additional_service_security_group_ids" {
+  type        = list(string)
+  description = "Additional Security Group IDs to add to the ECS Service."
+  default     = []
 }
 
 variable "load_balancers" {
