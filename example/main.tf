@@ -29,24 +29,6 @@ provider "aws" {
 }
 
 ################################################################################
-## certificates
-################################################################################
-module "acm" {
-  source = "git::https://github.com/cloudposse/terraform-aws-acm-request-certificate?ref=0.17.0"
-
-  name                              = "${var.environment}-${var.namespace}-acm-certificate"
-  namespace                         = var.namespace
-  environment                       = var.environment
-  zone_name                         = trimprefix(var.acm_domain_name, "*.")
-  domain_name                       = var.acm_domain_name
-  subject_alternative_names         = var.acm_subject_alternative_names
-  process_domain_validation_options = true
-  ttl                               = "300"
-
-  tags = module.tags.tags
-}
-
-################################################################################
 ## ecs
 ################################################################################
 module "ecs" {
@@ -59,7 +41,6 @@ module "ecs" {
   alb_subnet_ids          = data.aws_subnets.public.ids
   ecs_service_subnet_ids  = data.aws_subnets.private.ids
   health_check_subnet_ids = data.aws_subnets.private.ids
-  alb_acm_certificate_arn = module.acm.arn
 
   // --- Devs: DO NOT override, otherwise tests will fail --- //
   access_logs_enabled                             = false
@@ -67,5 +48,7 @@ module "ecs" {
   alb_access_logs_s3_bucket_force_destroy_enabled = true
   // -------------------------- END ------------------------- //
 
-  tags = module.tags.tags
+  tags            = module.tags.tags
+  route_53_zone   = "sfrefarch.com" // TODO: make variable
+  acm_domain_name = var.acm_domain_name
 }
