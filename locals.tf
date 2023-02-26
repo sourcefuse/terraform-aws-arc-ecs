@@ -32,4 +32,24 @@ locals {
       type        = "String"
     }
   ])
+
+  ## container definitions
+  container_definitions = concat(var.container_definitions, [
+    {
+      name      = "${local.cluster_name}-health-check-nginx"
+      image     = "nginx"
+      service   = "health-check"
+      memory    = 100
+      cpu       = 100
+      essential = true
+
+      port_mappings = [
+        {
+          containerPort = 80
+          hostPort      = 80
+          protocol      = "tcp"
+        }
+      ]
+    }
+  ])
 }
