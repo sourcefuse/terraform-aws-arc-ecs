@@ -65,6 +65,63 @@ variable "execution_policy_attachment_arns" {
     "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
   ]
 }
+################################################################################
+## task / container definitions
+################################################################################
+variable "task_definition_requires_compatibilities" {
+  type        = list(string)
+  description = "Set of launch types required by the task. The valid values are EC2 and FARGATE."
+  default     = ["FARGATE"]
+}
+
+variable "task_definition_network_mode" {
+  type        = string
+  description = "Docker networking mode to use for the containers in the task. Valid values are none, bridge, awsvpc, and host."
+  default     = "awsvpc"
+}
+
+variable "task_definition_cpu" {
+  type        = number
+  description = "Number of cpu units used by the task. If the requires_compatibilities is FARGATE this field is required."
+  default     = 1024
+}
+
+variable "task_definition_memory" {
+  type        = number
+  description = "Amount (in MiB) of memory used by the task. If the requires_compatibilities is FARGATE this field is required."
+  default     = 2048
+}
+
+// TODO - remove if not needed
+#variable "task_execution_role_arn" {
+#  type        = string
+#  description = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume."
+#}
+
+variable "container_definitions" {
+  type = list(object({
+    name      = string
+    image     = string
+    service   = string
+    memory    = optional(number)
+    cpu       = optional(number)
+    essential = optional(bool)
+    port_mappings = list(object({
+      containerPort = number
+      hostPort      = number
+      protocol      = string
+    }))
+  }))
+  description = <<-EOT
+    List of maps that define container definitions to create.
+    The options for port_mappings.protocol are "udp" or "tcp"
+    if the optional values are left undefined, they will default to:
+      memory    = 100
+      cpu       = 100
+      essential = false
+  EOT
+  default     = []
+}
 
 ################################################################################
 ## health check
@@ -120,7 +177,6 @@ variable "alb_access_logs_s3_bucket_force_destroy" {
 
 variable "alb_access_logs_s3_bucket_force_destroy_enabled" {
   type        = bool
-  default     = false
   description = <<-EOT
     When `true`, permits `force_destroy` to be set to `true`.
     This is an extra safety precaution to reduce the chance that Terraform will destroy and recreate
@@ -130,15 +186,51 @@ variable "alb_access_logs_s3_bucket_force_destroy_enabled" {
       unless you follow the upgrade instructions on the Wiki [here](https://github.com/cloudposse/terraform-aws-s3-log-storage/wiki/Upgrading-to-v0.27.0-(POTENTIAL-DATA-LOSS)).
       See additional instructions for upgrading from v0.27.0 to v0.28.0 [here](https://github.com/cloudposse/terraform-aws-s3-log-storage/wiki/Upgrading-to-v0.28.0-and-AWS-provider-v4-(POTENTIAL-DATA-LOSS)).
     EOT
+  default     = false
 }
 
 ################################################################################
 ## cluster
 ################################################################################
 variable "cluster_name_override" {
+  type        = string
   description = "Name to assign the cluster. If null, the default will be `namespace-environment-cluster`"
+  default     = null
+}
+
+################################################################################
+## service
+################################################################################
+variable "service_desired_count" {
+  type        = number
+  description = "The desired number of instantiations of the task definition to keep running on the service."
+  default     = 1
+}
+
+variable "load_balancers" {
+  type = list(object({
+    target_group_arn = string
+  }))
+  description = "A list of load balancer config objects for the ECS service"
+  default     = []
+}
+
+variable "alb_container_name" {
+  description = "The container name for the ALB"
   type        = string
   default     = null
+}
+
+variable "alb_container_port" {
+  description = "The port that the container will use to listen to requests"
+  type        = number
+  default     = null
+}
+
+variable "health_check_grace_period_seconds" {
+  description = "Number of seconds for the task health check"
+  type        = number
+  default     = 30
 }
 
 ################################################################################
