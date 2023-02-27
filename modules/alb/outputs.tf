@@ -15,3 +15,8 @@ output "alb_dns_name" {
   description = "External DNS name to the ALB"
   value       = module.alb.alb_dns_name
 }
+
+output "alb_zone_id" {
+  description = "Zone ID of the ALB"
+  value       = module.alb.alb_zone_id
+}

@@ -58,6 +58,7 @@ variable "vpc_name" {
 variable "acm_domain_name" {
   description = "Domain name the ACM Certificate belongs to"
   type        = string
+  default     = "*.sfrefarch.com"
 }
 
 variable "acm_subject_alternative_names" {

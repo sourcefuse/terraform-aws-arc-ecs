@@ -30,10 +30,10 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
-variable "service_task_definition" {
-  type        = string
-  description = "Family and revision (family:revision) or full ARN of the task definition that you want to run in your service."
-}
+#variable "service_task_definition" {
+#  type        = string
+#  description = "Family and revision (family:revision) or full ARN of the task definition that you want to run in your service."
+#}
 
 /*
 ################################################################################
@@ -79,6 +79,26 @@ variable "health_check_path_pattern" {
   type        = string
   description = "Path pattern to match against the request URL."
   default     = "/"
+}
+
+variable "health_check_domains" {
+  type        = list(string)
+  description = "List of A record domains to create for the health check service"
+}
+
+variable "route_53_zone_id" {
+  type        = string
+  description = "Route 53 zone ID to use when making an A record for the health check."
+}
+
+variable "alb_dns_name" {
+  type        = string
+  description = "ALB DNS name to create A record for health check service"
+}
+
+variable "alb_zone_id" {
+  type        = string
+  description = "ALB Route53 zone ID to create A record for health check service"
 }
 
 ################################################################################

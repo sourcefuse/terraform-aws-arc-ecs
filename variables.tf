@@ -110,49 +110,62 @@ variable "task_definition_memory" {
 #  description = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume."
 #}
 
-variable "container_definitions" {
-  type = list(object({
-    name      = string
-    image     = string
-    service   = string
-    memory    = optional(number)
-    cpu       = optional(number)
-    essential = optional(bool)
-    port_mappings = list(object({
-      containerPort = number
-      hostPort      = number
-      protocol      = string
-    }))
-  }))
-  description = <<-EOT
-    List of maps that define container definitions to create.
-    The options for port_mappings.protocol are "udp" or "tcp"
-    if the optional values are left undefined, they will default to:
-      memory    = 100
-      cpu       = 100
-      essential = false
-  EOT
-  default     = []
-}
+#variable "container_definitions" {
+#  type = list(object({
+#    name      = string
+#    image     = string
+#    service   = string
+#    memory    = optional(number)
+#    cpu       = optional(number)
+#    essential = optional(bool)
+#    port_mappings = list(object({
+#      containerPort = number
+#      hostPort      = number
+#      protocol      = string
+#    }))
+#  }))
+#  description = <<-EOT
+#    List of maps that define container definitions to create.
+#    The options for port_mappings.protocol are "udp" or "tcp"
+#    if the optional values are left undefined, they will default to:
+#      memory    = 100
+#      cpu       = 100
+#      essential = false
+#  EOT
+#  default     = []
+#}
 
 ################################################################################
 ## health check
 ################################################################################
-// TODO - consolidate to var.ecs_service_subnet_ids, if it seems appropriate
 variable "health_check_subnet_ids" {
   type        = list(string)
   description = "Subnet IDs for the health check tasks to run in. If not defined, this will use `var.alb_subnet_ids`."
   default     = []
 }
 
+variable "route_53_zone" {
+  type        = string
+  description = "Route 53 domain to generate an ACM request for and to create A records against, i.e. sfrefarch.com. A wildcard subject alternative name is generated with the certificate."
+}
+
+################################################################################
+## acm
+################################################################################
+variable "acm_domain_name" {
+  description = "Domain name the ACM Certificate belongs to"
+  type        = string
+}
+
+variable "acm_subject_alternative_names" {
+  description = "Subject alternative names for the ACM Certificate"
+  type        = list(string)
+  default     = []
+}
+
 ################################################################################
 ## alb
 ################################################################################
-variable "alb_acm_certificate_arn" {
-  type        = string
-  description = "ACM Certificate ARN for the ALB"
-}
-
 variable "alb_subnet_ids" {
   type        = list(string)
   description = "Subnet Ids assigned to the LB"
@@ -268,20 +281,20 @@ variable "health_check_grace_period_seconds" {
 ################################################################################
 ## cluster
 ################################################################################
-variable "additional_ssm_params" {
-  type = list(object({
-    name        = string
-    value       = string
-    description = optional(string)
-    type        = optional(string)
-    overwrite   = optional(bool)
-  }))
-  description = <<-EOF
-    Additional SSM Parameters you would like to add for your ECS configuration.
-    The optional value defaults are:
-      description = "Managed by Terraform"
-      type = "SecureString"
-      overwrite = true
-  EOF
-  default     = []
-}
+#variable "additional_ssm_params" {
+#  type = list(object({
+#    name        = string
+#    value       = string
+#    description = optional(string)
+#    type        = optional(string)
+#    overwrite   = optional(bool)
+#  }))
+#  description = <<-EOF
+#    Additional SSM Parameters you would like to add for your ECS configuration.
+#    The optional value defaults are:
+#      description = "Managed by Terraform"
+#      type = "SecureString"
+#      overwrite = true
+#  EOF
+#  default     = []
+#}

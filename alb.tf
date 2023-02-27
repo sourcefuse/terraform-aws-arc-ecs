@@ -1,3 +1,18 @@
+module "acm" {
+  source = "git::https://github.com/cloudposse/terraform-aws-acm-request-certificate?ref=0.17.0"
+
+  name                              = "${var.environment}-${var.namespace}-acm-certificate"
+  namespace                         = var.namespace
+  environment                       = var.environment
+  zone_name                         = trimprefix(var.acm_domain_name, "*.")
+  domain_name                       = var.acm_domain_name
+  subject_alternative_names         = var.acm_subject_alternative_names
+  process_domain_validation_options = true
+  ttl                               = "300"
+
+  tags = var.tags
+}
+
 ################################################################################
 ## load balancer
 ################################################################################
@@ -65,6 +80,11 @@ module "alb" {
   tags = var.tags
 }
 
+data "aws_route53_zone" "health_check" {
+  name = var.route_53_zone
+}
+
+
 // TODO - determine if this is needed / if needs to be consolidated to root
 module "health_check" {
   source = "./modules/health-check"
@@ -72,9 +92,9 @@ module "health_check" {
   vpc_id     = var.vpc_id
   subnet_ids = length(var.health_check_subnet_ids) > 0 ? var.health_check_subnet_ids : var.alb_subnet_ids
 
-  cluster_id              = module.ecs.cluster_id
-  cluster_name            = module.ecs.cluster_name
-  service_task_definition = aws_ecs_task_definition.this.arn
+  cluster_id   = module.ecs.cluster_id
+  cluster_name = module.ecs.cluster_name
+  #  service_task_definition = aws_ecs_task_definition.this.arn
 
   lb_listener_arn       = aws_lb_listener.https.arn
   lb_security_group_ids = [aws_security_group.alb.id]
@@ -85,6 +105,10 @@ module "health_check" {
     module.ecs,
     module.alb
   ]
+  alb_dns_name         = module.alb.alb_dns_name
+  alb_zone_id          = module.alb.alb_zone_id
+  health_check_domains = ["healthcheck-ecs-example.sfrefarch.com"]
+  route_53_zone_id     = data.aws_route53_zone.health_check.zone_id
 }
 
 ################################################################################
@@ -117,7 +141,7 @@ resource "aws_lb_listener" "https" {
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = var.alb_ssl_policy
-  certificate_arn   = var.alb_acm_certificate_arn
+  certificate_arn   = module.acm.arn
 
   default_action {
     type = "fixed-response"
