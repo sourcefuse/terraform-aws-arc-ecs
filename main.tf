@@ -140,19 +140,24 @@ resource "aws_cloudwatch_log_group" "this" {
 ################################################################################
 ## ssm parameters
 ################################################################################
-#resource "aws_ssm_parameter" "this" {
-#  for_each = { for x in local.ssm_params : x.name => x }
-#
-#  name        = each.value.name
-#  value       = each.value.value
-#  description = try(each.value.description, "Managed by Terraform")
-#  type        = try(each.value.type, "SecureString")
-#  overwrite   = try(each.value.overwrite, true)
-#
-#  tags = merge(var.tags, tomap({
-#    Name = each.value.name
-#  }))
-#}
+resource "aws_ssm_parameter" "this" {
+  for_each = { for x in local.ssm_params : x.name => x }
+
+  name        = each.value.name
+  value       = each.value.value
+  description = try(each.value.description, "Managed by Terraform")
+  type        = try(each.value.type, "SecureString")
+  overwrite   = try(each.value.overwrite, true)
+
+  tags = merge(var.tags, tomap({
+    Name = each.value.name
+  }))
+}
+
+################################################################################
+## load balancer
+################################################################################
+## certificate
 module "acm" {
   source = "git::https://github.com/cloudposse/terraform-aws-acm-request-certificate?ref=0.17.0"
 
@@ -168,9 +173,7 @@ module "acm" {
   tags = var.tags
 }
 
-################################################################################
-## load balancer
-################################################################################
+## security groups
 resource "aws_security_group" "alb" {
   name   = "${local.cluster_name}-alb"
   vpc_id = var.vpc_id
