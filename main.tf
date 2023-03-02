@@ -153,6 +153,11 @@ resource "aws_ssm_parameter" "this" {
     Name = each.value.name
   }))
 }
+
+################################################################################
+## load balancer
+################################################################################
+## certificate
 module "acm" {
   source = "git::https://github.com/cloudposse/terraform-aws-acm-request-certificate?ref=0.17.0"
 
