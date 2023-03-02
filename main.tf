@@ -140,19 +140,19 @@ resource "aws_cloudwatch_log_group" "this" {
 ################################################################################
 ## ssm parameters
 ################################################################################
-#resource "aws_ssm_parameter" "this" {
-#  for_each = { for x in local.ssm_params : x.name => x }
-#
-#  name        = each.value.name
-#  value       = each.value.value
-#  description = try(each.value.description, "Managed by Terraform")
-#  type        = try(each.value.type, "SecureString")
-#  overwrite   = try(each.value.overwrite, true)
-#
-#  tags = merge(var.tags, tomap({
-#    Name = each.value.name
-#  }))
-#}
+resource "aws_ssm_parameter" "this" {
+  for_each = { for x in local.ssm_params : x.name => x }
+
+  name        = each.value.name
+  value       = each.value.value
+  description = try(each.value.description, "Managed by Terraform")
+  type        = try(each.value.type, "SecureString")
+  overwrite   = try(each.value.overwrite, true)
+
+  tags = merge(var.tags, tomap({
+    Name = each.value.name
+  }))
+}
 module "acm" {
   source = "git::https://github.com/cloudposse/terraform-aws-acm-request-certificate?ref=0.17.0"
 
@@ -171,35 +171,48 @@ module "acm" {
 ################################################################################
 ## load balancer
 ################################################################################
-resource "aws_security_group" "alb" {
-  name   = "${local.cluster_name}-alb"
+module "alb_sg" {
+  source = "cloudposse/security-group/aws"
+  # Cloud Posse recommends pinning every module to a specific version
+  version = "2.0.0"
+
+  # Security Group names must be unique within a VPC.
+  # This module follows Cloud Posse naming conventions and generates the name
+  # based on the inputs to the null-label module, which means you cannot
+  # reuse the label as-is for more than one security group in the VPC.
+  #
+  # Here we add an attribute to give the security group a unique name.
+  attributes = ["${local.cluster_name}-alb"]
+
+  # Allow unlimited egress
+  allow_all_egress = true
+
+  rules = [
+    {
+      key              = "alb-ingress-80"
+      type             = "ingress"
+      from_port        = 80
+      protocol         = "tcp"
+      to_port          = 80
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
+      self             = null # preferable to self = false
+      description      = "Allow port 80 from anywhere"
+    },
+    {
+      key              = "alb-ingress-443"
+      type             = "ingress"
+      from_port        = 443
+      protocol         = "tcp"
+      to_port          = 443
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
+      self             = null # preferable to self = false
+      description      = "Allow port 443 from anywhere"
+    }
+  ]
+
   vpc_id = var.vpc_id
-
-  // TODO - make dynamic
-  ingress {
-    from_port        = 80
-    protocol         = "tcp"
-    to_port          = 80
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  ingress {
-    from_port        = 443
-    protocol         = "tcp"
-    to_port          = 443
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  // TODO - tighten this down to only go to the task subnets
-  egress {
-    from_port        = 0
-    protocol         = "-1"
-    to_port          = 0
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
 
   tags = merge(var.tags, tomap({
     Name = "${local.cluster_name}-alb"
@@ -214,7 +227,7 @@ module "alb" {
   environment        = var.environment
   vpc_id             = var.vpc_id
   subnet_ids         = var.alb_subnet_ids
-  security_group_ids = [aws_security_group.alb.id]
+  security_group_ids = [module.alb_sg.id]
 
   access_logs_enabled                             = var.access_logs_enabled
   alb_access_logs_s3_bucket_force_destroy         = var.alb_access_logs_s3_bucket_force_destroy
@@ -239,8 +252,6 @@ data "aws_route53_zone" "health_check" {
   name = var.route_53_zone
 }
 
-
-// TODO - determine if this is needed / if needs to be consolidated to root
 module "health_check" {
   source = "./modules/health-check"
 
@@ -249,10 +260,9 @@ module "health_check" {
 
   cluster_id   = module.ecs.cluster_id
   cluster_name = module.ecs.cluster_name
-  #  service_task_definition = aws_ecs_task_definition.this.arn
 
   lb_listener_arn       = aws_lb_listener.https.arn
-  lb_security_group_ids = [aws_security_group.alb.id]
+  lb_security_group_ids = [module.alb_sg.id]
 
   tags = var.tags
 
@@ -262,7 +272,7 @@ module "health_check" {
   ]
   alb_dns_name         = module.alb.alb_dns_name
   alb_zone_id          = module.alb.alb_zone_id
-  health_check_domains = ["healthcheck-ecs-example.sfrefarch.com"]
+  health_check_domains = var.health_check_domains
   route_53_zone_id     = data.aws_route53_zone.health_check.zone_id
 }
 

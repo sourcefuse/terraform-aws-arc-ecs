@@ -149,6 +149,10 @@ variable "route_53_zone" {
   description = "Route 53 domain to generate an ACM request for and to create A records against, i.e. sfrefarch.com. A wildcard subject alternative name is generated with the certificate."
 }
 
+variable "health_check_domains" {
+  type        = list(string)
+  description = "List of domains for the health check service."
+}
 ################################################################################
 ## acm
 ################################################################################
@@ -281,20 +285,20 @@ variable "health_check_grace_period_seconds" {
 ################################################################################
 ## cluster
 ################################################################################
-#variable "additional_ssm_params" {
-#  type = list(object({
-#    name        = string
-#    value       = string
-#    description = optional(string)
-#    type        = optional(string)
-#    overwrite   = optional(bool)
-#  }))
-#  description = <<-EOF
-#    Additional SSM Parameters you would like to add for your ECS configuration.
-#    The optional value defaults are:
-#      description = "Managed by Terraform"
-#      type = "SecureString"
-#      overwrite = true
-#  EOF
-#  default     = []
-#}
+variable "additional_ssm_params" {
+  type = list(object({
+    name        = string
+    value       = string
+    description = optional(string)
+    type        = optional(string)
+    overwrite   = optional(bool)
+  }))
+  description = <<-EOF
+    Additional SSM Parameters you would like to add for your ECS configuration.
+    The optional value defaults are:
+      description = "Managed by Terraform"
+      type = "SecureString"
+      overwrite = true
+  EOF
+  default     = []
+}

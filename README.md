@@ -46,6 +46,7 @@ module "ecs" {
 |------|--------|---------|
 | <a name="module_acm"></a> [acm](#module\_acm) | git::https://github.com/cloudposse/terraform-aws-acm-request-certificate | 0.17.0 |
 | <a name="module_alb"></a> [alb](#module\_alb) | ./modules/alb | n/a |
+| <a name="module_alb_sg"></a> [alb\_sg](#module\_alb\_sg) | cloudposse/security-group/aws | 2.0.0 |
 | <a name="module_ecs"></a> [ecs](#module\_ecs) | git::https://github.com/terraform-aws-modules/terraform-aws-ecs | v4.1.2 |
 | <a name="module_health_check"></a> [health\_check](#module\_health\_check) | ./modules/health-check | n/a |
 
@@ -62,7 +63,7 @@ module "ecs" {
 | [aws_iam_role_policy.task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_lb_listener.http](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
 | [aws_lb_listener.https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
-| [aws_security_group.alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_ssm_parameter.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
 | [aws_iam_policy_document.assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_iam_policy_document.task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_route53_zone.health_check](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
@@ -75,6 +76,7 @@ module "ecs" {
 | <a name="input_acm_domain_name"></a> [acm\_domain\_name](#input\_acm\_domain\_name) | Domain name the ACM Certificate belongs to | `string` | n/a | yes |
 | <a name="input_acm_subject_alternative_names"></a> [acm\_subject\_alternative\_names](#input\_acm\_subject\_alternative\_names) | Subject alternative names for the ACM Certificate | `list(string)` | `[]` | no |
 | <a name="input_additional_service_security_group_ids"></a> [additional\_service\_security\_group\_ids](#input\_additional\_service\_security\_group\_ids) | Additional Security Group IDs to add to the ECS Service. | `list(string)` | `[]` | no |
+| <a name="input_additional_ssm_params"></a> [additional\_ssm\_params](#input\_additional\_ssm\_params) | Additional SSM Parameters you would like to add for your ECS configuration.<br>The optional value defaults are:<br>  description = "Managed by Terraform"<br>  type = "SecureString"<br>  overwrite = true | <pre>list(object({<br>    name        = string<br>    value       = string<br>    description = optional(string)<br>    type        = optional(string)<br>    overwrite   = optional(bool)<br>  }))</pre> | `[]` | no |
 | <a name="input_alb_access_logs_s3_bucket_force_destroy"></a> [alb\_access\_logs\_s3\_bucket\_force\_destroy](#input\_alb\_access\_logs\_s3\_bucket\_force\_destroy) | A boolean that indicates all objects should be deleted from the ALB access logs S3 bucket so that the bucket can be destroyed without error | `bool` | `false` | no |
 | <a name="input_alb_access_logs_s3_bucket_force_destroy_enabled"></a> [alb\_access\_logs\_s3\_bucket\_force\_destroy\_enabled](#input\_alb\_access\_logs\_s3\_bucket\_force\_destroy\_enabled) | When `true`, permits `force_destroy` to be set to `true`.<br>This is an extra safety precaution to reduce the chance that Terraform will destroy and recreate<br>your S3 bucket, causing COMPLETE LOSS OF ALL DATA even if it was stored in Glacier.<br>WARNING: Upgrading this module from a version prior to 0.27.0 to this version<br>  will cause Terraform to delete your existing S3 bucket CAUSING COMPLETE DATA LOSS<br>  unless you follow the upgrade instructions on the Wiki [here](https://github.com/cloudposse/terraform-aws-s3-log-storage/wiki/Upgrading-to-v0.27.0-(POTENTIAL-DATA-LOSS)).<br>  See additional instructions for upgrading from v0.27.0 to v0.28.0 [here](https://github.com/cloudposse/terraform-aws-s3-log-storage/wiki/Upgrading-to-v0.28.0-and-AWS-provider-v4-(POTENTIAL-DATA-LOSS)). | `bool` | `false` | no |
 | <a name="input_alb_container_name"></a> [alb\_container\_name](#input\_alb\_container\_name) | The container name for the ALB | `string` | `null` | no |
@@ -88,6 +90,7 @@ module "ecs" {
 | <a name="input_ecs_service_subnet_ids"></a> [ecs\_service\_subnet\_ids](#input\_ecs\_service\_subnet\_ids) | List of Subnets IDs to assign the ECS Service | `list(string)` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT' | `string` | n/a | yes |
 | <a name="input_execution_policy_attachment_arns"></a> [execution\_policy\_attachment\_arns](#input\_execution\_policy\_attachment\_arns) | The ARNs of the policies you want to apply | `list(string)` | <pre>[<br>  "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess",<br>  "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"<br>]</pre> | no |
+| <a name="input_health_check_domains"></a> [health\_check\_domains](#input\_health\_check\_domains) | List of domains for the health check service. | `list(string)` | n/a | yes |
 | <a name="input_health_check_grace_period_seconds"></a> [health\_check\_grace\_period\_seconds](#input\_health\_check\_grace\_period\_seconds) | Number of seconds for the task health check | `number` | `30` | no |
 | <a name="input_health_check_subnet_ids"></a> [health\_check\_subnet\_ids](#input\_health\_check\_subnet\_ids) | Subnet IDs for the health check tasks to run in. If not defined, this will use `var.alb_subnet_ids`. | `list(string)` | `[]` | no |
 | <a name="input_load_balancers"></a> [load\_balancers](#input\_load\_balancers) | A list of load balancer config objects for the ECS service | <pre>list(object({<br>    target_group_arn = string<br>  }))</pre> | `[]` | no |
