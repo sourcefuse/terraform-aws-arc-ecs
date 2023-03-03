@@ -23,7 +23,7 @@ jobs:
         uses: snyk/actions/iac@master
         with:
           command: monitor
-          args: --severity-threshold=medium
+          args: --severity-threshold=low
       - name: Set up Node 16
         uses: actions/setup-node@v3
         with:
@@ -31,6 +31,6 @@ jobs:
       - name: install Snyk CLI
         run: npm install -g snyk
       - name: snyk monitor
-        run: snyk iac test --report
+        run: snyk iac test --report --severity-threshold=medium
         env:
           SNYK_TOKEN: ${{ secrets.ARC_SNYK_TOKEN }}
