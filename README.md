@@ -38,7 +38,7 @@ module "ecs" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 4.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.57.0 |
 
 ## Modules
 
