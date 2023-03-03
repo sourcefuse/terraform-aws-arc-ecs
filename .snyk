@@ -2,7 +2,7 @@
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   SNYK-CC-TF-1:
-    - 'main.tf > resource > aws_security_group[ecs_task_sg] > ingress':
+    - 'main.tf > input > resource > aws_security_group[ecs_task_sg] > ingress':
         reason: That inbound traffic is allowed to a resource from any source instead
                 of a restricted range. That potentially everyone can access your
                 resource
