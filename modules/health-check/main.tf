@@ -205,10 +205,10 @@ resource "aws_lb_listener_rule" "forward" {
   tags = var.tags
 }
 
-resource "aws_route53_record" "health_check_records" {
-  zone_id  = var.route_53_zone_id
+resource "aws_route53_record" "health_check" {
   for_each = toset(var.health_check_domains)
 
+  zone_id  = var.alb_zone_id
   name = each.value
   type = "A"
 

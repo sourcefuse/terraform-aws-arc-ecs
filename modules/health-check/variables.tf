@@ -86,11 +86,6 @@ variable "health_check_domains" {
   description = "List of A record domains to create for the health check service"
 }
 
-variable "route_53_zone_id" {
-  type        = string
-  description = "Route 53 zone ID to use when making an A record for the health check."
-}
-
 variable "alb_dns_name" {
   type        = string
   description = "ALB DNS name to create A record for health check service"
