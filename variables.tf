@@ -58,18 +58,6 @@ variable "service_discovery_private_dns_namespace" {
 ################################################################################
 ## task execution
 ################################################################################
-variable "attach_task_role_policy" {
-  description = "Attach the task role policy to the task role"
-  type        = bool
-  default     = false
-}
-
-variable "task_role_policy" {
-  description = "The task's role policy"
-  type        = string
-  default     = null
-}
-
 variable "execution_policy_attachment_arns" {
   type        = list(string)
   description = "The ARNs of the policies you want to apply"
