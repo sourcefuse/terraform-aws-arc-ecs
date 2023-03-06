@@ -81,7 +81,7 @@ variable "health_check_path_pattern" {
   default     = "/"
 }
 
-variable "health_check_domains" {
+variable "health_check_route_53_records" {
   type        = list(string)
   description = "List of A record domains to create for the health check service"
 }

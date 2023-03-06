@@ -22,3 +22,9 @@ output "security_group_arn" {
 output "security_group_id" {
   value = aws_security_group.this.id
 }
+
+## route 53
+output "route_53_fqdn" {
+  description = "Health check FQDN record created in Route 53."
+  value       = [for x in aws_route53_record.this : x.fqdn]
+}

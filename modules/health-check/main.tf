@@ -153,7 +153,7 @@ resource "aws_ecs_task_definition" "this" {
 ## route 53
 ################################################################################
 resource "aws_route53_record" "this" {
-  for_each = toset(var.health_check_domains)
+  for_each = toset(var.health_check_route_53_records)
 
   zone_id = data.aws_route53_zone.this.id
   name    = each.value

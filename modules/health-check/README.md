@@ -47,8 +47,8 @@ AWS Terraform ALB Health Check Module
 | <a name="input_alb_zone_id"></a> [alb\_zone\_id](#input\_alb\_zone\_id) | ALB Route53 zone ID to create A record for health check service | `string` | n/a | yes |
 | <a name="input_cluster_id"></a> [cluster\_id](#input\_cluster\_id) | ID of the ECS cluster. | `string` | n/a | yes |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the ECS cluster. | `string` | n/a | yes |
-| <a name="input_health_check_domains"></a> [health\_check\_domains](#input\_health\_check\_domains) | List of A record domains to create for the health check service | `list(string)` | n/a | yes |
 | <a name="input_health_check_path_pattern"></a> [health\_check\_path\_pattern](#input\_health\_check\_path\_pattern) | Path pattern to match against the request URL. | `string` | `"/"` | no |
+| <a name="input_health_check_route_53_records"></a> [health\_check\_route\_53\_records](#input\_health\_check\_route\_53\_records) | List of A record domains to create for the health check service | `list(string)` | n/a | yes |
 | <a name="input_lb_listener_arn"></a> [lb\_listener\_arn](#input\_lb\_listener\_arn) | ARN of the load balancer listener. | `string` | n/a | yes |
 | <a name="input_lb_security_group_ids"></a> [lb\_security\_group\_ids](#input\_lb\_security\_group\_ids) | LB Security Group IDs for ingress access to the health check task definition. | `list(string)` | n/a | yes |
 | <a name="input_route_53_zone_name"></a> [route\_53\_zone\_name](#input\_route\_53\_zone\_name) | Route53 zone name used for looking up and creating an `A` record for the health check service | `string` | n/a | yes |
@@ -65,6 +65,7 @@ AWS Terraform ALB Health Check Module
 |------|-------------|
 | <a name="output_forward_listener_rule_arn"></a> [forward\_listener\_rule\_arn](#output\_forward\_listener\_rule\_arn) | TODO - add descriptions |
 | <a name="output_forward_listener_rule_id"></a> [forward\_listener\_rule\_id](#output\_forward\_listener\_rule\_id) | n/a |
+| <a name="output_route_53_fqdn"></a> [route\_53\_fqdn](#output\_route\_53\_fqdn) | Health check FQDN record created in Route 53. |
 | <a name="output_security_group_arn"></a> [security\_group\_arn](#output\_security\_group\_arn) | n/a |
 | <a name="output_security_group_id"></a> [security\_group\_id](#output\_security\_group\_id) | n/a |
 | <a name="output_target_group_arn"></a> [target\_group\_arn](#output\_target\_group\_arn) | n/a |
