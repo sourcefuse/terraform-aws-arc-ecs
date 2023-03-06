@@ -109,6 +109,8 @@ module "health_check" {
   alb_zone_id          = module.alb.alb_zone_id
   health_check_domains = var.health_check_domains
 
+  task_execution_role_arn = aws_iam_role.execution.arn
+
   tags = var.tags
 
   depends_on = [
