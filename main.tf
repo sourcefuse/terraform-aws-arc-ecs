@@ -129,17 +129,19 @@ resource "aws_cloudwatch_log_group" "this" {
 ################################################################################
 ## service discovery namespaces
 ################################################################################
-#resource "aws_service_discovery_private_dns_namespace" "this" {
-#  for_each = toset(var.service_discovery_private_dns_namespace)
-#
-#  name        = "${each.key}.${local.cluster_name}.local"
-#  description = "Service discovery for ${each.key}.${local.cluster_name}.local" # TODO - update this if needed. .local should be configurable
-#  vpc         = var.vpc_id
-#}
+// ARC-731: support discovery namespace
+resource "aws_service_discovery_private_dns_namespace" "this" {
+  for_each = toset(var.service_discovery_private_dns_namespace)
+
+  name        = "${each.key}.${local.cluster_name}.local"
+  description = "Service discovery for ${each.key}.${local.cluster_name}.local" # TODO - update this if needed. .local should be configurable
+  vpc         = var.vpc_id
+}
 
 ################################################################################
 ## ssm parameters
 ################################################################################
+// ARC-734: support custom ssm parameters / tags
 resource "aws_ssm_parameter" "this" {
   for_each = { for x in local.ssm_params : x.name => x }
 
