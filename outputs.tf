@@ -29,6 +29,11 @@ output "alb_dns_name" {
   value       = module.alb.alb_dns_name
 }
 
+output "health_check_fqdn" {
+  description = "Health check FQDN record created in Route 53."
+  value       = module.health_check.route_53_fqdn
+}
+
 ################################################################################
 ## acm
 ################################################################################
