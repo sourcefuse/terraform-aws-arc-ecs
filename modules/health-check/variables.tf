@@ -50,6 +50,7 @@ variable "task_definition_network_mode" {
   description = "Docker networking mode to use for the containers in the task. Valid values are none, bridge, awsvpc, and host."
   default     = "awsvpc"
 }
+*/
 
 variable "task_definition_cpu" {
   type        = number
@@ -68,12 +69,11 @@ variable "task_execution_role_arn" {
   description = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume."
 }
 
-variable "health_check_task_role_arn" {
-  type        = string
-  description = "ARN of IAM role that allows the health check container task to make calls to other AWS services."
-  default     = null
-}
-*/
+#variable "health_check_task_role_arn" {
+#  type        = string
+#  description = "ARN of IAM role that allows the health check container task to make calls to other AWS services."
+#  default     = null
+#}
 
 variable "health_check_path_pattern" {
   type        = string

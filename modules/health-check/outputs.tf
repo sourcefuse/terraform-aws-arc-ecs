@@ -8,17 +8,17 @@ output "forward_listener_rule_id" {
 }
 
 output "target_group_arn" {
-  value = aws_lb_target_group.health_check.arn
+  value = aws_lb_target_group.this.arn
 }
 
 output "target_group_id" {
-  value = aws_lb_target_group.health_check.id
+  value = aws_lb_target_group.this.id
 }
 
 output "security_group_arn" {
-  value = aws_security_group.health_check.id
+  value = aws_security_group.this.id
 }
 
 output "security_group_id" {
-  value = aws_security_group.health_check.id
+  value = aws_security_group.this.id
 }
