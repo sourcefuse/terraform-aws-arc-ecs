@@ -9,7 +9,7 @@ module "acm" {
   name                              = "${var.environment}-${var.namespace}-acm-certificate"
   namespace                         = var.namespace
   environment                       = var.environment
-  zone_name                         = trimprefix(var.acm_domain_name, "*.")
+  zone_name                         = var.route_53_zone
   domain_name                       = var.acm_domain_name
   subject_alternative_names         = var.acm_subject_alternative_names
   process_domain_validation_options = var.acm_process_domain_validation_options
@@ -105,8 +105,12 @@ module "health_check" {
   lb_listener_arn       = aws_lb_listener.https.arn
   lb_security_group_ids = [module.alb_sg.id]
 
-  alb_dns_name         = module.alb.alb_dns_name
-  alb_zone_id          = module.alb.alb_zone_id
+  ## for alb alias records
+  alb_dns_name = module.alb.alb_dns_name
+  alb_zone_id  = module.alb.alb_zone_id
+
+  ## for internal records on health check
+  route_53_zone_name   = var.route_53_zone
   health_check_domains = var.health_check_domains
 
   task_execution_role_arn = aws_iam_role.execution.arn
