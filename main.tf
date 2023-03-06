@@ -133,8 +133,8 @@ resource "aws_cloudwatch_log_group" "this" {
 resource "aws_service_discovery_private_dns_namespace" "this" {
   for_each = toset(var.service_discovery_private_dns_namespace)
 
-  name        = "${each.key}.${local.cluster_name}.local"
-  description = "Service discovery for ${each.key}.${local.cluster_name}.local" # TODO - update this if needed. .local should be configurable
+  name        = each.value
+  description = "Service discovery for ${each.value}"
   vpc         = var.vpc_id
 }
 

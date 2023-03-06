@@ -52,7 +52,7 @@ variable "log_group_skip_destroy" {
 variable "service_discovery_private_dns_namespace" {
   type        = list(string)
   description = "The name of the namespace"
-  default     = ["default"]
+  default     = ["default.example.local"]
 }
 
 ################################################################################

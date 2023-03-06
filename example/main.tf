@@ -56,5 +56,9 @@ module "ecs" {
     "healthcheck-ecs-${var.namespace}-${var.environment}.${local.route_53_zone}"
   ]
 
+  service_discovery_private_dns_namespace = [
+    "${var.namespace}.${var.environment}.${local.route_53_zone}"
+  ]
+
   tags = module.tags.tags
 }
