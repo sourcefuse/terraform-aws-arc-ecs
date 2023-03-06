@@ -50,9 +50,9 @@ module "ecs" {
 
   ## create acm certificate and dns record for health check
   route_53_zone                 = local.route_53_zone
-  acm_domain_name               = var.acm_domain_name
+  acm_domain_name               = "healthcheck-ecs-${var.namespace}-${var.environment}.${local.route_53_zone}"
   acm_subject_alternative_names = []
-  health_check_domains = [
+  health_check_route_53_records = [
     "healthcheck-ecs-${var.namespace}-${var.environment}.${local.route_53_zone}"
   ]
 
