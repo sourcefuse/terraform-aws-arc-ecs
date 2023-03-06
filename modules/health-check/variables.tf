@@ -96,6 +96,11 @@ variable "alb_zone_id" {
   description = "ALB Route53 zone ID to create A record for health check service"
 }
 
+variable "route_53_zone_name" {
+  type        = string
+  description = "Route53 zone name used for looking up and creating an `A` record for the health check service"
+}
+
 ################################################################################
 ## alb
 ################################################################################
