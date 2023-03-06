@@ -60,10 +60,3 @@ variable "acm_domain_name" {
   type        = string
   default     = "*.sfrefarch.com"
 }
-
-// TODO - remove if not needed
-#variable "acm_subject_alternative_names" {
-#  description = "Subject alternative names for the ACM Certificate"
-#  type        = list(string)
-#  default     = []
-#}

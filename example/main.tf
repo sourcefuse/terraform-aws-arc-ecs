@@ -48,8 +48,13 @@ module "ecs" {
   alb_access_logs_s3_bucket_force_destroy_enabled = true
   // -------------------------- END ------------------------- //
 
-  tags                 = module.tags.tags
-  route_53_zone        = "sfrefarch.com" // TODO: make variable
-  acm_domain_name      = var.acm_domain_name
-  health_check_domains = ["healthcheck-ecs-example.sfrefarch.com"]
+  ## create acm certificate and dns record for health check
+  route_53_zone                 = local.route_53_zone
+  acm_domain_name               = var.acm_domain_name
+  acm_subject_alternative_names = []
+  health_check_domains = [
+    "healthcheck-ecs-${var.namespace}-${var.environment}.${local.route_53_zone}"
+  ]
+
+  tags = module.tags.tags
 }
