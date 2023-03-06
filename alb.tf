@@ -110,8 +110,8 @@ module "health_check" {
   alb_zone_id  = module.alb.alb_zone_id
 
   ## for internal records on health check
-  route_53_zone_name   = var.route_53_zone
-  health_check_domains = var.health_check_domains
+  route_53_zone_name            = var.route_53_zone
+  health_check_route_53_records = var.health_check_route_53_records
 
   task_execution_role_arn = aws_iam_role.execution.arn
 

@@ -138,9 +138,9 @@ variable "route_53_zone" {
   description = "Route 53 domain to generate an ACM request for and to create A records against, i.e. sfrefarch.com. A wildcard subject alternative name is generated with the certificate."
 }
 
-variable "health_check_domains" {
+variable "health_check_route_53_records" {
   type        = list(string)
-  description = "List of domains for the health check service."
+  description = "List of Route 53 records for the health check service."
 }
 ################################################################################
 ## acm
