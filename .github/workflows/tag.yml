@@ -1,7 +1,7 @@
 ---
 name: Tag
 
-on:  # yamllint disable-line rule:truthy
+on:              # yamllint disable-line rule:truthy
   push:
     branches:
       - main
@@ -10,8 +10,8 @@ jobs:
   ## tag
   tag:
     runs-on:
+      - self-hosted
       - refarch
-      - dev
     steps:
       - uses: actions/checkout@v2
 

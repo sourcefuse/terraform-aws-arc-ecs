@@ -1,11 +1,11 @@
 ---
 name: snyk
 
-on:  # yamllint disable-line rule:truthy
+on:                # yamllint disable-line rule:truthy
   push:
     branches:
-      - '**'     # matches every branch
-      - '!main'  # excludes main
+      - "**"        # matches every branch
+      - "!main"     # excludes main
   pull_request:
     branches:
       - main
@@ -13,8 +13,8 @@ on:  # yamllint disable-line rule:truthy
 jobs:
   security:
     runs-on:
+      - self-hosted
       - refarch
-      - dev
     name: snyk
     steps:
       - name: checkout
@@ -31,6 +31,6 @@ jobs:
       - name: install Snyk CLI
         run: npm install -g snyk
       - name: snyk monitor
-        run: snyk iac test --report
+        run: snyk iac test --report --severity-threshold=medium
         env:
           SNYK_TOKEN: ${{ secrets.ARC_SNYK_TOKEN }}

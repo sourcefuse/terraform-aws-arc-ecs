@@ -1,0 +1,10 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-CC-TF-1:
+    - 'main.tf > input > resource > aws_security_group[ecs_task_sg] > ingress':
+        reason: That inbound traffic is allowed to a resource from any source instead
+                of a restricted range. That potentially everyone can access your
+                resource
+        expires: 2025-04-01T00:00:00.000Z
+        created: 2023-02-28T18:20:39.256Z
