@@ -37,9 +37,8 @@ module "ecs" {
   environment = var.environment
   namespace   = var.namespace
 
-  vpc_id         = data.aws_vpc.vpc.id
-  alb_subnet_ids = data.aws_subnets.public.ids
-  #  ecs_service_subnet_ids  = data.aws_subnets.private.ids  # TODO - remove if not needed here
+  vpc_id                  = data.aws_vpc.vpc.id
+  alb_subnet_ids          = data.aws_subnets.public.ids
   health_check_subnet_ids = data.aws_subnets.private.ids
 
   // --- Devs: DO NOT override, otherwise tests will fail --- //

@@ -30,28 +30,10 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
-#variable "service_task_definition" {
-#  type        = string
-#  description = "Family and revision (family:revision) or full ARN of the task definition that you want to run in your service."
-#}
 
-/*
 ################################################################################
 ## task definitions
 ################################################################################
-variable "task_definition_requires_compatibilities" {
-  type        = list(string)
-  description = "Set of launch types required by the task. The valid values are EC2 and FARGATE."
-  default     = ["FARGATE"]
-}
-
-variable "task_definition_network_mode" {
-  type        = string
-  description = "Docker networking mode to use for the containers in the task. Valid values are none, bridge, awsvpc, and host."
-  default     = "awsvpc"
-}
-*/
-
 variable "task_definition_cpu" {
   type        = number
   description = "Number of cpu units used by the task. If the requires_compatibilities is FARGATE this field is required."
@@ -69,12 +51,6 @@ variable "task_execution_role_arn" {
   description = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume."
 }
 
-#variable "health_check_task_role_arn" {
-#  type        = string
-#  description = "ARN of IAM role that allows the health check container task to make calls to other AWS services."
-#  default     = null
-#}
-
 variable "health_check_path_pattern" {
   type        = string
   description = "Path pattern to match against the request URL."
@@ -84,6 +60,38 @@ variable "health_check_path_pattern" {
 variable "health_check_route_53_records" {
   type        = list(string)
   description = "List of A record domains to create for the health check service"
+}
+
+variable "health_check_route_53_record_type" {
+  default     = "A"
+  type        = string
+  description = "Health check Route53 record type"
+}
+
+variable "health_check_image" {
+  default     = "ealen/echo-server"
+  type        = string
+  description = "Docker image used for the health-check"
+}
+
+variable "health_check_launch_type" {
+  default     = "FARGATE"
+  type        = string
+  description = "Launch type for the health check service."
+}
+
+variable "health_check_desired_count" {
+  default     = 1
+  type        = number
+  description = "Number of ECS tasks to run for the health check."
+}
+
+variable "health_check_service_registry_list" {
+  description = "A list of service discovery registry names for the service"
+  type = list(object({
+    registry_arn = string
+  }))
+  default = []
 }
 
 variable "alb_dns_name" {

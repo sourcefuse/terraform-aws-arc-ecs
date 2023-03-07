@@ -42,15 +42,13 @@ resource "aws_security_group" "this" {
 ## task definition
 ################################################################################
 ## container definition
-module "health_check" {
+
+module "health_check_container_definition" {
   source = "git::https://github.com/aws-ia/ecs-blueprints.git//modules/ecs-container-definition?ref=5a80841ac6f2436941c45e7a9cd9b69407b9ab32"
 
-  name = "${var.cluster_name}-health-check"
-  #  image     = "nginx"  # TODO - remove if not needed
-  image   = "ealen/echo-server"
-  service = "health-check"
-  #  memory    = 100  # TODO - remove if not needed
-  #  cpu       = 100  # TODO - remove if not needed
+  name      = "${var.cluster_name}-health-check"
+  image     = var.health_check_image
+  service   = "health-check"
   essential = true
 
   port_mappings = [
@@ -61,16 +59,13 @@ module "health_check" {
   ]
 }
 
-################################################################################
-## service
-################################################################################
 resource "aws_ecs_service" "this" {
   name    = "${var.cluster_name}-health-check"
   cluster = var.cluster_id
 
   task_definition = aws_ecs_task_definition.this.arn
-  launch_type     = "FARGATE" # TODO - change this
-  desired_count   = 1         # TODO - change this
+  launch_type     = var.health_check_launch_type
+  desired_count   = var.health_check_desired_count
 
   network_configuration {
     subnets          = var.subnet_ids
@@ -131,7 +126,7 @@ resource "aws_lb_listener_rule" "forward" {
   tags = var.tags
 }
 
-## task definition
+# task definition
 resource "aws_ecs_task_definition" "this" {
   family                   = "${var.cluster_name}-health-check"
   requires_compatibilities = ["FARGATE"]
@@ -139,10 +134,9 @@ resource "aws_ecs_task_definition" "this" {
   cpu                      = var.task_definition_cpu
   memory                   = var.task_definition_memory
 
-  task_role_arn      = aws_iam_role.task.arn
-  execution_role_arn = var.task_execution_role_arn # aws_iam_role.health_check_ecs_role.arn
+  execution_role_arn = var.task_execution_role_arn
 
-  container_definitions = jsonencode([module.health_check.container_definition])
+  container_definitions = jsonencode([module.health_check_container_definition.container_definition])
 
   tags = merge(var.tags, tomap({
     Name = "${var.cluster_name}-health-check"
@@ -152,12 +146,13 @@ resource "aws_ecs_task_definition" "this" {
 ################################################################################
 ## route 53
 ################################################################################
+
 resource "aws_route53_record" "this" {
   for_each = toset(var.health_check_route_53_records)
 
   zone_id = data.aws_route53_zone.this.id
   name    = each.value
-  type    = "A"
+  type    = var.health_check_route_53_record_type
 
   alias {
     name                   = var.alb_dns_name

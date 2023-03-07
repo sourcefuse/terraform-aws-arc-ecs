@@ -22,7 +22,7 @@ AWS Terraform ALB Health Check Module
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_health_check"></a> [health\_check](#module\_health\_check) | git::https://github.com/aws-ia/ecs-blueprints.git//modules/ecs-container-definition | 5a80841ac6f2436941c45e7a9cd9b69407b9ab32 |
+| <a name="module_health_check_container_definition"></a> [health\_check\_container\_definition](#module\_health\_check\_container\_definition) | git::https://github.com/aws-ia/ecs-blueprints.git//modules/ecs-container-definition | 5a80841ac6f2436941c45e7a9cd9b69407b9ab32 |
 
 ## Resources
 
@@ -30,13 +30,10 @@ AWS Terraform ALB Health Check Module
 |------|------|
 | [aws_ecs_service.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) | resource |
 | [aws_ecs_task_definition.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
-| [aws_iam_role.task](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role_policy_attachment.aws_ec2_container_service_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_lb_listener_rule.forward](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener_rule) | resource |
 | [aws_lb_target_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group) | resource |
 | [aws_route53_record.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
 | [aws_security_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
-| [aws_iam_policy_document.assume](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 | [aws_route53_zone.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
 
 ## Inputs
@@ -47,8 +44,13 @@ AWS Terraform ALB Health Check Module
 | <a name="input_alb_zone_id"></a> [alb\_zone\_id](#input\_alb\_zone\_id) | ALB Route53 zone ID to create A record for health check service | `string` | n/a | yes |
 | <a name="input_cluster_id"></a> [cluster\_id](#input\_cluster\_id) | ID of the ECS cluster. | `string` | n/a | yes |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the ECS cluster. | `string` | n/a | yes |
+| <a name="input_health_check_desired_count"></a> [health\_check\_desired\_count](#input\_health\_check\_desired\_count) | Number of ECS tasks to run for the health check. | `number` | `1` | no |
+| <a name="input_health_check_image"></a> [health\_check\_image](#input\_health\_check\_image) | Docker image used for the health-check | `string` | `"ealen/echo-server"` | no |
+| <a name="input_health_check_launch_type"></a> [health\_check\_launch\_type](#input\_health\_check\_launch\_type) | Launch type for the health check service. | `string` | `"FARGATE"` | no |
 | <a name="input_health_check_path_pattern"></a> [health\_check\_path\_pattern](#input\_health\_check\_path\_pattern) | Path pattern to match against the request URL. | `string` | `"/"` | no |
+| <a name="input_health_check_route_53_record_type"></a> [health\_check\_route\_53\_record\_type](#input\_health\_check\_route\_53\_record\_type) | Health check Route53 record type | `string` | `"A"` | no |
 | <a name="input_health_check_route_53_records"></a> [health\_check\_route\_53\_records](#input\_health\_check\_route\_53\_records) | List of A record domains to create for the health check service | `list(string)` | n/a | yes |
+| <a name="input_health_check_service_registry_list"></a> [health\_check\_service\_registry\_list](#input\_health\_check\_service\_registry\_list) | A list of service discovery registry names for the service | <pre>list(object({<br>    registry_arn = string<br>  }))</pre> | `[]` | no |
 | <a name="input_lb_listener_arn"></a> [lb\_listener\_arn](#input\_lb\_listener\_arn) | ARN of the load balancer listener. | `string` | n/a | yes |
 | <a name="input_lb_security_group_ids"></a> [lb\_security\_group\_ids](#input\_lb\_security\_group\_ids) | LB Security Group IDs for ingress access to the health check task definition. | `list(string)` | n/a | yes |
 | <a name="input_route_53_zone_name"></a> [route\_53\_zone\_name](#input\_route\_53\_zone\_name) | Route53 zone name used for looking up and creating an `A` record for the health check service | `string` | n/a | yes |
