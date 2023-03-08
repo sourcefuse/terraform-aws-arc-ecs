@@ -48,28 +48,16 @@ variable "log_group_skip_destroy" {
 ################################################################################
 # service discovery namespaces
 ################################################################################
-// TODO - remove if unused
-#variable "service_discovery_private_dns_namespace" {
-#  type        = list(string)
-#  description = "The name of the namespace"
-#  default     = ["default"]
-#}
+// ARC-731: support discovery namespace
+variable "service_discovery_private_dns_namespace" {
+  type        = list(string)
+  description = "The name of the namespace"
+  default     = ["default.example.local"]
+}
 
 ################################################################################
 ## task execution
 ################################################################################
-variable "attach_task_role_policy" {
-  description = "Attach the task role policy to the task role"
-  type        = bool
-  default     = false
-}
-
-variable "task_role_policy" {
-  description = "The task's role policy"
-  type        = string
-  default     = null
-}
-
 variable "execution_policy_attachment_arns" {
   type        = list(string)
   description = "The ARNs of the policies you want to apply"
@@ -150,17 +138,17 @@ variable "route_53_zone" {
   description = "Route 53 domain to generate an ACM request for and to create A records against, i.e. sfrefarch.com. A wildcard subject alternative name is generated with the certificate."
 }
 
-variable "health_check_domains" {
+variable "health_check_route_53_records" {
   type        = list(string)
-  description = "List of domains for the health check service."
+  description = "List of Route 53 records for the health check service."
 }
 ################################################################################
 ## acm
 ################################################################################
 variable "create_acm_certificate" {
   description = "Create an ACM Certificate to use with the ALB"
-  type = bool
-  default = true
+  type        = bool
+  default     = true
 }
 
 variable "acm_domain_name" {
@@ -176,23 +164,23 @@ variable "acm_subject_alternative_names" {
 
 variable "acm_process_domain_validation_options" {
   description = "Flag to enable/disable processing of the record to add to the DNS zone to complete certificate validation"
-  type = bool
-  default = true
+  type        = bool
+  default     = true
 }
 
 variable "acm_process_domain_validation_record_ttl" {
   description = "The TTL of the record to add to the DNS zone to complete certificate validation"
-  type = string
-  default = "300"
+  type        = string
+  default     = "300"
 }
 
 ################################################################################
 ## alb
 ################################################################################
 variable "alb_certificate_arn" {
-  type = string
+  type        = string
   description = "ALB Certificate ARN. If `var.create_acm_certificate` is `true`, this will be ignored."
-  default = null
+  default     = null
 }
 
 variable "alb_subnet_ids" {

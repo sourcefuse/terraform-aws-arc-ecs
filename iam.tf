@@ -1,3 +1,5 @@
+// TODO - remove if not needed. moved to health-check module.
+/*
 ################################################################################
 ## task role
 ################################################################################
@@ -31,6 +33,7 @@ resource "aws_iam_role_policy" "task" {
   role        = aws_iam_role.task.id
   policy      = var.task_role_policy
 }
+*/
 
 ################################################################################
 ## task execution role
@@ -67,7 +70,7 @@ resource "aws_iam_policy_attachment" "execution" {
 ## secrets manager
 ################################################################################
 resource "aws_iam_policy" "secrets_manager_read_policy" {
-  name = "${local.cluster_name}-secrets-manager-ro"
+  name_prefix = "${local.cluster_name}-secrets-manager-ro-"
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -83,7 +86,7 @@ resource "aws_iam_policy" "secrets_manager_read_policy" {
   })
 
   tags = merge(var.tags, tomap({
-    Name = "${local.cluster_name}-secrets-manager-ro"
+    NamePrefix = "${local.cluster_name}-secrets-manager-ro-"
   }))
 }
 

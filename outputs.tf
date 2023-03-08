@@ -3,17 +3,17 @@
 ################################################################################
 output "cluster_arn" {
   description = "ECS Cluster ARN"
-  value = module.ecs.cluster_arn
+  value       = module.ecs.cluster_arn
 }
 
 output "cluster_id" {
   description = "ECS Cluster ID"
-  value = module.ecs.cluster_id
+  value       = module.ecs.cluster_id
 }
 
 output "cluster_name" {
   description = "ECS Cluster name"
-  value = module.ecs.cluster_name
+  value       = module.ecs.cluster_name
 }
 
 ################################################################################
@@ -29,6 +29,11 @@ output "alb_dns_name" {
   value       = module.alb.alb_dns_name
 }
 
+output "health_check_fqdn" {
+  description = "Health check FQDN record created in Route 53."
+  value       = module.health_check.route_53_fqdn
+}
+
 ################################################################################
 ## acm
 ################################################################################
@@ -36,4 +41,3 @@ output "alb_certificate_arn" {
   description = "ACM Certificate ARN"
   value       = try(module.acm[0].arn, var.alb_certificate_arn)
 }
-

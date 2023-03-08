@@ -2,7 +2,7 @@
 
 ## Overview
 
-AWS ALB Module
+AWS Terraform ALB Module
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -58,3 +58,38 @@ No resources.
 | <a name="output_alb_name"></a> [alb\_name](#output\_alb\_name) | Name of the ALB |
 | <a name="output_alb_zone_id"></a> [alb\_zone\_id](#output\_alb\_zone\_id) | Zone ID of the ALB |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
+## Development
+
+### Prerequisites
+
+- [terraform](https://learn.hashicorp.com/terraform/getting-started/install#installing-terraform)
+- [terraform-docs](https://github.com/segmentio/terraform-docs)
+- [pre-commit](https://pre-commit.com/#install)
+- [golang](https://golang.org/doc/install#install)
+- [golint](https://github.com/golang/lint#installation)
+
+### Configurations
+
+- Configure pre-commit hooks
+  ```sh
+  pre-commit install
+  ```
+
+### Tests
+- Tests are available in `test` directory
+- Configure the dependencies
+  ```sh
+  cd test/
+  go mod init github.com/sourcefuse/terraform-aws-refarch-alb
+  go get github.com/gruntwork-io/terratest/modules/terraform
+  ```
+- Now execute the test  
+  ```sh
+  go test -timeout  30m
+  ```
+
+## Authors
+
+This project is authored by:
+- SourceFuse

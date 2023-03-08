@@ -50,6 +50,7 @@ variable "task_definition_network_mode" {
   description = "Docker networking mode to use for the containers in the task. Valid values are none, bridge, awsvpc, and host."
   default     = "awsvpc"
 }
+*/
 
 variable "task_definition_cpu" {
   type        = number
@@ -68,12 +69,11 @@ variable "task_execution_role_arn" {
   description = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume."
 }
 
-variable "health_check_task_role_arn" {
-  type        = string
-  description = "ARN of IAM role that allows the health check container task to make calls to other AWS services."
-  default     = null
-}
-*/
+#variable "health_check_task_role_arn" {
+#  type        = string
+#  description = "ARN of IAM role that allows the health check container task to make calls to other AWS services."
+#  default     = null
+#}
 
 variable "health_check_path_pattern" {
   type        = string
@@ -81,7 +81,7 @@ variable "health_check_path_pattern" {
   default     = "/"
 }
 
-variable "health_check_domains" {
+variable "health_check_route_53_records" {
   type        = list(string)
   description = "List of A record domains to create for the health check service"
 }
@@ -94,6 +94,11 @@ variable "alb_dns_name" {
 variable "alb_zone_id" {
   type        = string
   description = "ALB Route53 zone ID to create A record for health check service"
+}
+
+variable "route_53_zone_name" {
+  type        = string
+  description = "Route53 zone name used for looking up and creating an `A` record for the health check service"
 }
 
 ################################################################################
