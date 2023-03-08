@@ -16,27 +16,40 @@ variable "environment" {
 variable "namespace" {
   type        = string
   description = "Namespace for the resources."
-  default     = "arc"
+  default     = "example"
 }
 
 ################################################################################
 ## network / security
 ################################################################################
 variable "private_subnet_names" {
-  description = "List of private subnet names for the autoscaling group to launch instances in."
+  description = <<-EOF
+    List of Private Subnet names in the VPC where the network resources currently exist.
+    If not defined, the default value from `terraform-aws-ref-arch-network` will be used.
+    From that module's example, the value is: [`example-dev-private-us-east-1a`, `example-dev-private-us-east-1b`]
+  EOF
   type        = list(string)
-  default     = null
+  default     = []
 }
 
 variable "public_subnet_names" {
-  description = "List of public subnet names for the ALB"
+  description = <<-EOF
+    List of Public Subnet names in the VPC where the network resources currently exist.
+    If not defined, the default value from `terraform-aws-ref-arch-network` will be used.
+    From that module's example, the value is: [`example-dev-public-us-east-1a`, `example-dev-public-us-east-1b`]
+  EOF
   type        = list(string)
-  default     = null
+  default     = []
 }
 
 variable "vpc_name" {
-  description = "List of VPC names to filter for"
+  description = <<-EOF
+    Name of the VPC where the network resources currently exist.
+    If not defined, the default value from `terraform-aws-ref-arch-network` will be used.
+    From that module's example, the name `example-dev-vpc` is used.
+  EOF
   type        = string
+  default     = null
 }
 
 ################################################################################
@@ -45,14 +58,5 @@ variable "vpc_name" {
 variable "acm_domain_name" {
   description = "Domain name the ACM Certificate belongs to"
   type        = string
-  default     = "*.arc-demo.io"
-}
-
-variable "acm_subject_alternative_names" {
-  description = "Subject alternative names for the ACM Certificate"
-  type        = list(string)
-  default = [
-    "*.ecs-dev.arc-demo.io",
-    "*.ecs-test.arc-demo.io"
-  ]
+  default     = "*.sfrefarch.com"
 }

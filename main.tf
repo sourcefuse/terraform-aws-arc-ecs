@@ -13,168 +13,118 @@ terraform {
 }
 
 ################################################################################
-## ecs cluster
+## cluster
 ################################################################################
 module "ecs" {
   source       = "git::https://github.com/terraform-aws-modules/terraform-aws-ecs?ref=v4.1.2"
   cluster_name = local.cluster_name
+
+  cluster_configuration = {
+    execute_command_configuration = {
+      logging = "OVERRIDE"
+
+      log_configuration = {
+        cloud_watch_log_group_name = aws_cloudwatch_log_group.this.name
+      }
+    }
+  }
 
   tags = merge(var.tags, tomap({
     Name = local.cluster_name
   }))
 }
 
-################################################################################
-## iam
-################################################################################
-data "aws_iam_policy_document" "assume_role_policy" {
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
+## logging
+resource "aws_cloudwatch_log_group" "this" {
+  name = "/${var.namespace}/${var.environment}/ecs/${local.cluster_name}"
 
-    principals {
-      type = "Service"
-      identifiers = [
-        "ecs-tasks.amazonaws.com"
-      ]
-    }
-  }
-}
-
-// TODO: clean up and split task execution role from task role
-resource "aws_iam_role" "health_check_ecs_role" {
-  name = "${module.ecs.cluster_name}-health-check"
-
-  assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
-
-  inline_policy {
-    name = "admin_policy_that_needs_to_go"
-
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Action   = "*"
-          Effect   = "Allow"
-          Resource = "*"
-        },
-      ]
-    })
-  }
+  retention_in_days = var.log_group_retention_days
+  skip_destroy      = var.log_group_skip_destroy
 
   tags = merge(var.tags, tomap({
-    Name = "${module.ecs.cluster_name}-health-check"
-  }))
-}
-
-resource "aws_iam_role_policy_attachment" "aws_service_linked_role" {
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
-  role       = aws_iam_role.health_check_ecs_role.name
-}
-
-################################################################################
-## ecs task definition
-################################################################################
-resource "aws_ecs_task_definition" "health_check_task_definition" {
-  family                   = "${module.ecs.cluster_name}-health-check"
-  requires_compatibilities = ["FARGATE"]
-  network_mode             = "awsvpc"
-  cpu                      = 1024 // TODO - change to variable
-  memory                   = 2048 // TODO - change to variable
-  task_role_arn            = aws_iam_role.health_check_ecs_role.arn
-  execution_role_arn       = aws_iam_role.health_check_ecs_role.arn
-
-  container_definitions = jsonencode([
-    {
-      name      = "${module.ecs.cluster_name}-health-check-nginx"
-      image     = "nginx"
-      cpu       = 100
-      memory    = 512
-      essential = true
-      portMappings = [
-        {
-          containerPort = 80
-          hostPort      = 80
-        }
-      ]
-    }
-  ])
-
-  tags = merge(var.tags, tomap({
-    Name = "${module.ecs.cluster_name}-health-check"
-  }))
-}
-
-################################################################################
-## security
-################################################################################
-resource "aws_security_group" "ecs_task_sg" {
-  vpc_id = var.vpc_id
-  name   = "${module.ecs.cluster_name}-ecs-task-sg"
-
-  ingress {
-    from_port        = 0
-    protocol         = "-1"
-    to_port          = 0
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  egress {
-    from_port        = 0
-    protocol         = "-1"
-    to_port          = 0
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  tags = merge(var.tags, tomap({
-    Name = "${module.ecs.cluster_name}-ecs-task-sg"
-  }))
-}
-
-################################################################################
-## ecs service
-################################################################################
-resource "aws_ecs_service" "health_check_service" {
-  name            = "${module.ecs.cluster_name}-health-check"
-  cluster         = module.ecs.cluster_id
-  task_definition = aws_ecs_task_definition.health_check_task_definition.arn
-  launch_type     = "FARGATE"
-  desired_count   = 3
-
-  network_configuration {
-    subnets          = var.task_subnet_ids
-    security_groups  = [aws_security_group.ecs_task_sg.id]
-    assign_public_ip = false
-  }
-
-  load_balancer {
-    target_group_arn = aws_lb_target_group.health_check_target_group.arn
-    container_name   = "${module.ecs.cluster_name}-health-check-nginx"
-    container_port   = 80
-  }
-
-  tags = merge(var.tags, tomap({
-    Name = "${module.ecs.cluster_name}-health-check"
+    Name = "/${var.namespace}/${var.environment}/ecs/${local.cluster_name}"
   }))
 }
 
 ################################################################################
 ## load balancer
 ################################################################################
+## certificate
+module "acm" {
+  source = "git::https://github.com/cloudposse/terraform-aws-acm-request-certificate?ref=0.17.0"
+  count  = var.create_acm_certificate == true ? 1 : 0
+
+  name                              = "${var.environment}-${var.namespace}-acm-certificate"
+  namespace                         = var.namespace
+  environment                       = var.environment
+  zone_name                         = var.route_53_zone
+  domain_name                       = var.acm_domain_name
+  subject_alternative_names         = var.acm_subject_alternative_names
+  process_domain_validation_options = var.acm_process_domain_validation_options
+  ttl                               = var.acm_process_domain_validation_record_ttl
+
+  tags = var.tags
+}
+
+module "alb_sg" {
+  source = "git::https://github.com/cloudposse/terraform-aws-security-group?ref=2.0.0"
+
+  # Security Group names must be unique within a VPC.
+  # This module follows Cloud Posse naming conventions and generates the name
+  # based on the inputs to the null-label module, which means you cannot
+  # reuse the label as-is for more than one security group in the VPC.
+  #
+  # Here we add an attribute to give the security group a unique name.
+  attributes = ["${local.cluster_name}-alb"]
+
+  # Allow unlimited egress
+  allow_all_egress = true
+
+  rules = [
+    {
+      key              = "alb-ingress-80"
+      type             = "ingress"
+      from_port        = 80
+      protocol         = "tcp"
+      to_port          = 80
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
+      self             = null # preferable to self = false
+      description      = "Allow port 80 from anywhere"
+    },
+    {
+      key              = "alb-ingress-443"
+      type             = "ingress"
+      from_port        = 443
+      protocol         = "tcp"
+      to_port          = 443
+      cidr_blocks      = ["0.0.0.0/0"]
+      ipv6_cidr_blocks = ["::/0"]
+      self             = null # preferable to self = false
+      description      = "Allow port 443 from anywhere"
+    }
+  ]
+
+  vpc_id = var.vpc_id
+
+  tags = merge(var.tags, tomap({
+    Name = "${local.cluster_name}-alb"
+  }))
+}
+
+## alb
 module "alb" {
   source = "./modules/alb"
 
   namespace          = var.namespace
   environment        = var.environment
   vpc_id             = var.vpc_id
-  subnet_ids         = var.alb_subnets_ids
-  security_group_ids = [aws_security_group.ecs_task_sg.id]
+  subnet_ids         = var.alb_subnet_ids
+  security_group_ids = [module.alb_sg.id]
 
-  access_logs_enabled                             = true  // TODO - change to variable
-  alb_access_logs_s3_bucket_force_destroy         = false // TODO - change to variable
-  alb_access_logs_s3_bucket_force_destroy_enabled = false // TODO - change to variable
+  access_logs_enabled                             = var.access_logs_enabled
+  alb_access_logs_s3_bucket_force_destroy         = var.alb_access_logs_s3_bucket_force_destroy
+  alb_access_logs_s3_bucket_force_destroy_enabled = var.alb_access_logs_s3_bucket_force_destroy_enabled
   internal                                        = var.alb_internal
   idle_timeout                                    = var.alb_idle_timeout
 
@@ -191,47 +141,40 @@ module "alb" {
   tags = var.tags
 }
 
-## target group
-resource "aws_lb_target_group" "health_check_target_group" {
-  name        = "${module.ecs.cluster_name}-hc"
-  port        = 80
-  protocol    = "HTTP"
-  target_type = "ip"
-  vpc_id      = var.vpc_id
+module "health_check" {
+  source = "./modules/health-check"
 
-  health_check {
-    healthy_threshold   = "3"
-    interval            = "30"
-    protocol            = "HTTP"
-    timeout             = "3"
-    path                = "/"
-    unhealthy_threshold = "2"
-  }
+  vpc_id     = var.vpc_id
+  subnet_ids = length(var.health_check_subnet_ids) > 0 ? var.health_check_subnet_ids : var.alb_subnet_ids
 
-  tags = merge(var.tags, tomap({
-    Name = "${module.ecs.cluster_name}-hc"
-  }))
+  cluster_id   = module.ecs.cluster_id
+  cluster_name = module.ecs.cluster_name
+
+  lb_listener_arn       = aws_lb_listener.https.arn
+  lb_security_group_ids = [module.alb_sg.id]
+
+  ## for alb alias records
+  alb_dns_name = module.alb.alb_dns_name
+  alb_zone_id  = module.alb.alb_zone_id
+
+  ## for internal records on health check
+  route_53_zone_name            = var.route_53_zone
+  health_check_route_53_records = var.health_check_route_53_records
+
+  task_execution_role_arn = aws_iam_role.execution.arn
+
+  tags = var.tags
+
+  depends_on = [
+    module.ecs,
+    module.alb
+  ]
 }
 
-## https forward
-resource "aws_lb_listener" "https_default" {
-  load_balancer_arn = module.alb.alb_arn
-  port              = "443"
-  protocol          = "HTTPS"
-  ssl_policy        = var.alb_ssl_policy
-  certificate_arn   = var.alb_acm_certificate_arn
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.health_check_target_group.arn
-  }
-
-  tags = merge(var.tags, tomap({
-    Name = "${module.ecs.cluster_name}-https-forward"
-  }))
-}
-
-## http redirect
+################################################################################
+## listeners
+################################################################################
+## http
 resource "aws_lb_listener" "http" {
   load_balancer_arn = module.alb.alb_arn
   port              = "80"
@@ -248,6 +191,57 @@ resource "aws_lb_listener" "http" {
   }
 
   tags = merge(var.tags, tomap({
-    Name = "${module.ecs.cluster_name}-http-redirect"
+    Name = "${local.cluster_name}-http-redirect"
+  }))
+}
+
+## https
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = module.alb.alb_arn
+  port              = "443"
+  protocol          = "HTTPS"
+  ssl_policy        = var.alb_ssl_policy
+  certificate_arn   = try(module.acm[0].arn, var.alb_certificate_arn)
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/html"
+      message_body = "Forbidden"
+      status_code  = "403"
+    }
+  }
+
+  tags = merge(var.tags, tomap({
+    Name = "${local.cluster_name}-https-forward"
+  }))
+}
+
+################################################################################
+## service discovery namespaces
+################################################################################
+resource "aws_service_discovery_private_dns_namespace" "this" {
+  for_each = toset(var.service_discovery_private_dns_namespace)
+
+  name        = each.value
+  description = "Service discovery for ${each.value}"
+  vpc         = var.vpc_id
+}
+
+################################################################################
+## ssm parameters
+################################################################################
+resource "aws_ssm_parameter" "this" {
+  for_each = { for x in local.ssm_params : x.name => x }
+
+  name        = each.value.name
+  value       = each.value.value
+  description = try(each.value.description, "Managed by Terraform")
+  type        = try(each.value.type, "SecureString")
+  overwrite   = try(each.value.overwrite, true)
+
+  tags = merge(var.tags, tomap({
+    Name = each.value.name
   }))
 }

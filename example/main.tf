@@ -13,7 +13,7 @@ terraform {
 }
 
 module "tags" {
-  source = "git::https://github.com/sourcefuse/terraform-aws-refarch-tags?ref=1.0.2"
+  source = "git::https://github.com/sourcefuse/terraform-aws-refarch-tags?ref=1.1.0"
 
   environment = var.environment
   project     = "Example"
@@ -29,24 +29,6 @@ provider "aws" {
 }
 
 ################################################################################
-## certificates // TODO: this should get generated inside the module for convenience
-################################################################################
-module "acm" {
-  source = "git::https://github.com/cloudposse/terraform-aws-acm-request-certificate?ref=0.17.0"
-
-  name                              = "${var.environment}-${var.namespace}-acm-certificate"
-  namespace                         = var.namespace
-  environment                       = var.environment
-  zone_name                         = trimprefix(var.acm_domain_name, "*.")
-  domain_name                       = var.acm_domain_name
-  subject_alternative_names         = var.acm_subject_alternative_names
-  process_domain_validation_options = true
-  ttl                               = "300"
-
-  tags = module.tags.tags
-}
-
-################################################################################
 ## ecs
 ################################################################################
 module "ecs" {
@@ -56,9 +38,26 @@ module "ecs" {
   namespace   = var.namespace
 
   vpc_id                  = data.aws_vpc.vpc.id
-  alb_subnets_ids         = data.aws_subnets.public.ids
-  task_subnet_ids         = data.aws_subnets.private.ids
-  alb_acm_certificate_arn = module.acm.arn
+  alb_subnet_ids          = data.aws_subnets.public.ids
+  health_check_subnet_ids = data.aws_subnets.private.ids
+
+  // --- Devs: DO NOT override, otherwise tests will fail --- //
+  access_logs_enabled                             = false
+  alb_access_logs_s3_bucket_force_destroy         = true
+  alb_access_logs_s3_bucket_force_destroy_enabled = true
+  // -------------------------- END ------------------------- //
+
+  ## create acm certificate and dns record for health check
+  route_53_zone                 = local.route_53_zone
+  acm_domain_name               = "healthcheck-ecs-${var.namespace}-${var.environment}.${local.route_53_zone}"
+  acm_subject_alternative_names = []
+  health_check_route_53_records = [
+    "healthcheck-ecs-${var.namespace}-${var.environment}.${local.route_53_zone}"
+  ]
+
+  service_discovery_private_dns_namespace = [
+    "${var.namespace}.${var.environment}.${local.route_53_zone}"
+  ]
 
   tags = module.tags.tags
 }

@@ -20,7 +20,7 @@ func TestTerraformExample(t *testing.T) {
 	// Assert
 	assert := assert.New(t)
 
-	outputValue := terraform.Output(t, terraformOptions, "output_name")
+	outputValue := terraform.Output(t, terraformOptions, "cluster_name")
 	assert.NotNil(outputValue)
-	assert.Equal("output_value", outputValue)
+	assert.Equal("example-dev-cluster", outputValue)
 }
