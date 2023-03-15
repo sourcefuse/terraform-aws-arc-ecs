@@ -86,14 +86,6 @@ variable "health_check_desired_count" {
   description = "Number of ECS tasks to run for the health check."
 }
 
-variable "health_check_service_registry_list" {
-  description = "A list of service discovery registry names for the service"
-  type = list(object({
-    registry_arn = string
-  }))
-  default = []
-}
-
 variable "alb_dns_name" {
   type        = string
   description = "ALB DNS name to create A record for health check service"
@@ -120,4 +112,13 @@ variable "lb_security_group_ids" {
 variable "lb_listener_arn" {
   type        = string
   description = "ARN of the load balancer listener."
+}
+
+################################################################################
+## route 53
+################################################################################
+variable "route_53_private_zone" {
+  type        = bool
+  description = "Used with `name` field to get a private Hosted Zone"
+  default     = false
 }

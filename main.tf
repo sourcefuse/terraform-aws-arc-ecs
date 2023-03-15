@@ -116,8 +116,7 @@ module "alb_sg" {
 module "alb" {
   source = "./modules/alb"
 
-  namespace          = var.namespace
-  environment        = var.environment
+  name               = local.cluster_name
   vpc_id             = var.vpc_id
   subnet_ids         = var.alb_subnet_ids
   security_group_ids = [module.alb_sg.id]
@@ -160,6 +159,7 @@ module "health_check" {
   ## for internal records on health check
   route_53_zone_name            = var.route_53_zone
   health_check_route_53_records = var.health_check_route_53_records
+  route_53_private_zone         = var.health_check_route_53_private_zone
 
   task_execution_role_arn = aws_iam_role.execution.arn
 

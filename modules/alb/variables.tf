@@ -7,16 +7,6 @@ variable "name" {
   default     = ""
 }
 
-variable "namespace" {
-  description = "Namespace the resource belongs to"
-  type        = string
-}
-
-variable "environment" {
-  description = "Name of the environment the resource belongs to"
-  type        = string
-}
-
 variable "vpc_id" {
   description = "Id of the VPC where the resources will live"
   type        = string
