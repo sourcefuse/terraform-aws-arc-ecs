@@ -84,6 +84,13 @@ variable "health_check_route_53_records" {
   type        = list(string)
   description = "List of Route 53 records for the health check service."
 }
+
+variable "health_check_route_53_private_zone" {
+  type        = bool
+  description = "Used with `name` field to get a private Hosted Zone"
+  default     = false
+}
+
 ################################################################################
 ## acm
 ################################################################################
