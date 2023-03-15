@@ -18,9 +18,7 @@ terraform {
 module "alb" {
   source = "git::https://github.com/cloudposse/terraform-aws-alb?ref=1.5.0"
 
-  name               = var.name
-  namespace          = var.namespace
-  stage              = var.environment
+  name               = "${var.name}-alb"
   vpc_id             = var.vpc_id
   security_group_ids = var.security_group_ids
   subnet_ids         = var.subnet_ids
