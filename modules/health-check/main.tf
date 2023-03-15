@@ -42,7 +42,6 @@ resource "aws_security_group" "this" {
 ## task definition
 ################################################################################
 ## container definition
-
 module "health_check_container_definition" {
   source = "git::https://github.com/aws-ia/ecs-blueprints.git//modules/ecs-container-definition?ref=5a80841ac6f2436941c45e7a9cd9b69407b9ab32"
 
@@ -146,7 +145,6 @@ resource "aws_ecs_task_definition" "this" {
 ################################################################################
 ## route 53
 ################################################################################
-
 resource "aws_route53_record" "this" {
   for_each = toset(var.health_check_route_53_records)
 

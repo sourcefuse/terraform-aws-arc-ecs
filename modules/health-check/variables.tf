@@ -121,3 +121,12 @@ variable "lb_listener_arn" {
   type        = string
   description = "ARN of the load balancer listener."
 }
+
+################################################################################
+## route 53
+################################################################################
+variable "route_53_private_zone" {
+  type        = bool
+  description = "Used with `name` field to get a private Hosted Zone"
+  default     = false
+}
