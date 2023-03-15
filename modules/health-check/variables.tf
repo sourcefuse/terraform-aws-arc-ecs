@@ -86,14 +86,6 @@ variable "health_check_desired_count" {
   description = "Number of ECS tasks to run for the health check."
 }
 
-variable "health_check_service_registry_list" {
-  description = "A list of service discovery registry names for the service"
-  type = list(object({
-    registry_arn = string
-  }))
-  default = []
-}
-
 variable "alb_dns_name" {
   type        = string
   description = "ALB DNS name to create A record for health check service"

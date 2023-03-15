@@ -50,7 +50,6 @@ AWS Terraform ALB Health Check Module
 | <a name="input_health_check_path_pattern"></a> [health\_check\_path\_pattern](#input\_health\_check\_path\_pattern) | Path pattern to match against the request URL. | `string` | `"/"` | no |
 | <a name="input_health_check_route_53_record_type"></a> [health\_check\_route\_53\_record\_type](#input\_health\_check\_route\_53\_record\_type) | Health check Route53 record type | `string` | `"A"` | no |
 | <a name="input_health_check_route_53_records"></a> [health\_check\_route\_53\_records](#input\_health\_check\_route\_53\_records) | List of A record domains to create for the health check service | `list(string)` | n/a | yes |
-| <a name="input_health_check_service_registry_list"></a> [health\_check\_service\_registry\_list](#input\_health\_check\_service\_registry\_list) | A list of service discovery registry names for the service | <pre>list(object({<br>    registry_arn = string<br>  }))</pre> | `[]` | no |
 | <a name="input_lb_listener_arn"></a> [lb\_listener\_arn](#input\_lb\_listener\_arn) | ARN of the load balancer listener. | `string` | n/a | yes |
 | <a name="input_lb_security_group_ids"></a> [lb\_security\_group\_ids](#input\_lb\_security\_group\_ids) | LB Security Group IDs for ingress access to the health check task definition. | `list(string)` | n/a | yes |
 | <a name="input_route_53_private_zone"></a> [route\_53\_private\_zone](#input\_route\_53\_private\_zone) | Used with `name` field to get a private Hosted Zone | `bool` | `false` | no |
