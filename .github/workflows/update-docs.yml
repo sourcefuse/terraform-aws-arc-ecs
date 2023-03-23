@@ -1,0 +1,35 @@
+name: Update-docs
+on:
+  push:
+    branches:
+      - main
+jobs:
+  transfer-file:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Pushes Readme file
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          source_file: 'README.md'
+          destination_repo: 'sourcefuse/arc-docs'
+          destination_folder: 'docs/arc-iac-docs/modules/terraform-aws-refarch-ecs'
+          user_email: 'saurabh.jindal@email.com'
+          user_name: 'saurabhjindal-SF'
+          commit_message: ${{ github.event.head_commit.message }}
+      - name: Pushes to another repository
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          source-directory: 'static'
+          destination-github-username: 'sourcefuse'
+          destination-repository-name: 'terraform-aws-refarch-ecs'
+          target-directory: 'docs/arc-iac-docs/modules/terraform-aws-refarch-ecs/static'
+          user-email: saurabh.jindal@email.com
+          user-name: 'saurabhjindal-SF'
+          target-branch: main
+          commit-message: ${{ github.event.head_commit.message }}
