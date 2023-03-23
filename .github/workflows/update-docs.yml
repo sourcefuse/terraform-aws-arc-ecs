@@ -12,7 +12,7 @@ jobs:
       - name: Pushes Readme file
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
-          API_TOKEN_GITHUB: ${{ secrets.GITHUB_TOKEN }}
+          API_TOKEN_GITHUB: ${{ secrets.ARC_DOCS_TOKEN }}
         with:
           source_file: 'README.md'
           destination_repo: 'sourcefuse/arc-docs'
@@ -23,7 +23,7 @@ jobs:
       - name: Pushes to another repository
         uses: cpina/github-action-push-to-another-repository@main
         env:
-          API_TOKEN_GITHUB: ${{ secrets.GITHUB_TOKEN }}
+          API_TOKEN_GITHUB: ${{ secrets.ARC_DOCS_TOKEN }}
         with:
           source-directory: 'static'
           destination-github-username: 'sourcefuse'
