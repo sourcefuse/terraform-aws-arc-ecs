@@ -87,7 +87,7 @@ resource "aws_ecs_service" "this" {
 ## target group
 ################################################################################
 resource "aws_lb_target_group" "this" {
-  name        = "${var.cluster_name}-health-check"
+  name        = substr("${var.cluster_name}-hc", 0, 32) # max-length for name is 32 chars
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
