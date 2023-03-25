@@ -21,7 +21,7 @@ jobs:
           destination_repo: 'sourcefuse/arc-docs'
           destination_folder: 'docs/arc-iac-docs/modules/terraform-aws-refarch-ecs'
           user_email: 'github-actions@github.com'
-          user_name: ${{ github.event.pull_request.user.login }}
+          user_name: ${{ github.actor }}
           commit_message: ${{ github.event.head_commit.message }}
       - name: Pushes to another repository
         uses: cpina/github-action-push-to-another-repository@main
