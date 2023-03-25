@@ -6,23 +6,54 @@ Terraform Module for AWS ECS by the SourceFuse ARC team.
 
 The module assumes that upstream dependencies, namely networking dependencies, are created upstream and the values are passed into this module via mechanisms such as Terraform data source queries.
 
-![Module Components](./static/ecs_module_hla.png)
+![Module Structure](./static/ecs_module_hla.png)
 
 The module provisions
 
 * ECS Cluster - we are focusing on the Fargate launch type, so we do not provision any underlying EC2 instances for the ECS launch type.
-* Application Load Balancer
-* Health Check Service - vanilla Nginx service that is used as the default route for the load balancer. The purpose of the health check service is to ensure that the core infrastructure, networking, security groups, etc. are configured correctly.
+* Application Load Balancer - default port 80 to 443 redirect.
+* Health Check Service - vanilla HTTP echo service that is used as the default target group for the load balancer. The purpose of the health check service is to ensure that the core infrastructure, networking, security groups, etc. are configured correctly.
 * Task execution IAM role - used by downstream services for task execution.
+* Utilizes ACM to generate a certificate specific to the ALB.
 * Tags/SSM params - the module tags resources and outputs SSM params that can be used in data source lookups downstream for ECS services to reference to deploy into the cluster.
+
+![Module Structure](./static/arc_ecs_basic_components.png)
 
 Our approach to ECS Fargate clusters is to provision a cluster and allow downstream services to attach to it via convention based data source queries.
 
+**Note**: the example below is does not have a pinned version. Be sure to pin your version. Refer to the `example` folder for a working example version.
 ## Usage
 
 ```hcl
 module "ecs" {
   source = "git::https://github.com/sourcefuse/terraform-aws-refarch-ecs"
+
+  environment = var.environment
+  namespace   = var.namespace
+
+  vpc_id                  = data.aws_vpc.vpc.id
+  alb_subnet_ids          = data.aws_subnets.public.ids
+  health_check_subnet_ids = data.aws_subnets.private.ids
+
+  // --- Devs: DO NOT override, otherwise tests will fail --- //
+  access_logs_enabled                             = false
+  alb_access_logs_s3_bucket_force_destroy         = true
+  alb_access_logs_s3_bucket_force_destroy_enabled = true
+  // -------------------------- END ------------------------- //
+
+  ## create acm certificate and dns record for health check
+  route_53_zone                 = local.route_53_zone
+  acm_domain_name               = "healthcheck-ecs-${var.namespace}-${var.environment}.${local.route_53_zone}"
+  acm_subject_alternative_names = []
+  health_check_route_53_records = [
+    "healthcheck-ecs-${var.namespace}-${var.environment}.${local.route_53_zone}"
+  ]
+
+  service_discovery_private_dns_namespace = [
+    "${var.namespace}.${var.environment}.${local.route_53_zone}"
+  ]
+
+  tags = module.tags.tags
 }
 ```
 
