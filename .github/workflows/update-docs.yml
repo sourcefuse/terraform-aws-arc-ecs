@@ -4,6 +4,7 @@ on:              # yamllint disable-line rule:truthy
   push:
     branches:
       - main
+      - chore/fix-gh-action
 jobs:
   transfer-file:
     runs-on: ubuntu-latest
