@@ -20,7 +20,7 @@ jobs:
           source_file: 'README.md'
           destination_repo: 'sourcefuse/arc-docs'
           destination_folder: 'docs/arc-iac-docs/modules/terraform-aws-refarch-ecs'
-          user_email: 'github-actions@github.com'
+          user_email: 'james.crowley@sourcefuse.com'
           user_name: ${{ github.actor }}
           commit_message: ${{ github.event.head_commit.message }}
       - name: Pushes to another repository
