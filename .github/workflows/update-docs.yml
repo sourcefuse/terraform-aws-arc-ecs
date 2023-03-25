@@ -15,12 +15,12 @@ jobs:
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           source_file: 'README.md'
           destination_repo: 'sourcefuse/arc-docs'
           destination_folder: 'docs/arc-iac-docs/modules/terraform-aws-refarch-ecs'
-          user_email: 'james.crowley@sourcefuse.com'
+          user_email: 'github-actions@github.com'
           user_name: ${{ github.actor }}
           commit_message: ${{ github.event.head_commit.message }}
       - name: Pushes to another repository
