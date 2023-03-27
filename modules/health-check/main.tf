@@ -117,8 +117,8 @@ resource "aws_lb_listener_rule" "forward" {
   }
 
   condition {
-    path_pattern {
-      values = [var.health_check_path_pattern]
+    host_header {
+      values = var.health_check_route_53_records
     }
   }
 

@@ -29,9 +29,24 @@ output "alb_dns_name" {
   value       = module.alb.alb_dns_name
 }
 
+output "alb_dns_zone_id" {
+  description = "External DNS name to the ALB"
+  value       = module.alb.alb_zone_id
+}
+
 output "health_check_fqdn" {
   description = "Health check FQDN record created in Route 53."
   value       = module.health_check.route_53_fqdn
+}
+
+output "alb_https_listener_arn" {
+  value       = aws_lb_listener.https.arn
+  description = "HTTPs listener ARN for downstream services to use"
+}
+
+output "alb_security_group_id" {
+  value       = module.alb_sg.id
+  description = "HTTPs listener ARN for downstream services to use"
 }
 
 ################################################################################
