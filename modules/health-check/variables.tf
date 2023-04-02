@@ -96,9 +96,9 @@ variable "alb_zone_id" {
   description = "ALB Route53 zone ID to create A record for health check service"
 }
 
-variable "route_53_zone_name" {
+variable "route_53_zone_id" {
   type        = string
-  description = "Route53 zone name used for looking up and creating an `A` record for the health check service"
+  description = "Route53 zone ID used for looking up and creating an `A` record for the health check service"
 }
 
 ################################################################################
@@ -121,4 +121,10 @@ variable "route_53_private_zone" {
   type        = bool
   description = "Used with `name` field to get a private Hosted Zone"
   default     = false
+}
+
+variable "externally_managed_route_53_record" {
+  type = bool
+  description = "If there is a Route 53 Zone externally managed from the account you are running in. If `true`, you will have to manage your DNS yourself."
+  default = false
 }

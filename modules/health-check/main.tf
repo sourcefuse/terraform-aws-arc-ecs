@@ -146,9 +146,9 @@ resource "aws_ecs_task_definition" "this" {
 ## route 53
 ################################################################################
 resource "aws_route53_record" "this" {
-  for_each = toset(var.health_check_route_53_records)
+  for_each = var.externally_managed_route_53_record != true ? toset(var.health_check_route_53_records) : []
 
-  zone_id = data.aws_route53_zone.this.id
+  zone_id = var.route_53_zone_id
   name    = each.value
   type    = var.health_check_route_53_record_type
 

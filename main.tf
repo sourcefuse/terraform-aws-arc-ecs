@@ -156,8 +156,10 @@ module "health_check" {
   alb_dns_name = module.alb.alb_dns_name
   alb_zone_id  = module.alb.alb_zone_id
 
+  externally_managed_route_53_record = var.externally_managed_route_53_record
+
   ## for internal records on health check
-  route_53_zone_name            = var.route_53_zone
+  route_53_zone_id = var.route_53_zone_id
   health_check_route_53_records = var.health_check_route_53_records
   route_53_private_zone         = var.health_check_route_53_private_zone
 
