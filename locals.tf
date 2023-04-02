@@ -17,8 +17,34 @@ locals {
       description = "ALB ARN"
       type        = "String"
     },
+    {
+      name        = "/${var.namespace}/${var.environment}/alb/${module.alb.alb_name}/dns_zone_id"
+      value       = module.alb.alb_zone_id
+      description = "ALB Zone ID"
+      type        = "String"
+    },
+    {
+      name        = "/${var.namespace}/${var.environment}/alb/${module.alb.alb_name}/health_check_fqdn"
+      value       = module.health_check.route_53_fqdn
+      description = "ALB Health Check FQDN."
+      type        = "String"
+    },
+
+    ## acm
+    {
+      name        = "/${var.namespace}/${var.environment}/alb/${module.alb.alb_name}/certificate_arn"
+      value       = try(module.acm.arn, "Not Assigned")
+      description = "ACM Certificate ARN."
+      type        = "String"
+    },
 
     ## ecs
+    {
+      name        = "/${var.namespace}/${var.environment}/ecs/${module.ecs.cluster_name}/cluster_name"
+      value       = module.ecs.cluster_name
+      description = "ECS Cluster Name"
+      type        = "String"
+    },
     {
       name        = "/${var.namespace}/${var.environment}/ecs/${module.ecs.cluster_name}/id"
       value       = module.ecs.cluster_id
