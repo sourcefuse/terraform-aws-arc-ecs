@@ -29,4 +29,3 @@ jobs:
 
       - name: Run tflint
         run: tflint -f compact
-

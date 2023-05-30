@@ -34,7 +34,6 @@ AWS Terraform ALB Health Check Module
 | [aws_lb_target_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group) | resource |
 | [aws_route53_record.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
 | [aws_security_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
-| [aws_route53_zone.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
 
 ## Inputs
 
@@ -44,6 +43,7 @@ AWS Terraform ALB Health Check Module
 | <a name="input_alb_zone_id"></a> [alb\_zone\_id](#input\_alb\_zone\_id) | ALB Route53 zone ID to create A record for health check service | `string` | n/a | yes |
 | <a name="input_cluster_id"></a> [cluster\_id](#input\_cluster\_id) | ID of the ECS cluster. | `string` | n/a | yes |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Name of the ECS cluster. | `string` | n/a | yes |
+| <a name="input_externally_managed_route_53_record"></a> [externally\_managed\_route\_53\_record](#input\_externally\_managed\_route\_53\_record) | If there is a Route 53 Zone externally managed from the account you are running in. If `true`, you will have to manage your DNS yourself. | `bool` | `false` | no |
 | <a name="input_health_check_desired_count"></a> [health\_check\_desired\_count](#input\_health\_check\_desired\_count) | Number of ECS tasks to run for the health check. | `number` | `1` | no |
 | <a name="input_health_check_image"></a> [health\_check\_image](#input\_health\_check\_image) | Docker image used for the health-check | `string` | `"ealen/echo-server"` | no |
 | <a name="input_health_check_launch_type"></a> [health\_check\_launch\_type](#input\_health\_check\_launch\_type) | Launch type for the health check service. | `string` | `"FARGATE"` | no |
@@ -52,8 +52,7 @@ AWS Terraform ALB Health Check Module
 | <a name="input_health_check_route_53_records"></a> [health\_check\_route\_53\_records](#input\_health\_check\_route\_53\_records) | List of A record domains to create for the health check service | `list(string)` | n/a | yes |
 | <a name="input_lb_listener_arn"></a> [lb\_listener\_arn](#input\_lb\_listener\_arn) | ARN of the load balancer listener. | `string` | n/a | yes |
 | <a name="input_lb_security_group_ids"></a> [lb\_security\_group\_ids](#input\_lb\_security\_group\_ids) | LB Security Group IDs for ingress access to the health check task definition. | `list(string)` | n/a | yes |
-| <a name="input_route_53_private_zone"></a> [route\_53\_private\_zone](#input\_route\_53\_private\_zone) | Used with `name` field to get a private Hosted Zone | `bool` | `false` | no |
-| <a name="input_route_53_zone_name"></a> [route\_53\_zone\_name](#input\_route\_53\_zone\_name) | Route53 zone name used for looking up and creating an `A` record for the health check service | `string` | n/a | yes |
+| <a name="input_route_53_zone_id"></a> [route\_53\_zone\_id](#input\_route\_53\_zone\_id) | Route53 zone ID used for looking up and creating an `A` record for the health check service | `string` | n/a | yes |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | Subnet IDs to run health check task in | `list(string)` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to assign the resources. | `map(string)` | `{}` | no |
 | <a name="input_task_definition_cpu"></a> [task\_definition\_cpu](#input\_task\_definition\_cpu) | Number of cpu units used by the task. If the requires\_compatibilities is FARGATE this field is required. | `number` | `1024` | no |
