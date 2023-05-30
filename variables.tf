@@ -78,11 +78,13 @@ variable "health_check_subnet_ids" {
 variable "route_53_zone_id" {
   type        = string
   description = "Route 53 zone ID"
+  default     = null
 }
 
-variable "route_53_zone" {
+variable "route_53_zone_name" {
   type        = string
   description = "Route 53 domain to generate an ACM request for and to create A records against, i.e. sfrefarch.com. A wildcard subject alternative name is generated with the certificate."
+  default     = null
 }
 
 variable "health_check_route_53_records" {
@@ -90,16 +92,10 @@ variable "health_check_route_53_records" {
   description = "List of Route 53 records for the health check service."
 }
 
-variable "health_check_route_53_private_zone" {
-  type        = bool
-  description = "Used with `name` field to get a private Hosted Zone"
-  default     = false
-}
-
 variable "externally_managed_route_53_record" {
-  type = bool
+  type        = bool
   description = "If there is a Route 53 Zone externally managed from the account you are running in. If `true`, you will have to manage your DNS yourself."
-  default = false
+  default     = false
 }
 
 ################################################################################

@@ -117,14 +117,8 @@ variable "lb_listener_arn" {
 ################################################################################
 ## route 53
 ################################################################################
-variable "route_53_private_zone" {
-  type        = bool
-  description = "Used with `name` field to get a private Hosted Zone"
-  default     = false
-}
-
 variable "externally_managed_route_53_record" {
-  type = bool
+  type        = bool
   description = "If there is a Route 53 Zone externally managed from the account you are running in. If `true`, you will have to manage your DNS yourself."
-  default = false
+  default     = false
 }
