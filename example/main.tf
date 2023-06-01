@@ -49,6 +49,7 @@ module "ecs" {
 
   ## create acm certificate and dns record for health check
   route_53_zone_name            = local.route_53_zone
+  route_53_zone_id              = data.aws_route53_zone.this.id
   acm_domain_name               = "healthcheck-ecs-${var.namespace}-${var.environment}.${local.route_53_zone}"
   acm_subject_alternative_names = []
   health_check_route_53_records = [
