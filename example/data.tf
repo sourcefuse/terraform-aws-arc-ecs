@@ -10,6 +10,10 @@ data "aws_vpc" "vpc" {
   }
 }
 
+data "aws_route53_zone" "this" {
+  name = local.route_53_zone
+}
+
 ## public
 data "aws_subnets" "public" {
   filter {
@@ -18,8 +22,8 @@ data "aws_subnets" "public" {
     ## if `var.public_subnet_names` is unassigned, it will attempt to lookup the
     ## subnets created by github.com/sourcefuse/terraform-aws-ref-arch-network
     values = length(var.public_subnet_names) > 0 ? var.public_subnet_names : [
-      "${var.namespace}-${var.environment}-public-${var.region}a",
-      "${var.namespace}-${var.environment}-public-${var.region}b"
+      "${var.namespace}-${var.environment}-public-subnet-public-${var.region}a",
+      "${var.namespace}-${var.environment}-public-subnet-public-${var.region}b"
     ]
   }
 }
@@ -32,8 +36,8 @@ data "aws_subnets" "private" {
     ## if `var.private_subnet_names` is unassigned, it will attempt to lookup the
     ## subnets created by github.com/sourcefuse/terraform-aws-ref-arch-network
     values = length(var.private_subnet_names) > 0 ? var.private_subnet_names : [
-      "${var.namespace}-${var.environment}-private-${var.region}a",
-      "${var.namespace}-${var.environment}-private-${var.region}b"
+      "${var.namespace}-${var.environment}-private-subnet-private-${var.region}a",
+      "${var.namespace}-${var.environment}-private-subnet-private-${var.region}b"
     ]
   }
 }
