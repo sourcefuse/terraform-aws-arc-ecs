@@ -25,7 +25,7 @@ locals {
     },
     {
       name        = "/${var.namespace}/${var.environment}/alb/${module.alb.alb_name}/health_check_fqdn"
-      value       = module.health_check.route_53_fqdn
+      value       = join(", ",module.health_check.route_53_fqdn)
       description = "ALB Health Check FQDN."
       type        = "String"
     },
