@@ -13,11 +13,11 @@ data "aws_iam_policy_document" "assume" {
 }
 
 resource "aws_iam_role" "execution" {
-  name_prefix        = "${local.cluster_name}-execution-"
+  name               = "${local.cluster_name}-execution"
   assume_role_policy = data.aws_iam_policy_document.assume.json
 
   tags = merge(var.tags, tomap({
-    NamePrefix = "${local.cluster_name}-execution-"
+    Name = "${local.cluster_name}-execution"
   }))
 }
 
