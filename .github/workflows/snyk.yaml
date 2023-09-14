@@ -16,16 +16,16 @@ jobs:
     name: snyk
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Vulnerability scan
         uses: snyk/actions/iac@master
         with:
           command: monitor
           args: --severity-threshold=low
-      - name: Set up Node 16
+      - name: Set up Node 18
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
       - name: install Snyk CLI
         run: npm install -g snyk
       - name: snyk monitor
