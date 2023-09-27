@@ -10,13 +10,13 @@ variable "region" {
 variable "environment" {
   description = "ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT'"
   type        = string
-  default     = "dev"
+  default     = "poc"
 }
 
 variable "namespace" {
   type        = string
   description = "Namespace for the resources."
-  default     = "example"
+  default     = "arc"
 }
 
 ################################################################################
@@ -58,5 +58,5 @@ variable "vpc_name" {
 variable "acm_domain_name" {
   description = "Domain name the ACM Certificate belongs to"
   type        = string
-  default     = "*.sfrefarch.com"
+  default     = "*.sfarcpoc.com"
 }

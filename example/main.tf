@@ -2,7 +2,7 @@
 ## defaults
 ################################################################################
 terraform {
-  required_version = "~> 1.3"
+  required_version = "~> 1.4"
 
   required_providers {
     aws = {
@@ -13,8 +13,8 @@ terraform {
 }
 
 module "tags" {
-  source = "git::https://github.com/sourcefuse/terraform-aws-refarch-tags?ref=1.1.0"
-
+  source      = "sourcefuse/arc-tags/aws"
+  version     = "1.2.3"
   environment = var.environment
   project     = "Example"
 
@@ -32,8 +32,8 @@ provider "aws" {
 ## ecs
 ################################################################################
 module "ecs" {
-  source = "../"
-
+  source      = "sourcefuse/arc-ecs/aws"
+  version     = "1.3.7"
   environment = var.environment
   namespace   = var.namespace
 
