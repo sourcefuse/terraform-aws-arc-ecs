@@ -4,7 +4,7 @@ locals {
 
   ## ssm
   ssm_params = concat(var.additional_ssm_params, [
-    ## alb
+    # alb
     {
       name        = "/${var.namespace}/${var.environment}/alb/${module.alb.alb_name}/endpoint"
       value       = module.alb.alb_dns_name
@@ -27,6 +27,19 @@ locals {
       name        = "/${var.namespace}/${var.environment}/alb/${module.alb.alb_name}/health_check_fqdn"
       value       = length(module.health_check.route_53_fqdn) > 0 ? join(", ", module.health_check.route_53_fqdn) : "No health check FQDN"
       description = "ALB Health Check FQDN."
+      type        = "String"
+    },
+    ## listeners
+    {
+      name        = "/${var.namespace}/${var.environment}/alb/${module.alb.alb_name}/http_listener/arn"
+      value       = aws_lb_listener.http.arn
+      description = "ARN of the HTTP listener"
+      type        = "String"
+    },
+    {
+      name        = "/${var.namespace}/${var.environment}/alb/${module.alb.alb_name}/https_listener/arn"
+      value       = aws_lb_listener.https.arn
+      description = "ARN of the HTTPS listener"
       type        = "String"
     },
 
