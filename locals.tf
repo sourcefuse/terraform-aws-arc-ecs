@@ -31,13 +31,13 @@ locals {
     },
     ## listeners
     {
-      name        = "/${var.namespace}/${var.environment}/alb/${module.alb.alb_name}/http_listener/arn"
+      name        = "/${var.namespace}/${var.environment}/alb/${module.alb.alb_name}/http-listener/arn"
       value       = aws_lb_listener.http.arn
       description = "ARN of the HTTP listener"
       type        = "String"
     },
     {
-      name        = "/${var.namespace}/${var.environment}/alb/${module.alb.alb_name}/https_listener/arn"
+      name        = "/${var.namespace}/${var.environment}/alb/${module.alb.alb_name}/https-listener/arn"
       value       = aws_lb_listener.https.arn
       description = "ARN of the HTTPS listener"
       type        = "String"

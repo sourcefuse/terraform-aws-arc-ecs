@@ -41,7 +41,7 @@ output "health_check_fqdn" {
 
 output "alb_https_listener_arn" {
   value       = aws_lb_listener.https.arn
-  description = "HTTPs listener ARN for downstream services to use"
+  description = "HTTPS listener ARN for downstream services to use"
 }
 
 output "alb_http_listener_arn" {
@@ -51,7 +51,7 @@ output "alb_http_listener_arn" {
 
 output "alb_security_group_id" {
   value       = module.alb_sg.id
-  description = "Alb Security Group"
+  description = "ALB Security Group"
 }
 
 ################################################################################
