@@ -21,10 +21,9 @@ resource "aws_iam_role" "execution" {
   }))
 }
 
-resource "aws_iam_policy_attachment" "execution" {
+resource "aws_iam_role_policy_attachment" "execution" {
   for_each = toset(var.execution_policy_attachment_arns)
 
-  name       = "${local.cluster_name}-execution"
   policy_arn = each.value
-  roles      = [aws_iam_role.execution.name]
+  role       = aws_iam_role.execution.name
 }
