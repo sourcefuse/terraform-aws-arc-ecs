@@ -39,7 +39,7 @@ Example demonstrating how to use terraform-aws-refarch-ecs.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_acm_domain_name"></a> [acm\_domain\_name](#input\_acm\_domain\_name) | Domain name the ACM Certificate belongs to | `string` | `"*.sfarcpoc.com"` | no |
+| <a name="input_acm_domain_name"></a> [acm\_domain\_name](#input\_acm\_domain\_name) | Domain name the ACM Certificate belongs to | `string` | `"*.arc-poc.link"` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT' | `string` | `"poc"` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace for the resources. | `string` | `"arc"` | no |
 | <a name="input_private_subnet_names"></a> [private\_subnet\_names](#input\_private\_subnet\_names) | List of Private Subnet names in the VPC where the network resources currently exist.<br>If not defined, the default value from `terraform-aws-ref-arch-network` will be used.<br>From that module's example, the value is: [`example-dev-private-us-east-1a`, `example-dev-private-us-east-1b`] | `list(string)` | `[]` | no |
