@@ -2,12 +2,20 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: terraform-aws-refarch-ecs
+  name: terraform-aws-arc-ecs
   namespace: arc
-  description: ARC Terraform module for provisioning an ECS Fargate cluster
+  description: ARC Terraform module for provisioning an ECS Fargate cluster with alb
   annotations:
-    github.com/project-slug: sourcefuse/terraform-aws-refarch-ecs
+    snyk.io/org-id: 04111b7b-2ba8-404b-8a16-42a04448794d
+    github.com/project-slug: sourcefuse/terraform-aws-arc-ecs
     backstage.io/techdocs-ref: dir:.
+  links:
+    - url: https://sourcefuse.atlassian.net/wiki/spaces/SOURCEFUSE/pages/3375857687/ARC
+      title: ARC Confluence
+      icon: dashboard
+    - url: https://sourcefuse.atlassian.net/jira/software/projects/ARC/boards/605/roadmap
+      title: ARC Jira
+      icon: dashboard
 spec:
   type: service
   owner: sourcefuse
