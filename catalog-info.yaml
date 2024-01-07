@@ -10,11 +10,11 @@ metadata:
     github.com/project-slug: sourcefuse/terraform-aws-arc-ecs
     backstage.io/techdocs-ref: dir:.
   links:
-    - url: https://sourcefuse.atlassian.net/wiki/spaces/SOURCEFUSE/pages/3375857687/ARC
-      title: ARC Confluence
+    - url: https://sourcefuse.github.io/arc-docs/arc-iac-docs/
+      title: ARC Docs
       icon: dashboard
-    - url: https://sourcefuse.atlassian.net/jira/software/projects/ARC/boards/605/roadmap
-      title: ARC Jira
+    - url: https://sourcefuse.github.io/arc-docs/arc-iac-docs/modules/terraform-aws-arc-ecs/
+      title: ARC ECS Docs
       icon: dashboard
 spec:
   type: service
