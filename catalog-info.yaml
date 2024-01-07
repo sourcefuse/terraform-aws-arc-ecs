@@ -7,6 +7,7 @@ metadata:
   description: ARC Terraform module for provisioning an ECS Fargate cluster with alb
   annotations:
     snyk.io/org-id: 04111b7b-2ba8-404b-8a16-42a04448794d
+    snyk.io/project-ids: 6f827bb4-1503-4718-816e-69da5d0eb000
     github.com/project-slug: sourcefuse/terraform-aws-arc-ecs
     backstage.io/techdocs-ref: dir:.
   links:
