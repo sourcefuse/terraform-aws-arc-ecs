@@ -32,8 +32,9 @@ provider "aws" {
 ## ecs
 ################################################################################
 module "ecs" {
-  source = "../"
-  # version     = "1.3.7"
+  source = "sourcefuse/arc-ecs/aws"
+  # version     = "1.4.5"   // please pin to the latest version from registry
+  // https://registry.terraform.io/modules/sourcefuse/arc-ecs/aws/latest
   environment = var.environment
   namespace   = var.namespace
 
