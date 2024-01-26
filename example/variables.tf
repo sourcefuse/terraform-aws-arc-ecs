@@ -58,5 +58,11 @@ variable "vpc_name" {
 variable "acm_domain_name" {
   description = "Domain name the ACM Certificate belongs to"
   type        = string
-  default     = "*.arc-poc.link"
+  default     = "sourcefuse.arc-poc.link" ///specify an acm domain name it will create for you
+}
+
+variable "route_53_zone" {
+  type        = string
+  description = "route53 zone name required to fetch the hosted zoneid"
+  default     = "arc-poc.link" // change the route53 zone name
 }
