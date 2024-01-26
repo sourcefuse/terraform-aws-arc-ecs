@@ -16,7 +16,7 @@ terraform {
 ## cluster
 ################################################################################
 module "ecs" {
-  source       = "git::https://github.com/terraform-aws-modules/terraform-aws-ecs?ref=v4.1.2"
+  source       = "git::https://github.com/terraform-aws-modules/terraform-aws-ecs?ref=v5.7.4"
   cluster_name = local.cluster_name
 
   cluster_configuration = {
@@ -217,6 +217,10 @@ resource "aws_lb_listener" "https" {
   tags = merge(var.tags, tomap({
     Name = "${local.cluster_name}-https-forward"
   }))
+
+  depends_on = [
+    module.acm
+  ]
 }
 
 ################################################################################

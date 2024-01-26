@@ -32,8 +32,8 @@ provider "aws" {
 ## ecs
 ################################################################################
 module "ecs" {
-  source      = "sourcefuse/arc-ecs/aws"
-  version     = "1.3.7"
+  source = "../"
+  # version     = "1.3.7"
   environment = var.environment
   namespace   = var.namespace
 
@@ -48,7 +48,7 @@ module "ecs" {
   // -------------------------- END ------------------------- //
 
   ## create acm certificate and dns record for health check
-  route_53_zone_name            = local.route_53_zone
+  route_53_zone_name            = var.route_53_zone
   route_53_zone_id              = data.aws_route53_zone.this.id
   acm_domain_name               = "healthcheck-ecs-${var.namespace}-${var.environment}.${local.route_53_zone}"
   acm_subject_alternative_names = []

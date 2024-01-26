@@ -11,7 +11,7 @@ data "aws_vpc" "vpc" {
 }
 
 data "aws_route53_zone" "this" {
-  name = local.route_53_zone
+  name = var.route_53_zone
 }
 
 ## public
