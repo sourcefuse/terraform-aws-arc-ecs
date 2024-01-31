@@ -1,4 +1,4 @@
-# Terraform AWS ARC EKS Module Usage Guide
+# Terraform AWS ARC ECS Module Usage Guide
 
 ## Introduction
 
@@ -100,9 +100,9 @@ If you encounter a bug or issue, please report it on the [GitHub repository](htt
 
 Understand the security considerations related to ECS clusters on AWS when using this module.
 
-### Best Practices for AWS EKS
+### Best Practices for AWS ECS
 
-Follow best practices to ensure secure EKS configurations:
+Follow best practices to ensure secure ECS configurations:
 
 - [ECS security on AWS](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/security.html)
 
