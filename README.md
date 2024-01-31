@@ -20,7 +20,7 @@ The module provisions
 * Utilizes ACM to generate a certificate specific to the ALB.
 * Tags/SSM params - the module tags resources and outputs SSM params that can be used in data source lookups downstream for ECS services to reference to deploy into the cluster.
 
-![Module Structure](./static/arc_ecs_basic_components.png)
+![Module Structure](https://github.com/sourcefuse/terraform-aws-arc-ecs/blob/GH-49/static/ecs_module_hla.png)
 
 Our approach to ECS Fargate clusters is to provision a cluster and allow downstream services to attach to it via convention based data source queries.
 
