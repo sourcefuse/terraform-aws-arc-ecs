@@ -10,8 +10,6 @@ This document provides guidelines and instructions for users looking to implemen
 
 The [Terraform AWS ARC ECS](https://github.com/sourcefuse/terraform-aws-arc-ecs) module provides a secure and modular foundation for deploying ECS clusters on AWS.
 
-![Module Components](./static/ecs_module_hla.png)
-
 ### Prerequisites
 
 Before using this module, ensure you have the following:
