@@ -16,9 +16,9 @@ To ensure a smooth collaboration, please take a moment to review the following g
    ```
 4. Make your changes and commit them.
    ```bash
-   git commit -m "Your descriptive commit message"   
+   git commit -m "Your descriptive commit message"  
    ```
-5. Push to your forked repository. 
+5. Push to your forked repository.
    ```bash
    git push origin feature/branch_name
    ```
@@ -115,6 +115,21 @@ By specifying this , it will bump the version and if you don't specify this in y
 
 2. **Branching:**
     - Follow a branching strategy (e.g., feature branches) for better collaboration.
+
+## Pre-commit Hooks
+
+1. **Install `pre-commit`:**
+    - Install `pre-commit` hooks to automatically check and enforce code formatting, linting, and other pre-defined rules before each commit.
+
+    Example:
+    ```bash
+    brew install pre-commit (for mac users)
+    ```
+    ```bash
+    pre-commit run -a
+    ```
+
+    This ensures that your code adheres to the defined standards before being committed, reducing the likelihood of introducing issues into the repository.
 
 ## Code Style
 
