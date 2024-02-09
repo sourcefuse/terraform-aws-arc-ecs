@@ -57,7 +57,6 @@ Inside the `variables.tf` or in `*.tfvars` file, you should define values for th
 3. **Use the Module in Your Main Configuration**
 In your main Terraform configuration file (e.g., main.tf), you can use the module. Specify the source of the module, and version, For Example
 
-## Usage
 
 ```hcl
 module "ecs" {
@@ -251,6 +250,18 @@ You can append to this array by adding values to `var.additional_ssm_params`.
 
 ## Development
 
+### Versioning 
+
+while Contributing or doing git commit please specify the breaking change in your commit message whether its major,minor or patch
+
+For Example
+
+```sh
+git commit -m "your commit message #major"
+```
+By specifying this , it will bump the version and if you don't specify this in your commit message then by default it will consider patch and will bump that accordingly
+
+
 ### Prerequisites
 
 - [terraform](https://learn.hashicorp.com/terraform/getting-started/install#installing-terraform)
@@ -265,17 +276,6 @@ You can append to this array by adding values to `var.additional_ssm_params`.
   ```sh
   pre-commit install
   ```
-
-### Git commits
-
-while Contributing or doing git commit please specify the breaking change in your commit message whether its major,minor or patch
-
-For Example
-
-```sh
-git commit -m "your commit message #major"
-```
-By specifying this , it will bump the version and if you don't specify this in your commit message then by default it will consider patch and will bump that accordingly
 
 ### Tests
 - Tests are available in `test` directory
