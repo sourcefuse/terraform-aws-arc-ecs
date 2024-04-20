@@ -52,6 +52,8 @@ Example demonstrating how to use terraform-aws-refarch-ecs.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_cluster_arn"></a> [cluster\_arn](#output\_cluster\_arn) | ECS Cluster ARN |
+| <a name="output_cluster_id"></a> [cluster\_id](#output\_cluster\_id) | ECS Cluster ID |
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | Name of the ECS Cluster |
 | <a name="output_health_check_fqdn"></a> [health\_check\_fqdn](#output\_health\_check\_fqdn) | Health check FQDN record created in Route 53. |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
