@@ -2,12 +2,12 @@
 ## defaults
 ################################################################################
 terraform {
-  required_version = "~> 1.3"
+  required_version = ">= 1.4, < 2.0.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.0"
+      version = ">= 4.0, < 6.0"
     }
   }
 }
@@ -16,7 +16,7 @@ terraform {
 ## cluster
 ################################################################################
 module "ecs" {
-  source       = "git::https://github.com/terraform-aws-modules/terraform-aws-ecs?ref=v5.7.4"
+  source       = "git::https://github.com/terraform-aws-modules/terraform-aws-ecs?ref=v5.11.1"
   cluster_name = local.cluster_name
 
   cluster_configuration = {
