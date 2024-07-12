@@ -21,7 +21,8 @@ module "ecs" {
 
   cluster_configuration = {
     execute_command_configuration = {
-      logging = "OVERRIDE"
+      kms_key_id = var.ecs_kms_key_arn_override != "" ? var.ecs_kms_key_arn_override : (var.enabled ? module.kms.key_arn : "")
+      logging    = "OVERRIDE"
 
       log_configuration = {
         cloud_watch_log_group_name = aws_cloudwatch_log_group.this.name
@@ -32,6 +33,16 @@ module "ecs" {
   tags = merge(var.tags, tomap({
     Name = local.cluster_name
   }))
+}
+module "kms" {
+  source                  = "sourcefuse/arc-kms/aws"
+  version                 = "1.0.0"
+  enabled                 = var.enabled
+  deletion_window_in_days = var.deletion_window_in_days
+  enable_key_rotation     = var.enable_key_rotation
+  alias                   = var.alias
+  tags                    = var.tags
+  policy                  = var.policy
 }
 
 ## logging

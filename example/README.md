@@ -2,7 +2,7 @@
 
 ## Overview
 
-Example demonstrating how to use terraform-aws-refarch-ecs.
+Example demonstrating how to use terraform-aws-arc-ecs.
 
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

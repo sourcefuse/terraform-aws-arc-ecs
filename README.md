@@ -150,6 +150,7 @@ Terraform will display a plan showing the changes it intends to make. Review the
 | <a name="module_alb_sg"></a> [alb\_sg](#module\_alb\_sg) | git::https://github.com/cloudposse/terraform-aws-security-group | 2.0.0 |
 | <a name="module_ecs"></a> [ecs](#module\_ecs) | git::https://github.com/terraform-aws-modules/terraform-aws-ecs | v5.11.1 |
 | <a name="module_health_check"></a> [health\_check](#module\_health\_check) | ./modules/health-check | n/a |
+| <a name="module_kms"></a> [kms](#module\_kms) | sourcefuse/arc-kms/aws | 1.0.0 |
 
 ## Resources
 
@@ -181,8 +182,13 @@ Terraform will display a plan showing the changes it intends to make. Review the
 | <a name="input_alb_internal"></a> [alb\_internal](#input\_alb\_internal) | Determines if this load balancer is internally or externally facing. | `bool` | `false` | no |
 | <a name="input_alb_ssl_policy"></a> [alb\_ssl\_policy](#input\_alb\_ssl\_policy) | Load Balancer SSL policy. | `string` | `"ELBSecurityPolicy-FS-1-2-Res-2020-10"` | no |
 | <a name="input_alb_subnet_ids"></a> [alb\_subnet\_ids](#input\_alb\_subnet\_ids) | Subnet Ids assigned to the LB | `list(string)` | n/a | yes |
+| <a name="input_alias"></a> [alias](#input\_alias) | The display name of the alias. The name must start with the word `alias` followed by a forward slash. If not specified, the alias name will be auto-generated. | `string` | `"alias/ecs"` | no |
 | <a name="input_cluster_name_override"></a> [cluster\_name\_override](#input\_cluster\_name\_override) | Name to assign the cluster. If null, the default will be `namespace-environment-cluster` | `string` | `null` | no |
 | <a name="input_create_acm_certificate"></a> [create\_acm\_certificate](#input\_create\_acm\_certificate) | Create an ACM Certificate to use with the ALB | `bool` | `true` | no |
+| <a name="input_deletion_window_in_days"></a> [deletion\_window\_in\_days](#input\_deletion\_window\_in\_days) | Duration in days after which the key is deleted after destruction of the resource | `number` | `10` | no |
+| <a name="input_ecs_kms_key_arn_override"></a> [ecs\_kms\_key\_arn\_override](#input\_ecs\_kms\_key\_arn\_override) | Override ARN for the ECS KMS key. | `string` | `""` | no |
+| <a name="input_enable_key_rotation"></a> [enable\_key\_rotation](#input\_enable\_key\_rotation) | Specifies whether key rotation is enabled | `bool` | `true` | no |
+| <a name="input_enabled"></a> [enabled](#input\_enabled) | Flag to determine whether to create a KMS key for the ECS cluster. | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT' | `string` | n/a | yes |
 | <a name="input_execution_policy_attachment_arns"></a> [execution\_policy\_attachment\_arns](#input\_execution\_policy\_attachment\_arns) | The ARNs of the policies you want to apply | `list(string)` | <pre>[<br>  "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess",<br>  "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"<br>]</pre> | no |
 | <a name="input_externally_managed_route_53_record"></a> [externally\_managed\_route\_53\_record](#input\_externally\_managed\_route\_53\_record) | If there is a Route 53 Zone externally managed from the account you are running in. If `true`, you will have to manage your DNS yourself. | `bool` | `false` | no |
@@ -191,6 +197,7 @@ Terraform will display a plan showing the changes it intends to make. Review the
 | <a name="input_log_group_retention_days"></a> [log\_group\_retention\_days](#input\_log\_group\_retention\_days) | Specifies the number of days you want to retain log events in the specified log group.<br>Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1096,<br>1827, 2192, 2557, 2922, 3288, 3653, and 0.<br>If you select 0, the events in the log group are always retained and never expire | `number` | `30` | no |
 | <a name="input_log_group_skip_destroy"></a> [log\_group\_skip\_destroy](#input\_log\_group\_skip\_destroy) | Set to true if you do not wish the log group (and any logs it may contain) to be deleted at destroy time, and instead just remove the log group from the Terraform state. | `bool` | `false` | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace your resource belongs to.<br>Usually an abbreviation of your organization name, e.g. 'example' or 'arc', to help ensure generated IDs are globally unique" | `string` | n/a | yes |
+| <a name="input_policy"></a> [policy](#input\_policy) | A valid KMS policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy. | `string` | `""` | no |
 | <a name="input_route_53_zone_id"></a> [route\_53\_zone\_id](#input\_route\_53\_zone\_id) | Route 53 zone ID | `string` | `null` | no |
 | <a name="input_route_53_zone_name"></a> [route\_53\_zone\_name](#input\_route\_53\_zone\_name) | Route 53 domain to generate an ACM request for and to create A records against, i.e. sfrefarch.com. A wildcard subject alternative name is generated with the certificate. | `string` | `null` | no |
 | <a name="input_service_discovery_private_dns_namespace"></a> [service\_discovery\_private\_dns\_namespace](#input\_service\_discovery\_private\_dns\_namespace) | The name of the namespace | `list(string)` | <pre>[<br>  "default.example.local"<br>]</pre> | no |
