@@ -1,0 +1,25 @@
+[
+  {
+    "name": "${service_name_full}",
+    "image": "${repository_name}:${environment}",
+    "essential": true,
+    "portMappings": [
+      {
+        "hostPort": ${alb_port},
+        "protocol": "tcp",
+        "containerPort": ${container_port}
+      }
+    ],
+    "environment": ${environment_vars},
+    "compatibilities": [
+      "FARGATE"
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/aws/ecs/${cluster_name}/${service_name}/${environment}",
+        "awslogs-region": "${aws_region}"
+      }
+    }
+  }
+]

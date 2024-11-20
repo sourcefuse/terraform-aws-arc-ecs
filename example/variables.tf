@@ -1,68 +1,71 @@
-################################################################################
-## shared
-################################################################################
-variable "region" {
+variable "aws_account" {
   type        = string
-  default     = "us-east-1"
-  description = "AWS region"
+  description = "The AWS account to use"
+}
+
+variable "vpc_id" {
+  type        = string
+  description = "The VPC to use"
 }
 
 variable "environment" {
-  description = "ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT'"
   type        = string
-  default     = "poc"
+  description = "The environment to use"
 }
 
-variable "namespace" {
+variable "project" {
   type        = string
-  description = "Namespace for the resources."
-  default     = "arc"
+  description = "The project to use"
 }
 
-################################################################################
-## network / security
-################################################################################
-variable "private_subnet_names" {
-  description = <<-EOF
-    List of Private Subnet names in the VPC where the network resources currently exist.
-    If not defined, the default value from `terraform-aws-ref-arch-network` will be used.
-    From that module's example, the value is: [`example-dev-private-us-east-1a`, `example-dev-private-us-east-1b`]
-  EOF
-  type        = list(string)
-  default     = []
-}
-
-variable "public_subnet_names" {
-  description = <<-EOF
-    List of Public Subnet names in the VPC where the network resources currently exist.
-    If not defined, the default value from `terraform-aws-ref-arch-network` will be used.
-    From that module's example, the value is: [`example-dev-public-us-east-1a`, `example-dev-public-us-east-1b`]
-  EOF
-  type        = list(string)
-  default     = []
-}
-
-variable "vpc_name" {
-  description = <<-EOF
-    Name of the VPC where the network resources currently exist.
-    If not defined, the default value from `terraform-aws-ref-arch-network` will be used.
-    From that module's example, the name `example-dev-vpc` is used.
-  EOF
+variable "service_name" {
   type        = string
-  default     = null
+  description = "The base name of the service (basically service name minus the environment)"
 }
 
-################################################################################
-## acm
-################################################################################
-variable "acm_domain_name" {
-  description = "Domain name the ACM Certificate belongs to"
+variable "cluster_name" {
   type        = string
-  default     = "sourcefuse.arc-poc.link" ///specify an acm domain name it will create for you
+  description = "The base name of the cluster"
 }
 
-variable "route_53_zone" {
+variable "region" {
   type        = string
-  description = "route53 zone name required to fetch the hosted zoneid"
-  default     = "arc-poc.link" // change the route53 zone name
+  description = "The region being deployed to"
+  default     = "us-east-1"
 }
+
+variable "container_port" {
+  type        = number
+  description = "The port proxy-hydrator listen on in the container"
+}
+
+variable "container_health_check_path" {
+  type        = string
+  description = "The path that the ALB should use to conduct a health check"
+}
+
+variable "repository_name" {
+  type        = string
+  description = "The repository to use for the hydrator image"
+}
+
+variable "alb_port" {
+  type        = number
+  description = "The port the ALB will listen on"
+}
+
+variable "deregistration_delay" {
+  type        = number
+  description = "The amount of time to wait before changing the status of a target from draining to unused"
+}
+
+variable "tasks_desired_min" {
+  type        = number
+  description = "The minimum number of tasks desired"
+}
+
+variable "tasks_desired_max" {
+  type        = number
+  description = "The maximum number of tasks desired"
+}
+
