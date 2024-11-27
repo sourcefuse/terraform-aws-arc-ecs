@@ -1,6 +1,6 @@
 ---
 site_name: terraform-aws-refarch-ecs
-site_description: ARC Terraform module for provisioning Cognito resources.
+site_description: ARC Terraform module for provisioning ECS.
 
 plugins:
   - techdocs-core

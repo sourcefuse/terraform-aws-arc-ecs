@@ -2,12 +2,12 @@
 ## defaults
 ################################################################################
 terraform {
-  required_version = ">= 1.3, < 2.0.0"
+  required_version = ">= 1.4, < 2.0.0"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 5.0"
+      version = ">= 4.0, < 6.0"
     }
   }
 }
@@ -21,7 +21,7 @@ module "tags" {
   version = "1.2.3"
 
   environment = var.environment
-  project     = var.project_name
+  project     = var.project
 
   extra_tags = {
     Example  = "True"
@@ -42,39 +42,33 @@ module "ecs" {
   proxy_security_group = data.aws_security_group.group.id
 
   ecs = {
-    cluster_name       = var.cluster_name
-    service_name       = var.service_name
-    service_name_short = var.service_name_short
-    repository_name    = var.repository_name
+    cluster_name    = var.ecs.cluster_name
+    service_name    = var.ecs.service_name
+    repository_name = var.ecs.repository_name
   }
 
   task = {
-    tasks_desired = var.tasks_desired_min
-
-    container_port              = var.container_port
-    container_health_check_path = var.container_health_check_path
-
-    container_vcpu   = 1024
-    container_memory = 2048
+    tasks_desired        = var.task.tasks_desired
+    container_vcpu       = var.task.container_vcpu
+    container_memory     = var.task.container_memory
+    container_port       = var.task.container_port
+    container_definition = var.task.container_definition
 
     environment_variables = {
-      PORT                    = var.container_port
-      URL_EXPIRE_SECONDS      = "3600"
+      PORT = var.task.container_port
     }
-
-    container_definition = "container/container_definition.json.tftpl"
   }
 
   alb = {
-    name                 = "service-alb-${var.environment}"
-    listener_port        = var.alb_port
-    deregistration_delay = var.deregistration_delay
+    name                 = var.alb.name
+    listener_port        = var.alb.alb_port
+    deregistration_delay = var.alb.deregistration_delay
   }
 
   autoscaling = {
-    metric_name      = "CPUUtilization"
-    minimum_capacity = var.tasks_desired_min
-    maximum_capacity = var.tasks_desired_max
+    metric_name      = var.autosclaing.metric_name
+    minimum_capacity = var.autosclaing.tasks_desired_min
+    maximum_capacity = var.autosclaing.tasks_desired_min
 
     dimensions = {
       ClusterName = local.cluster_name_full
@@ -82,22 +76,20 @@ module "ecs" {
     }
 
     scale_up = {
-      threshold = "85"
-      cooldown  = "60"
+      threshold = var.autoscaling.scale_up.threshold
+      cooldown  = var.autoscaling.scale_up.cooldown
       step_adjustment = [{
-        metric_interval_lower_bound = 0
-        scaling_adjustment          = 1
+        metric_interval_lower_bound = var.autoscaling.scale_up.step_adjustment.metric_interval_lower_bound
+        scaling_adjustment          = var.autoscaling.scale_up.step_adjustment.scaling_adjustment
       }]
     }
     scale_down = {
-      threshold = "20"
-      cooldown  = "60"
+      threshold = var.autoscaling.scale_down.threshold
+      cooldown  = var.autoscaling.scale_down.cooldown
       step_adjustment = [{
-        metric_interval_lower_bound = 0
-        scaling_adjustment          = -1
+        metric_interval_lower_bound = var.autoscaling.scale_down.step_adjustment.metric_interval_lower_bound
+        scaling_adjustment          = var.autoscaling.scale_down.step_adjustment.scaling_adjustment
       }]
     }
   }
-
-  tags = module.tags.tags
 }

@@ -12,8 +12,7 @@ resource "aws_ecs_service" "service" {
   force_new_deployment = true
 
   depends_on = [
-    aws_security_group.ecs,
-    aws_cloudwatch_log_group.proxy,
+    aws_security_group.ecs
   ]
 
   load_balancer {

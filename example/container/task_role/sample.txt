@@ -1,0 +1,13 @@
+# this will contain a sample policy to be attached to task role in json format, for example:
+{
+   "Version": "2012-10-17",
+   "Statement": [
+      {
+         "Effect": "Allow",
+         "Action": [
+             "ssm:GetParameters"
+         ],
+         "Resource": "*"
+      }
+   ]
+}
