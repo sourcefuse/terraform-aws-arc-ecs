@@ -10,4 +10,3 @@ output "cluster_id" {
   description = "ECS Cluster ID"
   value       = module.ecs.cluster_id
 }
-

@@ -26,11 +26,11 @@ resource "aws_ecs_service" "service" {
     security_groups = [aws_security_group.ecs.id]
   }
   tags = {
-        Name = "${var.ecs.service_name}-${var.environment}",
-        Environment = "${var.environment}",
-        Project = "${var.project}",
-        Service = "${var.ecs.service_name_tag}"
-    }
+    Name        = "${var.ecs.service_name}-${var.environment}",
+    Environment = "${var.environment}",
+    Project     = "${var.project}",
+    Service     = "${var.ecs.service_name_tag}"
+  }
   propagate_tags = "TASK_DEFINITION"
 }
 
@@ -57,9 +57,9 @@ resource "aws_ecs_task_definition" "definition" {
   })
 
   tags = {
-        Name = "${var.ecs.service_name}-${var.environment}-task-definition",
-        Environment = "${var.environment}",
-        Project = "${var.project}",
-        Service = "${var.ecs.service_name_tag}"
-    }
+    Name        = "${var.ecs.service_name}-${var.environment}-task-definition",
+    Environment = "${var.environment}",
+    Project     = "${var.project}",
+    Service     = "${var.ecs.service_name_tag}"
+  }
 }

@@ -2,11 +2,11 @@ resource "aws_cloudwatch_log_group" "proxy" {
   name              = "/aws/ecs/${var.ecs.cluster_name}/${var.ecs.service_name}/${var.environment}"
   retention_in_days = 90
   tags = {
-        Name = "/aws/ecs/${var.ecs.cluster_name}/${var.ecs.service_name}/${var.environment}",
-        Environment = "${var.environment}",
-        Project = "${var.project}",
-        Service = "${var.ecs.service_name_tag}"
-    }
+    Name        = "/aws/ecs/${var.ecs.cluster_name}/${var.ecs.service_name}/${var.environment}",
+    Environment = "${var.environment}",
+    Project     = "${var.project}",
+    Service     = "${var.ecs.service_name_tag}"
+  }
 }
 
 
@@ -25,11 +25,11 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
 
   alarm_actions = [aws_appautoscaling_policy.scale_up.arn]
   tags = {
-        Name = "${local.service_name_full}-cpu-high-alarm",
-        Environment = "${var.environment}",
-        Project = "${var.project}",
-        Service = "${var.ecs.service_name_tag}"
-    }
+    Name        = "${local.service_name_full}-cpu-high-alarm",
+    Environment = "${var.environment}",
+    Project     = "${var.project}",
+    Service     = "${var.ecs.service_name_tag}"
+  }
 }
 
 // Autoscaling - Alarm CPU Low
@@ -47,9 +47,9 @@ resource "aws_cloudwatch_metric_alarm" "cpu_low" {
 
   alarm_actions = [aws_appautoscaling_policy.scale_down.arn]
   tags = {
-        Name = "${local.service_name_full}-cpu-low-alarm",
-        Environment = "${var.environment}",
-        Project = "${var.project}",
-        Service = "${var.ecs.service_name_tag}"
-    }
+    Name        = "${local.service_name_full}-cpu-low-alarm",
+    Environment = "${var.environment}",
+    Project     = "${var.project}",
+    Service     = "${var.ecs.service_name_tag}"
+  }
 }

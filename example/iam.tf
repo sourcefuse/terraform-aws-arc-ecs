@@ -5,9 +5,9 @@ resource "aws_iam_role_policy" "policies" {
   role = module.aws_service.task_role_id
 
   policy = templatefile("${path.module}/container/task_role/${each.value}", {
-    aws_region       = var.region
-    aws_account      = var.aws_account
-    environment      = var.environment
+    aws_region  = var.region
+    aws_account = var.aws_account
+    environment = var.environment
   })
 
   depends_on = [

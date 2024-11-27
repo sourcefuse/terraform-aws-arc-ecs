@@ -1,7 +1,7 @@
 locals {
-  service_name_full       = "${var.ecs.service_name}-${var.environment}"
-  cluster_name_full       = "${var.ecs.cluster_name}-${var.environment}"
-  
+  service_name_full = "${var.ecs.service_name}-${var.environment}"
+  cluster_name_full = "${var.ecs.cluster_name}-${var.environment}"
+
   region_code = (var.aws_region == "us-west-1") ? "uw1" : "ue1"
 
   task = defaults(var.task, {

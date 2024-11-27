@@ -16,11 +16,11 @@ resource "aws_lb_target_group" "tg" {
     }
   }
   tags = {
-        Name = "${local.service_name_full}-tg",
-        Environment = "${var.environment}",
-        Project = "${var.project}",
-        Service = "${var.ecs.service_name_tag}"
-    }
+    Name        = "${local.service_name_full}-tg",
+    Environment = "${var.environment}",
+    Project     = "${var.project}",
+    Service     = "${var.ecs.service_name_tag}"
+  }
 }
 
 resource "aws_lb_listener" "listener" {
@@ -33,8 +33,8 @@ resource "aws_lb_listener" "listener" {
     target_group_arn = aws_lb_target_group.tg.arn
   }
   tags = {
-        Environment = "${var.environment}",
-        Project = "${var.project}",
-        Service = "${var.ecs.service_name_tag}"
-    }
+    Environment = "${var.environment}",
+    Project     = "${var.project}",
+    Service     = "${var.ecs.service_name_tag}"
+  }
 }

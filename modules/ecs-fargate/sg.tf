@@ -20,12 +20,12 @@ resource "aws_security_group" "alb" {
   }
 
   tags = {
-     Name        = "${local.service_name_full}-alb",
-     Environment = var.environment,
-     Project     = "${var.project}",
-     Service     = "${var.ecs.service_name_tag}",
-     Description = "Allow HTTP traffic to the application proxy"
-     owner       = "devops"
+    Name        = "${local.service_name_full}-alb",
+    Environment = var.environment,
+    Project     = "${var.project}",
+    Service     = "${var.ecs.service_name_tag}",
+    Description = "Allow HTTP traffic to the application proxy"
+    owner       = "devops"
   }
 }
 
@@ -51,11 +51,11 @@ resource "aws_security_group" "ecs" {
   }
 
   tags = {
-     Name        = "${local.service_name_full}-ecs",
-     Environment = var.environment,
-     Project     = "${var.project}",
-     Service     = "${var.ecs.service_name_tag}",
-     Description = "Allow traffic from the ALB into the Docker containers."
-     owner       = "devops"
+    Name        = "${local.service_name_full}-ecs",
+    Environment = var.environment,
+    Project     = "${var.project}",
+    Service     = "${var.ecs.service_name_tag}",
+    Description = "Allow traffic from the ALB into the Docker containers."
+    owner       = "devops"
   }
 }

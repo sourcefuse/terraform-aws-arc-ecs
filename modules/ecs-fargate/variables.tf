@@ -22,7 +22,7 @@ variable "project" {
 variable "proxy_security_group" {
   type        = string
   description = "The associated SG of the Dopple Proxy"
-  default = none
+  default     = none
 }
 
 # ECS-specific variables
