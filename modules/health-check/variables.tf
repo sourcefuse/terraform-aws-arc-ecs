@@ -1,124 +1,92 @@
-################################################################################
-## shared
-################################################################################
+# General variables
 variable "vpc_id" {
-  description = "Id of the VPC where the resources will live"
   type        = string
+  description = "The VPC the service will be deployed in"
 }
 
-variable "tags" {
-  description = "Tags to assign the resources."
-  type        = map(string)
-  default     = {}
-}
-
-################################################################################
-## ecs
-################################################################################
-variable "cluster_name" {
-  description = "Name of the ECS cluster."
+variable "aws_region" {
   type        = string
+  description = "The AWS region to use"
 }
 
-variable "cluster_id" {
-  description = "ID of the ECS cluster."
+variable "environment" {
   type        = string
+  description = "The environment associated with the service"
 }
 
-variable "subnet_ids" {
-  description = "Subnet IDs to run health check task in"
-  type        = list(string)
-}
-
-
-################################################################################
-## task definitions
-################################################################################
-variable "task_definition_cpu" {
-  type        = number
-  description = "Number of cpu units used by the task. If the requires_compatibilities is FARGATE this field is required."
-  default     = 1024
-}
-
-variable "task_definition_memory" {
-  type        = number
-  description = "Amount (in MiB) of memory used by the task. If the requires_compatibilities is FARGATE this field is required."
-  default     = 2048
-}
-
-variable "task_execution_role_arn" {
+variable "project" {
   type        = string
-  description = "ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume."
+  description = "The project associated with the service"
 }
 
-variable "health_check_path_pattern" {
+variable "proxy_security_group" {
   type        = string
-  description = "Path pattern to match against the request URL."
-  default     = "/"
+  description = "The associated SG of the Dopple Proxy"
+  default     = none
 }
 
-variable "health_check_route_53_records" {
-  type        = list(string)
-  description = "List of A record domains to create for the health check service"
+# ECS-specific variables
+variable "ecs" {
+  type = object({
+    cluster_name       = string
+    service_name       = string
+    service_name_short = string
+    service_name_tag   = string
+    repository_name    = string
+  })
+  description = "The ECS-specific values to use such as cluster, service, and repository names."
 }
 
-variable "health_check_route_53_record_type" {
-  default     = "A"
-  type        = string
-  description = "Health check Route53 record type"
+# Task-specific variables
+variable "task" {
+  type = object({
+    tasks_desired               = optional(number)
+    container_vcpu              = optional(number)
+    container_memory            = optional(number)
+    container_port              = number
+    container_health_check_path = optional(string)
+    container_definition        = optional(string)
+    environment_variables       = optional(map(string))
+    task_execution_role         = optional(string)
+  })
+  description = "Task-related information (vCPU, memory, # of tasks, port, and health check info.)"
 }
 
-variable "health_check_image" {
-  default     = "ealen/echo-server"
-  type        = string
-  description = "Docker image used for the health-check"
+# Load balancer
+variable "alb" {
+  type = object({
+    name                 = string
+    listener_port        = number
+    deregistration_delay = optional(number)
+  })
+  description = "ALB-related information (listening port, internal, and deletion protection.)"
 }
 
-variable "health_check_launch_type" {
-  default     = "FARGATE"
-  type        = string
-  description = "Launch type for the health check service."
-}
-
-variable "health_check_desired_count" {
-  default     = 1
-  type        = number
-  description = "Number of ECS tasks to run for the health check."
-}
-
-variable "alb_dns_name" {
-  type        = string
-  description = "ALB DNS name to create A record for health check service"
-}
-
-variable "alb_zone_id" {
-  type        = string
-  description = "ALB Route53 zone ID to create A record for health check service"
-}
-
-variable "route_53_zone_id" {
-  type        = string
-  description = "Route53 zone ID used for looking up and creating an `A` record for the health check service"
-}
-
-################################################################################
-## alb
-################################################################################
-variable "lb_security_group_ids" {
-  type        = list(string)
-  description = "LB Security Group IDs for ingress access to the health check task definition."
-}
-
-variable "lb_listener_arn" {
-  type        = string
-  description = "ARN of the load balancer listener."
-}
-
-################################################################################
-## route 53
-################################################################################
-variable "externally_managed_route_53_record" {
-  type        = bool
-  description = "If there is a Route 53 Zone externally managed from the account you are running in. If `true`, you will have to manage your DNS yourself."
-  default     = false
+# Autoscaling parameters
+variable "autoscaling" {
+  type = object({
+    namespace = optional(string)
+    scale_up = object({
+      evaluation_periods  = optional(string)
+      period              = optional(string)
+      threshold           = string
+      comparison_operator = optional(string)
+      statistic           = optional(string)
+      cooldown            = string
+      step_adjustment     = list(map(number))
+    })
+    scale_down = object({
+      evaluation_periods  = optional(string)
+      period              = optional(string)
+      threshold           = string
+      comparison_operator = optional(string)
+      statistic           = optional(string)
+      cooldown            = string
+      step_adjustment     = list(map(number))
+    })
+    dimensions       = map(string)
+    metric_name      = optional(string)
+    minimum_capacity = number
+    maximum_capacity = number
+  })
 }

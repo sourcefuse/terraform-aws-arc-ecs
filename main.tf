@@ -16,23 +16,45 @@ terraform {
 ## cluster
 ################################################################################
 module "ecs" {
-  source       = "git::https://github.com/terraform-aws-modules/terraform-aws-ecs?ref=v5.11.1"
-  cluster_name = local.cluster_name
+  source = "./modules/ecs" 
 
-  cluster_configuration = {
-    execute_command_configuration = {
-      logging = "OVERRIDE"
+  create = true
 
-      log_configuration = {
-        cloud_watch_log_group_name = aws_cloudwatch_log_group.this.name
-      }
-    }
+  ecs_cluster = {
+    cluster_name                   = "my-ecs-cluster"
+    cluster_service_connect_defaults = []
+    create_cloudwatch_log_group = false
+    
   }
 
-  tags = merge(var.tags, tomap({
-    Name = local.cluster_name
-  }))
+  cloudwatch = {
+    log_group_name            = "my-cloudwatch-log-group"
+    log_group_retention_in_days = 7
+    log_group_kms_key_id      = null
+    log_group_tags            = { Environment = "production" }
+  }
+
+  capacity_provider = {
+    autoscaling_capacity_providers = {
+      my-provider = {
+        name                      = "my-autoscaling-provider"
+        auto_scaling_group_arn    = "arn:aws:autoscaling:region:account-id:autoScalingGroup:autoScalingGroupName/my-asg"
+        managed_scaling           = { instance_warmup_period = 300, maximum_scaling_step_size = 10, minimum_scaling_step_size = 1, status = "ENABLED", target_capacity = 100 }
+        managed_termination_protection = "ENABLED"
+        managed_draining          = "ENABLED"
+        tags                      = { Environment = "production" }
+      }
+    }
+    fargate_capacity_providers = {}
+    default_capacity_provider_use_fargate = false
+  }
+
+  tags = {
+    Project     = "MyProject"
+    Environment = "production"
+  }
 }
+
 
 ## logging
 resource "aws_cloudwatch_log_group" "this" {
