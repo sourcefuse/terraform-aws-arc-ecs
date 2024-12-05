@@ -109,8 +109,8 @@ resource "aws_ecs_capacity_provider" "this" {
     }
   }
 
-  tags = merge(var.tags, each.value.tags)
-	depends_on = [aws_ecs_cluster.this]
+  tags       = merge(var.tags, each.value.tags)
+  depends_on = [aws_ecs_cluster.this]
 }
 
 
@@ -141,12 +141,10 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
 
     content {
       capacity_provider = strategy.value.name
-      base              = lookup(strategy.value, "base", null)  # Adjusted lookup
+      base              = lookup(strategy.value, "base", null) # Adjusted lookup
       weight            = lookup(strategy.value, "weight", null)
     }
   }
 
   depends_on = [aws_ecs_capacity_provider.this]
 }
-
-

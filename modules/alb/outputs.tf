@@ -23,7 +23,7 @@ output "alb_zone_id" {
 
 
 output "public_subnet_ids" {
-  value = data.aws_subnets.public
+  value       = data.aws_subnets.public
   description = "List of IDs of the public subnets in the specified VPC"
 }
 

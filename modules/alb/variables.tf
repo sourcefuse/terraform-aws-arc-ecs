@@ -30,7 +30,7 @@ variable "alb" {
     enable_deletion_protection = optional(bool, false)
     enable_http2               = optional(bool, true)
     certificate_arn            = optional(string, null)
-    subnets                = list(string)
+    subnets                    = list(string)
 
     access_logs = optional(object({
       bucket  = string

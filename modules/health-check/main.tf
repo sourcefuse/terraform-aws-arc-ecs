@@ -13,17 +13,17 @@ terraform {
 }
 
 module "ecs_cluster" {
-    source = "../ecs"
+  source = "../ecs"
 
-    ecs_cluster = {
-      cluster_name = "healthcheck-poc-cluster"
-    }
+  ecs_cluster = {
+    cluster_name = "healthcheck-poc-cluster"
+  }
 
-    capacity_provider = {
-      default_capacity_provider_use_fargate = true
-    }
-    cloudwatch =  {}
-    
+  capacity_provider = {
+    default_capacity_provider_use_fargate = true
+  }
+  cloudwatch = {}
+
 }
 resource "aws_ecs_service" "service" {
   name            = local.service_name_full

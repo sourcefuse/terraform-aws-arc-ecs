@@ -9,52 +9,48 @@ AWS Terraform ALB Module
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.3 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.30 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.5 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
 
 ## Providers
 
-No providers.
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.80.0 |
 
 ## Modules
 
-| Name | Source | Version |
-|------|--------|---------|
-| <a name="module_alb"></a> [alb](#module\_alb) | git::https://github.com/cloudposse/terraform-aws-alb | 1.5.0 |
+No modules.
 
 ## Resources
 
-No resources.
+| Name | Type |
+|------|------|
+| [aws_lb.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb) | resource |
+| [aws_lb_listener.http](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener) | resource |
+| [aws_lb_listener_rule.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener_rule) | resource |
+| [aws_lb_target_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group) | resource |
+| [aws_security_group.lb_sg](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
+| [aws_subnets.public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnets) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_access_logs_enabled"></a> [access\_logs\_enabled](#input\_access\_logs\_enabled) | A boolean flag to enable/disable access\_logs | `bool` | `true` | no |
-| <a name="input_alb_access_logs_s3_bucket_force_destroy"></a> [alb\_access\_logs\_s3\_bucket\_force\_destroy](#input\_alb\_access\_logs\_s3\_bucket\_force\_destroy) | A boolean that indicates all objects should be deleted from the ALB access logs S3 bucket so that the bucket can be destroyed without error | `bool` | `false` | no |
-| <a name="input_alb_access_logs_s3_bucket_force_destroy_enabled"></a> [alb\_access\_logs\_s3\_bucket\_force\_destroy\_enabled](#input\_alb\_access\_logs\_s3\_bucket\_force\_destroy\_enabled) | When `true`, permits `force_destroy` to be set to `true`.<br>This is an extra safety precaution to reduce the chance that Terraform will destroy and recreate<br>your S3 bucket, causing COMPLETE LOSS OF ALL DATA even if it was stored in Glacier.<br>WARNING: Upgrading this module from a version prior to 0.27.0 to this version<br>  will cause Terraform to delete your existing S3 bucket CAUSING COMPLETE DATA LOSS<br>  unless you follow the upgrade instructions on the Wiki [here](https://github.com/cloudposse/terraform-aws-s3-log-storage/wiki/Upgrading-to-v0.27.0-(POTENTIAL-DATA-LOSS)).<br>  See additional instructions for upgrading from v0.27.0 to v0.28.0 [here](https://github.com/cloudposse/terraform-aws-s3-log-storage/wiki/Upgrading-to-v0.28.0-and-AWS-provider-v4-(POTENTIAL-DATA-LOSS)). | `bool` | `false` | no |
-| <a name="input_cross_zone_load_balancing_enabled"></a> [cross\_zone\_load\_balancing\_enabled](#input\_cross\_zone\_load\_balancing\_enabled) | A boolean flag to enable/disable cross zone load balancing | `bool` | `true` | no |
-| <a name="input_deletion_protection_enabled"></a> [deletion\_protection\_enabled](#input\_deletion\_protection\_enabled) | A boolean flag to enable/disable deletion protection for ALB | `bool` | `false` | no |
-| <a name="input_deregistration_delay"></a> [deregistration\_delay](#input\_deregistration\_delay) | The amount of time to wait in seconds before changing the state of a deregistering target to unused | `number` | `15` | no |
-| <a name="input_http_ingress_cidr_blocks"></a> [http\_ingress\_cidr\_blocks](#input\_http\_ingress\_cidr\_blocks) | List of CIDR blocks to allow in HTTP security group | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
-| <a name="input_https_ingress_cidr_blocks"></a> [https\_ingress\_cidr\_blocks](#input\_https\_ingress\_cidr\_blocks) | List of CIDR blocks to allow in HTTPS security group | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
-| <a name="input_idle_timeout"></a> [idle\_timeout](#input\_idle\_timeout) | The time in seconds that the connection is allowed to be idle | `number` | `60` | no |
-| <a name="input_internal"></a> [internal](#input\_internal) | Internal or external facing ALB. | `bool` | `false` | no |
-| <a name="input_ip_address_type"></a> [ip\_address\_type](#input\_ip\_address\_type) | The type of IP addresses used by the subnets for your load balancer. The possible values are `ipv4` and `dualstack`. | `string` | `"ipv4"` | no |
-| <a name="input_name"></a> [name](#input\_name) | Name to assign the resource | `string` | `""` | no |
-| <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | Security group Ids for access | `list(string)` | n/a | yes |
-| <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | Subnet Ids assigned to the LB | `list(string)` | n/a | yes |
-| <a name="input_tags"></a> [tags](#input\_tags) | Tags to assign the resources | `map(string)` | `{}` | no |
-| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | Id of the VPC where the resources will live | `string` | n/a | yes |
+| <a name="input_alb"></a> [alb](#input\_alb) | n/a | <pre>object({<br>    name                       = optional(string, null)<br>    port                       = optional(number)<br>    protocol                   = optional(string, "HTTP")<br>    internal                   = optional(bool, false)<br>    load_balancer_type         = optional(string, "application")<br>    idle_timeout               = optional(number, 60)<br>    enable_deletion_protection = optional(bool, false)<br>    enable_http2               = optional(bool, true)<br>    certificate_arn            = optional(string, null)<br>    subnets                    = list(string)<br><br>    access_logs = optional(object({<br>      bucket  = string<br>      enabled = optional(bool, false)<br>      prefix  = optional(string, "")<br>    }))<br><br>    tags = optional(map(string), {})<br>  })</pre> | n/a | yes |
+| <a name="input_alb_target_group"></a> [alb\_target\_group](#input\_alb\_target\_group) | List of target groups to create | <pre>list(object({<br>    name                              = optional(string, "target-group")<br>    port                              = number<br>    protocol                          = optional(string, null)<br>    protocol_version                  = optional(string, "HTTP1")<br>    vpc_id                            = optional(string, "")<br>    target_type                       = optional(string, "instance")<br>    ip_address_type                   = optional(string, "ipv4")<br>    load_balancing_algorithm_type     = optional(string, "round_robin")<br>    load_balancing_cross_zone_enabled = optional(string, "use_load_balancer_configuration")<br>    deregistration_delay              = optional(number, 300)<br>    slow_start                        = optional(number, 0)<br>    tags                              = optional(map(string), {})<br><br>    health_check = optional(object({<br>      enabled             = optional(bool, true)<br>      protocol            = optional(string, "HTTP") # Allowed values: "HTTP", "HTTPS", "TCP", etc.<br>      path                = optional(string, "/")<br>      port                = optional(string, "traffic-port")<br>      timeout             = optional(number, 6)<br>      healthy_threshold   = optional(number, 3)<br>      unhealthy_threshold = optional(number, 3)<br>      interval            = optional(number, 30)<br>      matcher             = optional(string, "200") # Default HTTP matcher. Range 200 to 499<br>    }))<br><br>    stickiness = optional(object({<br>      enabled         = optional(bool, true)<br>      type            = string<br>      cookie_duration = optional(number, 86400)<br>      })<br>    )<br><br>  }))</pre> | n/a | yes |
+| <a name="input_create_alb"></a> [create\_alb](#input\_create\_alb) | A flag that decides whether to create alb | `bool` | `false` | no |
+| <a name="input_create_listener_rule"></a> [create\_listener\_rule](#input\_create\_listener\_rule) | n/a | `bool` | `false` | no |
+| <a name="input_listener_rules"></a> [listener\_rules](#input\_listener\_rules) | List of listener rules to create | <pre>list(object({<br>    # listener_arn = string<br>    priority = number<br><br>    conditions = list(object({<br>      field  = string<br>      values = list(string)<br>    }))<br><br>    actions = list(object({<br>      type             = string<br>      target_group_arn = optional(string)<br>      order            = optional(number)<br>      redirect = optional(object({<br>        protocol    = string<br>        port        = string<br>        host        = optional(string)<br>        path        = optional(string)<br>        query       = optional(string)<br>        status_code = string<br>      }), null)<br><br>      fixed_response = optional(object({<br>        content_type = string<br>        message_body = optional(string)<br>        status_code  = optional(string)<br>      }), null)<br><br>    }))<br><br>  }))</pre> | n/a | yes |
+| <a name="input_region"></a> [region](#input\_region) | n/a | `string` | `"us-east-1"` | no |
+| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC in which security group for ALB has to be created | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_alb_arn"></a> [alb\_arn](#output\_alb\_arn) | ARN to the ALB |
-| <a name="output_alb_dns_name"></a> [alb\_dns\_name](#output\_alb\_dns\_name) | External DNS name to the ALB |
-| <a name="output_alb_name"></a> [alb\_name](#output\_alb\_name) | Name of the ALB |
-| <a name="output_alb_zone_id"></a> [alb\_zone\_id](#output\_alb\_zone\_id) | Zone ID of the ALB |
+| <a name="output_alb_subnets_debug"></a> [alb\_subnets\_debug](#output\_alb\_subnets\_debug) | n/a |
+| <a name="output_public_subnet_ids"></a> [public\_subnet\_ids](#output\_public\_subnet\_ids) | List of IDs of the public subnets in the specified VPC |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Development

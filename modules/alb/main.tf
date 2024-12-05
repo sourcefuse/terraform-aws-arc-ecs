@@ -150,7 +150,7 @@ resource "aws_lb_listener" "http" {
     target_group_arn = aws_lb_target_group.this[var.alb_target_group[0].name].arn
   }
 
- # Dynamic "default_action" for variable-driven actions
+  # Dynamic "default_action" for variable-driven actions
   dynamic "default_action" {
     for_each = var.listener_rules
 

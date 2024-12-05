@@ -41,7 +41,7 @@ Keys:
   - cluster_configuration: The execute command configuration for the cluster.
   - cluster_settings: A list of cluster settings (e.g., container insights). Default is an empty list.
   - cluster_service_connect_defaults: Configures a default Service Connect namespace.
-  - create_cloudwatch_log_group: Boolean flag to specify whether to create a CloudWatch log group for the ECS cluster. 
+  - create_cloudwatch_log_group: Boolean flag to specify whether to create a CloudWatch log group for the ECS cluster.
 EOT
 
   default = {
@@ -96,6 +96,3 @@ variable "capacity_provider" {
     }))
   })
 }
-
-
-

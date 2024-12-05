@@ -41,14 +41,14 @@ module "ecs" {
     cluster_service_connect_defaults = []
     create_cloudwatch_log_group      = true
     cluster_service_connect_defaults = {}
-    cluster_settings = []
+    cluster_settings                 = []
     cluster_configuration = {
-        execute_command_configuration = {
-            logging = "OVERRIDE"
-            log_configuration = {
-                cloud_watch_log_group_name = "arc-poc-cluster-log-group"
-            }
+      execute_command_configuration = {
+        logging = "OVERRIDE"
+        log_configuration = {
+          cloud_watch_log_group_name = "arc-poc-cluster-log-group"
         }
+      }
     }
 
   }
@@ -63,7 +63,7 @@ module "ecs" {
     autoscaling_capacity_providers = {}
     fargate_capacity_providers = {
       fargate_cp = {
-        name = "FARGATE" 
+        name = "FARGATE"
         tags = {
           Environment = "poc"
         }
