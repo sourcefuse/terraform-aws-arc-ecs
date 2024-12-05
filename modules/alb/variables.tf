@@ -5,19 +5,32 @@ variable "create_alb" {
 }
 
 variable "create_listener_rule" {
-  type        = bool
-  default     = false
+  type    = bool
+  default = false
+}
+
+variable "region" {
+  type    = string
+  default = "us-east-1"
+}
+
+variable "vpc_id" {
+  type        = string
+  description = "VPC in which security group for ALB has to be created"
 }
 
 variable "alb" {
   type = object({
     name                       = optional(string, null)
+    port                       = optional(number)
+    protocol                   = optional(string, "HTTP")
     internal                   = optional(bool, false)
     load_balancer_type         = optional(string, "application")
     idle_timeout               = optional(number, 60)
     enable_deletion_protection = optional(bool, false)
     enable_http2               = optional(bool, true)
     certificate_arn            = optional(string, null)
+    subnets                = list(string)
 
     access_logs = optional(object({
       bucket  = string
@@ -29,10 +42,11 @@ variable "alb" {
   })
 }
 
+
 variable "alb_target_group" {
   description = "List of target groups to create"
   type = list(object({
-    name                              = optional(string, null)
+    name                              = optional(string, "target-group")
     port                              = number
     protocol                          = optional(string, null)
     protocol_version                  = optional(string, "HTTP1")
@@ -70,12 +84,14 @@ variable "alb_target_group" {
 variable "listener_rules" {
   description = "List of listener rules to create"
   type = list(object({
-    listener_arn = string
-    priority     = number
-    conditions  = list(object({
-      field     = string
-      values    = list(string)
+    # listener_arn = string
+    priority = number
+
+    conditions = list(object({
+      field  = string
+      values = list(string)
     }))
+
     actions = list(object({
       type             = string
       target_group_arn = optional(string)
@@ -88,11 +104,14 @@ variable "listener_rules" {
         query       = optional(string)
         status_code = string
       }), null)
+
       fixed_response = optional(object({
         content_type = string
         message_body = optional(string)
         status_code  = optional(string)
       }), null)
+
     }))
+
   }))
 }

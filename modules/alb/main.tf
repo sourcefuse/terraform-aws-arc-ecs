@@ -1,6 +1,6 @@
-################################################################################
+###################################################################
 ## defaults
-################################################################################
+###################################################################
 terraform {
   required_version = "~> 1.5"
 
@@ -11,32 +11,85 @@ terraform {
     }
   }
 }
+provider "aws" {
+  region = var.region
+}
 
-################################################################################
+###################################################################
 ## Load balancer
-################################################################################
+###################################################################
+resource "aws_security_group" "lb_sg" {
+  name        = "${var.alb.name}-sg"
+  description = "Default security group for internet facing ALB"
+  vpc_id      = var.vpc_id
 
-resource "aws_lb" "this" {
-  count = var.create_alb ? 1 : 0
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-  name                       = var.alb.name
-  internal                   = var.alb.internal
-  load_balancer_type         = var.alb.load_balancer_type
-  security_groups            = [aws_security_group.lb_sg.id]
-  subnets                    = [for subnet in aws_subnet.public : subnet.id]
-  idle_timeout               = var.alb.idle_timeout
-  enable_deletion_protection = var.alb.enable_deletion_protection
-  enable_http2               = var.alb.enable_http2
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-  access_logs {
-    bucket  = var.alb.access_logs.bucket
-    enabled = var.alb.access_logs.enabled
-    prefix  = var.alb.access_logs.prefix
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.alb.name}-sg"
   }
 }
 
 
+data "aws_subnets" "public" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
+
+  tags = {
+    Type = "public"
+  }
+}
+
+locals {
+  alb_subnets = var.create_alb ? [for subnet in data.aws_subnets.public : subnet.id] : []
+}
+
+resource "aws_lb" "this" {
+  name                       = var.alb.name
+  internal                   = var.alb.internal
+  load_balancer_type         = var.alb.load_balancer_type
+  security_groups            = [aws_security_group.lb_sg.id]
+  subnets                    = var.alb.subnets
+  idle_timeout               = var.alb.idle_timeout
+  enable_deletion_protection = var.alb.enable_deletion_protection
+  enable_http2               = var.alb.enable_http2
+
+  dynamic "access_logs" {
+    for_each = var.alb.access_logs != null ? [var.alb.access_logs] : []
+
+    content {
+      bucket  = access_logs.value.bucket
+      enabled = access_logs.value.enabled
+      prefix  = access_logs.value.prefix
+    }
+  }
+}
+
+
+###################################################################
 ## Target Group
+###################################################################
 
 resource "aws_lb_target_group" "this" {
   for_each = { for tg in var.alb_target_group : tg.name => tg }
@@ -66,7 +119,7 @@ resource "aws_lb_target_group" "this" {
   }
 
   dynamic "stickiness" {
-    for_each = each.value.stickiness != null && each.value.stickiness.enabled ? [each.value.stickiness] : []
+    for_each = each.value.stickiness != null ? [each.value.stickiness] : []
     content {
       cookie_duration = stickiness.value.cookie_duration
       type            = stickiness.value.type
@@ -77,25 +130,37 @@ resource "aws_lb_target_group" "this" {
     create_before_destroy = true
   }
 
-	tags = each.value.tags
+  tags = each.value.tags
 }
 
-# Listener
+###################################################################
+## Listener
+###################################################################
+
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.this.arn
   port              = var.alb.port
   protocol          = var.alb.protocol
 
-  certificate_arn   = var.alb.certificate_arn
+  certificate_arn = var.alb.certificate_arn
 
+  # Static "default_action" for forward
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.this[var.alb_target_group[0].name].arn
+  }
+
+ # Dynamic "default_action" for variable-driven actions
   dynamic "default_action" {
     for_each = var.listener_rules
+
     content {
-      type             = each.value.actions[0].type
-      target_group_arn = lookup(each.value.actions[0], "target_group_arn", null)
+      type             = length(each.value.actions) > 0 ? each.value.actions[0].type : null
+      target_group_arn = length(each.value.actions) > 0 ? lookup(each.value.actions[0], "target_group_arn", null) : null
     }
   }
 }
+
 
 
 resource "aws_lb_listener_rule" "this" {
@@ -105,23 +170,23 @@ resource "aws_lb_listener_rule" "this" {
   priority     = each.value.priority
 
   dynamic "condition" {
-  for_each = each.value.conditions
-  content {
-    dynamic "host_header" {
-      for_each = each.value.field == "host-header" ? [each.value] : []
-      content {
-        values = each.value.values
+    for_each = each.value.conditions
+    content {
+      dynamic "host_header" {
+        for_each = each.value.field == "host-header" ? [each.value] : []
+        content {
+          values = each.value.values
+        }
       }
-    }
 
-    dynamic "path_pattern" {
-      for_each = each.value.field == "path-pattern" ? [each.value] : []
-      content {
-        values = each.value.values
+      dynamic "path_pattern" {
+        for_each = each.value.field == "path-pattern" ? [each.value] : []
+        content {
+          values = each.value.values
+        }
       }
     }
   }
-}
 
   dynamic "action" {
     for_each = each.value.actions
