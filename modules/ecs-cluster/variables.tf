@@ -1,9 +1,3 @@
-variable "create" {
-  description = "Determines whether resources will be created (affects all resources)"
-  type        = bool
-  default     = true
-}
-
 variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
@@ -15,23 +9,27 @@ variable "tags" {
 
 variable "ecs_cluster" {
   type = object({
-    cluster_name                     = string
-    cluster_settings                 = optional(any, null)
-    cluster_service_connect_defaults = optional(map(string), null)
-    create_cloudwatch_log_group      = bool
-    cluster_configuration = optional(object({
+    name                        = string
+    configuration = optional(object({
       execute_command_configuration = optional(object({
         kms_key_id = optional(string, "")
         logging    = optional(string, "DEFAULT")
         log_configuration = optional(object({
-          cloud_watch_encryption_enabled = optional(bool, null)
-          cloud_watch_log_group_name     = optional(string, null)
-          s3_bucket_name                 = optional(string, null)
-          s3_bucket_encryption_enabled   = optional(bool, null)
-          s3_key_prefix                  = optional(string, null)
+          cloudwatch_encryption_enabled = optional(bool, null)
+          log_group_name                = optional(string, null)
+          log_group_retention_in_days   = optional(number, null)
+          log_group_kms_key_id          = optional(string, null)
+          log_group_tags                = optional(map(string), null)
+          s3_bucket_name                = optional(string, null)
+          s3_bucket_encryption_enabled  = optional(bool, null)
+          s3_key_prefix                 = optional(string, null)
         }), {})
       }), {})
     }), {})
+    create_cloudwatch_log_group = bool
+    service_connect_defaults    = optional(map(string), null)
+    settings                    = optional(any, null)
+    tags = optional(map(string), null)
   })
   description = <<EOT
 The ECS-specific values to use such as cluster, service, and repository names.
@@ -58,18 +56,6 @@ EOT
   }
 }
 
-########################################################################
-# CloudWatch Log Group
-########################################################################
-
-variable "cloudwatch" {
-  type = object({
-    log_group_name              = optional(string, null)
-    log_group_retention_in_days = optional(number, null)
-    log_group_kms_key_id        = optional(string, null)
-    log_group_tags              = optional(map(string), null)
-  })
-}
 
 
 ################################################################################
@@ -78,8 +64,6 @@ variable "cloudwatch" {
 
 variable "capacity_provider" {
   type = object({
-    default_capacity_provider_use_fargate = bool
-    fargate_capacity_providers            = any
     autoscaling_capacity_providers = map(object({
       name                           = optional(string)             # Optional; use key if not provided
       auto_scaling_group_arn         = string                       # Required
@@ -94,5 +78,7 @@ variable "capacity_provider" {
       }))
       tags = optional(map(string), {}) # Optional; default to empty map
     }))
+    default_capacity_provider_use_fargate = bool
+    fargate_capacity_providers            = any
   })
 }

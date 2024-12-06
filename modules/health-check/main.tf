@@ -12,7 +12,11 @@ terraform {
   }
 }
 
-module "ecs_cluster" {
+provider "aws" {
+  region = data.aws_region.current
+}
+
+/* module "ecs_cluster" {
   source = "../ecs"
 
   ecs_cluster = {
@@ -24,24 +28,25 @@ module "ecs_cluster" {
   }
   cloudwatch = {}
 
-}
-resource "aws_ecs_service" "service" {
+} */
+
+resource "aws_ecs_service" "this" {
   name            = local.service_name_full
-  cluster         = module.ecs_cluster.ecs_cluster_id
-  task_definition = aws_ecs_task_definition.definition.arn
-  desired_count   = local.task.tasks_desired
+  cluster         = data.aws_ecs_cluster.cluster
+  task_definition = aws_ecs_task_definition.this.arn
+  desired_count   = var.task.tasks_desired
   launch_type     = "FARGATE"
 
   force_new_deployment = true
 
-  depends_on = [
-    aws_security_group.ecs
-  ]
+  dynamic "load_balancer" {
+    for_each = var.ecs.enable_load_balancer ? [1] : []
 
-  load_balancer {
-    container_name   = local.service_name_full
-    container_port   = local.task.container_port
-    target_group_arn = aws_lb_target_group.tg.arn
+    content {
+      container_name   = var.ecs.cluster_name
+      container_port   = var.task.container_port
+      target_group_arn = var.ecs.aws_lb_target_group_arn
+    }
   }
 
   network_configuration {
@@ -49,22 +54,26 @@ resource "aws_ecs_service" "service" {
     security_groups = [aws_security_group.ecs.id]
   }
   propagate_tags = "TASK_DEFINITION"
+
+  depends_on = [
+    aws_security_group.ecs
+  ]
 }
 
-resource "aws_ecs_task_definition" "definition" {
+resource "aws_ecs_task_definition" "this" {
   family                   = local.service_name_full
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = local.task.container_vcpu
-  memory                   = local.task.container_memory
+  cpu                      = var.task.container_vcpu
+  memory                   = var.task.container_memory
   task_role_arn            = aws_iam_role.task_role.arn
   execution_role_arn       = aws_iam_role.execution_role.arn
 
-  container_definitions = templatefile(local.task.container_definition, {
-    alb_port          = local.alb.listener_port,
-    aws_region        = var.aws_region,
+  container_definitions = templatefile(var.task.container_definition, {
+    alb_port          = var.alb.listener_port,
+    aws_region        = data.aws_region.current,
     cluster_name_full = local.cluster_name_full,
-    container_port    = local.task.container_port,
+    container_port    = var.task.container_port,
     environment       = var.environment,
     environment_vars  = jsonencode(local.environment_variables),
     repository_name   = var.ecs.repository_name,
@@ -82,11 +91,11 @@ resource "aws_security_group" "ecs" {
 
   ingress {
     description     = "Allow inbound proxy traffic"
-    from_port       = local.task.container_port
-    to_port         = local.task.container_port
+    from_port       = var.task.container_port
+    to_port         = var.task.container_port
     protocol        = "tcp"
     cidr_blocks     = [for s in data.aws_subnet.private : s.cidr_block]
-    security_groups = [aws_security_group.alb.id]
+    #security_groups = [data.aws_security_group.alb_sg]
   }
 
   egress {

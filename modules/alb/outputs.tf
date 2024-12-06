@@ -21,7 +21,11 @@ output "alb_zone_id" {
   value       = aws_lb.this.alb_zone_id
 } */
 
-
+output "alb" {
+  value = {
+    name = aws_lb.this.name
+  }
+}
 
 # Use the filtered subnets
 output "public_subnets" {

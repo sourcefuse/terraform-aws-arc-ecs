@@ -1,17 +1,7 @@
-variable "create_alb" {
-  type        = bool
-  default     = false
-  description = "A flag that decides whether to create alb"
-}
 
 variable "create_listener_rule" {
   type    = bool
   default = false
-}
-
-variable "region" {
-  type    = string
-  default = "us-east-1"
 }
 
 variable "vpc_id" {

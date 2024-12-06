@@ -12,13 +12,30 @@ terraform {
   }
 }
 
-resource "aws_ecs_cluster" "this" {
-  count = var.create ? 1 : 0
+########################################################################
+# CloudWatch Log Group
+########################################################################
+resource "aws_cloudwatch_log_group" "this" {
+  count = var.ecs_cluster.create_cloudwatch_log_group ? 1 : 0
 
-  name = var.ecs_cluster.cluster_name
+  name = var.ecs_cluster.configuration.log_configuration.log_group_name != null ? var.ecs_cluster.configuration.log_configuration.log_group_name : "/aws/ecs/${var.ecs_cluster.name}"
+
+  retention_in_days = var.ecs_cluster.configuration.log_configuration.log_group_retention_in_days
+  kms_key_id        = var.ecs_cluster.configuration.log_configuration.log_group_kms_key_id
+
+  tags = merge(var.tags, var.ecs_cluster.configuration.log_configuration.log_group_tags)
+}
+
+
+########################################################################
+# ECS Cluster
+########################################################################
+resource "aws_ecs_cluster" "this" {
+
+  name = var.ecs_cluster.name
 
   dynamic "configuration" {
-    for_each = var.ecs_cluster.create_cloudwatch_log_group ? [var.ecs_cluster.cluster_configuration] : []
+    for_each = var.ecs_cluster.configuration != null ? { "default" = var.ecs_cluster.configuration } : {}
 
     content {
       dynamic "execute_command_configuration" {
@@ -29,7 +46,7 @@ resource "aws_ecs_cluster" "this" {
           logging    = length(execute_command_configuration.value.logging) > 0 ? execute_command_configuration.value.logging : "DEFAULT"
 
           dynamic "log_configuration" {
-            for_each = length(execute_command_configuration.value.log_configuration) > 0 ? [execute_command_configuration.value.log_configuration] : []
+            for_each = var.ecs_cluster.create_cloudwatch_log_group && length(execute_command_configuration.value.log_configuration) > 0 ? [execute_command_configuration.value.log_configuration] : []
 
             content {
               cloud_watch_encryption_enabled = log_configuration.value.cloud_watch_encryption_enabled
@@ -44,18 +61,16 @@ resource "aws_ecs_cluster" "this" {
     }
   }
 
-
   dynamic "service_connect_defaults" {
-    for_each = length(var.ecs_cluster.cluster_service_connect_defaults) > 0 ? [var.ecs_cluster.cluster.cluster_service_connect_defaults] : []
+    for_each = length(var.ecs_cluster.service_connect_defaults) > 0 ? [var.ecs_cluster.cluster.service_connect_defaults] : []
 
     content {
       namespace = service_connect_defaults.value.namespace
     }
   }
 
-
   dynamic "setting" {
-    for_each = flatten([var.ecs_cluster.cluster_settings])
+    for_each = flatten([var.ecs_cluster.settings])
 
     content {
       name  = setting.value.name
@@ -63,31 +78,17 @@ resource "aws_ecs_cluster" "this" {
     }
   }
 
-  tags = var.tags
+  tags = merge(var.tags, var.ecs_cluster.tags)
+
+  depends_on = [ aws_cloudwatch_log_group.this ]
 }
-
-
-########################################################################
-# CloudWatch Log Group
-########################################################################
-resource "aws_cloudwatch_log_group" "this" {
-  count = var.create && var.ecs_cluster.create_cloudwatch_log_group ? 1 : 0
-
-  name = var.cloudwatch.log_group_name != null ? var.cloudwatch.log_group_name : "/aws/ecs/${var.ecs_cluster.cluster_name}"
-
-  retention_in_days = var.cloudwatch.log_group_retention_in_days
-  kms_key_id        = var.cloudwatch.log_group_kms_key_id
-
-  tags = merge(var.tags, var.cloudwatch.log_group_tags)
-}
-
 
 ################################################################################
 # ECS Capacity Provider - EC2
 ################################################################################
 
 resource "aws_ecs_capacity_provider" "this" {
-  for_each = var.create ? var.capacity_provider.autoscaling_capacity_providers : {}
+  for_each = var.capacity_provider.autoscaling_capacity_providers != null ? var.capacity_provider.autoscaling_capacity_providers : {}
 
   name = each.value.name != "" ? each.value.name : each.key
 
@@ -127,9 +128,9 @@ locals {
 }
 
 resource "aws_ecs_cluster_capacity_providers" "this" {
-  count = var.create && length(merge(var.capacity_provider.fargate_capacity_providers, var.capacity_provider.autoscaling_capacity_providers)) > 0 ? 1 : 0
+  count = length(merge(var.capacity_provider.fargate_capacity_providers, var.capacity_provider.autoscaling_capacity_providers)) > 0 ? 1 : 0
 
-  cluster_name = var.ecs_cluster.cluster_name
+  cluster_name = var.ecs_cluster.name
 
   capacity_providers = distinct(concat(
     [for k, v in var.capacity_provider.fargate_capacity_providers : try(v.name, k)],
@@ -142,10 +143,9 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
 
     content {
       capacity_provider = strategy.value.name
-      base              = lookup(strategy.value, "base", null) # Adjusted lookup
+      base              = lookup(strategy.value, "base", null)
       weight            = lookup(strategy.value, "weight", null)
     }
   }
-
   depends_on = [aws_ecs_capacity_provider.this]
 }
