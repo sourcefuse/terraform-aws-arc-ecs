@@ -16,7 +16,7 @@ provider "aws" {
 }
 
 ###################################################################
-## Load balancer
+## Load balancer Security Group
 ###################################################################
 resource "aws_security_group" "lb_sg" {
   name        = "${var.alb.name}-sg"
@@ -49,28 +49,15 @@ resource "aws_security_group" "lb_sg" {
   }
 }
 
-
-data "aws_subnets" "public" {
-  filter {
-    name   = "vpc-id"
-    values = [var.vpc_id]
-  }
-
-  tags = {
-    Type = "public"
-  }
-}
-
-locals {
-  alb_subnets = var.create_alb ? [for subnet in data.aws_subnets.public : subnet.id] : []
-}
-
+###################################################################
+## Application Load balancer
+###################################################################
 resource "aws_lb" "this" {
   name                       = var.alb.name
   internal                   = var.alb.internal
   load_balancer_type         = var.alb.load_balancer_type
   security_groups            = [aws_security_group.lb_sg.id]
-  subnets                    = var.alb.subnets
+  subnets                    = local.public_subnets
   idle_timeout               = var.alb.idle_timeout
   enable_deletion_protection = var.alb.enable_deletion_protection
   enable_http2               = var.alb.enable_http2
@@ -159,10 +146,13 @@ resource "aws_lb_listener" "http" {
       target_group_arn = length(each.value.actions) > 0 ? lookup(each.value.actions[0], "target_group_arn", null) : null
     }
   }
+  depends_on = [ aws_lb_target_group.this ]
 }
 
 
-
+###################################################################
+## Listener Rules
+###################################################################
 resource "aws_lb_listener_rule" "this" {
   for_each = var.create_listener_rule ? { for rule in var.listener_rules : "${rule.priority}" => rule } : {}
 
@@ -209,4 +199,6 @@ resource "aws_lb_listener_rule" "this" {
       }
     }
   }
+
+  depends_on = [ aws_lb_listener.http ]
 }

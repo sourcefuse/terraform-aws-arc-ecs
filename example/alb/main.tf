@@ -12,19 +12,19 @@ terraform {
 module "alb" {
   source = "../../modules/alb"
 
-  vpc_id = "vpc-123445"
+  vpc_id = "vpc-12345"
 
   alb = {
     name     = "arc-poc-alb"
     internal = false
-    subnets  = ["subnet-1123", "subnet-1113"]
+    port = 80
   }
 
   alb_target_group = [{
     name     = "arc-poc-alb-tg"
     port     = 80
     protocol = "HTTP"
-    vpc_id   = "vpc-123445"
+    vpc_id = "vpc-12345"
     health_check = {
       enabled = true
       path    = "/"

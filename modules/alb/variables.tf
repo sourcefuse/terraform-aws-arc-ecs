@@ -30,7 +30,6 @@ variable "alb" {
     enable_deletion_protection = optional(bool, false)
     enable_http2               = optional(bool, true)
     certificate_arn            = optional(string, null)
-    subnets                    = list(string)
 
     access_logs = optional(object({
       bucket  = string
@@ -84,7 +83,6 @@ variable "alb_target_group" {
 variable "listener_rules" {
   description = "List of listener rules to create"
   type = list(object({
-    # listener_arn = string
     priority = number
 
     conditions = list(object({
