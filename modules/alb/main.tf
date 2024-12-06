@@ -11,9 +11,6 @@ terraform {
     }
   }
 }
-provider "aws" {
-  region = data.aws_region.current
-}
 
 ###################################################################
 ## Load balancer Security Group
@@ -42,10 +39,6 @@ resource "aws_security_group" "lb_sg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "${var.alb.name}-sg"
   }
 }
 

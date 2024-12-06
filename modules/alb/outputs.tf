@@ -31,3 +31,7 @@ output "alb" {
 output "public_subnets" {
   value = local.public_subnets
 }
+
+output "alb_security_group_id" {
+  value = aws_security_group.lb_sg.id
+}

@@ -29,3 +29,12 @@ output "route_53_fqdn" {
   value       = try([for x in aws_route53_record.this : x.fqdn], [])
 }
  */
+
+ output "private_subnets" {
+  value = data.aws_subnets.private
+}
+
+output "private_subnet_ids" {
+  value = data.aws_subnets.private.ids
+}
+

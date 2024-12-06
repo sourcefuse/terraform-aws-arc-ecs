@@ -43,15 +43,15 @@ Keys:
 EOT
 
   default = {
-    cluster_name          = ""
-    cluster_configuration = {}
-    cluster_settings = [
+    name          = ""
+    configuration = {}
+    settings = [
       {
         name  = "containerInsights"
         value = "enabled"
       }
     ]
-    cluster_service_connect_defaults = {}
+    service_connect_defaults = {}
     create_cloudwatch_log_group      = true
   }
 }

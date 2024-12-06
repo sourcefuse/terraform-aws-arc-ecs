@@ -12,27 +12,11 @@ terraform {
   }
 }
 
-module "tags" {
-  source      = "sourcefuse/arc-tags/aws"
-  version     = "1.2.3"
-  environment = var.environment
-  project     = "Example"
-
-  extra_tags = {
-    RepoName = "terraform-aws-refarch-ecs"
-    Example  = "true"
-  }
-}
-
-provider "aws" {
-  region = var.region
-}
-
 ################################################################################
 ## ecs
 ################################################################################
-module "ecs" {
-  source = "../modules/ecs"
+module "ecs-cluster" {
+  source = "../modules/ecs-cluster"
 
   create = true
 

@@ -18,12 +18,12 @@ terraform {
 resource "aws_cloudwatch_log_group" "this" {
   count = var.ecs_cluster.create_cloudwatch_log_group ? 1 : 0
 
-  name = var.ecs_cluster.configuration.log_configuration.log_group_name != null ? var.ecs_cluster.configuration.log_configuration.log_group_name : "/aws/ecs/${var.ecs_cluster.name}"
+  name = var.ecs_cluster.configuration.execute_command_configuration.log_configuration.log_group_name != null ? var.ecs_cluster.configuration.execute_command_configuration.log_configuration.log_group_name : "/aws/ecs/${var.ecs_cluster.name}"
 
-  retention_in_days = var.ecs_cluster.configuration.log_configuration.log_group_retention_in_days
-  kms_key_id        = var.ecs_cluster.configuration.log_configuration.log_group_kms_key_id
+  retention_in_days = var.ecs_cluster.configuration.execute_command_configuration.log_configuration.log_group_retention_in_days
+  kms_key_id        = var.ecs_cluster.configuration.execute_command_configuration.log_configuration.log_group_kms_key_id
 
-  tags = merge(var.tags, var.ecs_cluster.configuration.log_configuration.log_group_tags)
+  tags = merge(var.tags, var.ecs_cluster.configuration.execute_command_configuration.log_configuration.log_group_tags)
 }
 
 
@@ -49,8 +49,8 @@ resource "aws_ecs_cluster" "this" {
             for_each = var.ecs_cluster.create_cloudwatch_log_group && length(execute_command_configuration.value.log_configuration) > 0 ? [execute_command_configuration.value.log_configuration] : []
 
             content {
-              cloud_watch_encryption_enabled = log_configuration.value.cloud_watch_encryption_enabled
-              cloud_watch_log_group_name     = log_configuration.value.cloud_watch_log_group_name
+              cloud_watch_encryption_enabled = log_configuration.value.cloudwatch_encryption_enabled
+              cloud_watch_log_group_name     = log_configuration.value.log_group_name
               s3_bucket_name                 = log_configuration.value.s3_bucket_name
               s3_bucket_encryption_enabled   = log_configuration.value.s3_bucket_encryption_enabled
               s3_key_prefix                  = log_configuration.value.s3_key_prefix
@@ -79,8 +79,6 @@ resource "aws_ecs_cluster" "this" {
   }
 
   tags = merge(var.tags, var.ecs_cluster.tags)
-
-  depends_on = [ aws_cloudwatch_log_group.this ]
 }
 
 ################################################################################

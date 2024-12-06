@@ -40,7 +40,7 @@ variable "alb_target_group" {
     protocol                          = optional(string, null)
     protocol_version                  = optional(string, "HTTP1")
     vpc_id                            = optional(string, "")
-    target_type                       = optional(string, "instance")
+    target_type                       = optional(string, "ip")
     ip_address_type                   = optional(string, "ipv4")
     load_balancing_algorithm_type     = optional(string, "round_robin")
     load_balancing_cross_zone_enabled = optional(string, "use_load_balancer_configuration")
@@ -98,8 +98,6 @@ variable "listener_rules" {
         message_body = optional(string)
         status_code  = optional(string)
       }), null)
-
     }))
-
   }))
 }

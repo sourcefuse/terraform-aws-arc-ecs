@@ -12,27 +12,9 @@ terraform {
   }
 }
 
-provider "aws" {
-  region = data.aws_region.current
-}
-
-/* module "ecs_cluster" {
-  source = "../ecs"
-
-  ecs_cluster = {
-    cluster_name = "healthcheck-poc-cluster"
-  }
-
-  capacity_provider = {
-    default_capacity_provider_use_fargate = true
-  }
-  cloudwatch = {}
-
-} */
-
 resource "aws_ecs_service" "this" {
   name            = local.service_name_full
-  cluster         = data.aws_ecs_cluster.cluster
+  cluster         = data.aws_ecs_cluster.cluster.cluster_name
   task_definition = aws_ecs_task_definition.this.arn
   desired_count   = var.task.tasks_desired
   launch_type     = "FARGATE"
@@ -45,18 +27,19 @@ resource "aws_ecs_service" "this" {
     content {
       container_name   = var.ecs.cluster_name
       container_port   = var.task.container_port
-      target_group_arn = var.ecs.aws_lb_target_group_arn
+      target_group_arn = data.aws_lb_target_group.ecs_target_group.arn
     }
   }
 
   network_configuration {
-    subnets         = [for s in data.aws_subnet.private : s.id]
+    subnets         = data.aws_subnets.private.ids
     security_groups = [aws_security_group.ecs.id]
   }
   propagate_tags = "TASK_DEFINITION"
 
   depends_on = [
-    aws_security_group.ecs
+    aws_security_group.ecs,
+    aws_ecs_task_definition.this
   ]
 }
 
@@ -71,7 +54,7 @@ resource "aws_ecs_task_definition" "this" {
 
   container_definitions = templatefile(var.task.container_definition, {
     alb_port          = var.alb.listener_port,
-    aws_region        = data.aws_region.current,
+    aws_region        = data.aws_region.current.name,
     cluster_name_full = local.cluster_name_full,
     container_port    = var.task.container_port,
     environment       = var.environment,
@@ -79,7 +62,8 @@ resource "aws_ecs_task_definition" "this" {
     repository_name   = var.ecs.repository_name,
     service_name_full = local.service_name_full,
     cluster_name      = var.ecs.cluster_name,
-    service_name      = var.ecs.service_name
+    service_name      = var.ecs.service_name,
+    log_group_name    = aws_cloudwatch_log_group.this.name
   })
 }
 
@@ -94,8 +78,8 @@ resource "aws_security_group" "ecs" {
     from_port       = var.task.container_port
     to_port         = var.task.container_port
     protocol        = "tcp"
-    cidr_blocks     = [for s in data.aws_subnet.private : s.cidr_block]
-    #security_groups = [data.aws_security_group.alb_sg]
+    #cidr_blocks     = [for subnet in data.aws_subnet.private : subnet.cidr_block]
+    security_groups = [var.alb.security_group_id]
   }
 
   egress {

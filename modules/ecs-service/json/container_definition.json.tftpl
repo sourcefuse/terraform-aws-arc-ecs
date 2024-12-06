@@ -17,9 +17,9 @@
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-group": "/aws/ecs/${cluster_name_full}/${service_name_full}",
+        "awslogs-group": "${log_group_name}",
         "awslogs-region": "${aws_region}",
-        "awslogs-stream-prefix": "proxy"
+        "awslogs-stream-prefix": "ecs"
       }
     }
   }

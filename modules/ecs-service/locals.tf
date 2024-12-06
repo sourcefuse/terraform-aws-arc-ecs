@@ -18,4 +18,10 @@ locals {
     Name  = name
     Value = value
   }]
+
+  /* private_subnets = [
+    for s in data.aws_subnet.private :
+    s.id if lookup(s.tags, "Type", "") == "private"
+  ] */
+
 }

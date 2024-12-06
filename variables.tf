@@ -1,219 +1,208 @@
 ################################################################################
-## shared
+## ecs cluster
 ################################################################################
-variable "environment" {
-  description = "ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT'"
-  type        = string
+
+variable "ecs_cluster" {
+  type = object({
+    name = string
+    configuration = optional(object({
+      execute_command_configuration = optional(object({
+        kms_key_id = optional(string, "")
+        logging    = optional(string, "DEFAULT")
+        log_configuration = optional(object({
+          cloudwatch_encryption_enabled = optional(bool, null)
+          log_group_name                = optional(string, null)
+          log_group_retention_in_days   = optional(number, null)
+          log_group_kms_key_id          = optional(string, null)
+          log_group_tags                = optional(map(string), null)
+          s3_bucket_name                = optional(string, null)
+          s3_bucket_encryption_enabled  = optional(bool, null)
+          s3_key_prefix                 = optional(string, null)
+        }), {})
+      }), {})
+    }), {})
+    create_cloudwatch_log_group = bool
+    service_connect_defaults    = optional(map(string), null)
+    settings                    = optional(any, null)
+    tags                        = optional(map(string), null)
+  })
+  description = <<EOT
+The ECS-specific values to use such as cluster, service, and repository names.
+
+Keys:
+  - cluster_name: The name of the ECS cluster.
+  - cluster_configuration: The execute command configuration for the cluster.
+  - cluster_settings: A list of cluster settings (e.g., container insights). Default is an empty list.
+  - cluster_service_connect_defaults: Configures a default Service Connect namespace.
+  - create_cloudwatch_log_group: Boolean flag to specify whether to create a CloudWatch log group for the ECS cluster.
+EOT
 }
 
-variable "namespace" {
-  type        = string
-  description = <<-EOF
-    Namespace your resource belongs to.
-    Usually an abbreviation of your organization name, e.g. 'example' or 'arc', to help ensure generated IDs are globally unique"
-  EOF
+variable "capacity_provider" {
+  type = object({
+    autoscaling_capacity_providers = map(object({
+      name                           = optional(string)
+      auto_scaling_group_arn         = string
+      managed_termination_protection = optional(string, "DISABLED")
+      managed_draining               = optional(string, "ENABLED")
+      managed_scaling = optional(object({
+        instance_warmup_period    = optional(number)
+        maximum_scaling_step_size = optional(number)
+        minimum_scaling_step_size = optional(number)
+        status                    = optional(string)
+        target_capacity           = optional(number)
+      }))
+      tags = optional(map(string), {})
+    }))
+    default_capacity_provider_use_fargate = bool
+    fargate_capacity_providers            = any
+  })
 }
 
-variable "tags" {
-  description = "Tags to assign the resources."
-  type        = map(string)
-  default     = {}
-}
+################################################################################
+##  ALB
+################################################################################
 
 variable "vpc_id" {
-  description = "Id of the VPC where the resources will live"
-  type        = string
+  type = string
 }
 
-################################################################################
-## logging
-################################################################################
-variable "log_group_retention_days" {
-  type        = number
-  description = <<-EOF
-    Specifies the number of days you want to retain log events in the specified log group.
-    Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1096,
-    1827, 2192, 2557, 2922, 3288, 3653, and 0.
-    If you select 0, the events in the log group are always retained and never expire
-  EOF
-  default     = 30
+variable "alb" {
+  type = object({
+    name                       = optional(string, null)
+    port                       = optional(number)
+    protocol                   = optional(string, "HTTP")
+    internal                   = optional(bool, false)
+    load_balancer_type         = optional(string, "application")
+    idle_timeout               = optional(number, 60)
+    enable_deletion_protection = optional(bool, false)
+    enable_http2               = optional(bool, true)
+    certificate_arn            = optional(string, null)
+
+    access_logs = optional(object({
+      bucket  = string
+      enabled = optional(bool, false)
+      prefix  = optional(string, "")
+    }))
+
+    tags = optional(map(string), {})
+  })
 }
 
-variable "log_group_skip_destroy" {
-  type        = bool
-  description = "Set to true if you do not wish the log group (and any logs it may contain) to be deleted at destroy time, and instead just remove the log group from the Terraform state."
-  default     = false
-}
-
-################################################################################
-# service discovery namespaces
-################################################################################
-variable "service_discovery_private_dns_namespace" {
-  type        = list(string)
-  description = "The name of the namespace"
-  default     = ["default.example.local"]
-}
-
-################################################################################
-## task execution
-################################################################################
-variable "execution_policy_attachment_arns" {
-  type        = list(string)
-  description = "The ARNs of the policies you want to apply"
-  default = [
-    "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess",
-    "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-  ]
-}
-
-################################################################################
-## health check
-################################################################################
-variable "health_check_subnet_ids" {
-  type        = list(string)
-  description = "Subnet IDs for the health check tasks to run in. If not defined, this will use `var.alb_subnet_ids`."
-  default     = []
-}
-
-variable "route_53_zone_id" {
-  type        = string
-  description = "Route 53 zone ID"
-  default     = null
-}
-
-variable "route_53_zone_name" {
-  type        = string
-  description = "Route 53 domain to generate an ACM request for and to create A records against, i.e. sfrefarch.com. A wildcard subject alternative name is generated with the certificate."
-  default     = null
-}
-
-variable "health_check_route_53_records" {
-  type        = list(string)
-  description = "List of Route 53 records for the health check service."
-}
-
-variable "externally_managed_route_53_record" {
-  type        = bool
-  description = "If there is a Route 53 Zone externally managed from the account you are running in. If `true`, you will have to manage your DNS yourself."
-  default     = false
-}
-
-################################################################################
-## acm
-################################################################################
-variable "create_acm_certificate" {
-  description = "Create an ACM Certificate to use with the ALB"
-  type        = bool
-  default     = true
-}
-
-variable "acm_domain_name" {
-  description = "Domain name the ACM Certificate belongs to"
-  type        = string
-}
-
-variable "acm_subject_alternative_names" {
-  description = "Subject alternative names for the ACM Certificate"
-  type        = list(string)
-  default     = []
-}
-
-variable "acm_process_domain_validation_options" {
-  description = "Flag to enable/disable processing of the record to add to the DNS zone to complete certificate validation"
-  type        = bool
-  default     = true
-}
-
-variable "acm_process_domain_validation_record_ttl" {
-  description = "The TTL of the record to add to the DNS zone to complete certificate validation"
-  type        = string
-  default     = "300"
-}
-
-################################################################################
-## alb
-################################################################################
-variable "alb_certificate_arn" {
-  type        = string
-  description = "ALB Certificate ARN. If `var.create_acm_certificate` is `true`, this will be ignored."
-  default     = null
-}
-
-variable "alb_subnet_ids" {
-  type        = list(string)
-  description = "Subnet Ids assigned to the LB"
-}
-
-variable "alb_internal" {
-  type        = bool
-  description = "Determines if this load balancer is internally or externally facing."
-  default     = false
-}
-
-variable "alb_idle_timeout" {
-  type        = number
-  description = "The time that the connection is allowed to be idle."
-  default     = 300
-}
-
-variable "alb_ssl_policy" {
-  type        = string
-  description = "Load Balancer SSL policy."
-  default     = "ELBSecurityPolicy-FS-1-2-Res-2020-10"
-}
-
-variable "access_logs_enabled" {
-  type        = bool
-  description = "A boolean flag to enable/disable access_logs"
-  default     = true
-}
-
-variable "alb_access_logs_s3_bucket_force_destroy" {
-  type        = bool
-  default     = false
-  description = "A boolean that indicates all objects should be deleted from the ALB access logs S3 bucket so that the bucket can be destroyed without error"
-}
-
-variable "alb_access_logs_s3_bucket_force_destroy_enabled" {
-  type        = bool
-  description = <<-EOT
-    When `true`, permits `force_destroy` to be set to `true`.
-    This is an extra safety precaution to reduce the chance that Terraform will destroy and recreate
-    your S3 bucket, causing COMPLETE LOSS OF ALL DATA even if it was stored in Glacier.
-    WARNING: Upgrading this module from a version prior to 0.27.0 to this version
-      will cause Terraform to delete your existing S3 bucket CAUSING COMPLETE DATA LOSS
-      unless you follow the upgrade instructions on the Wiki [here](https://github.com/cloudposse/terraform-aws-s3-log-storage/wiki/Upgrading-to-v0.27.0-(POTENTIAL-DATA-LOSS)).
-      See additional instructions for upgrading from v0.27.0 to v0.28.0 [here](https://github.com/cloudposse/terraform-aws-s3-log-storage/wiki/Upgrading-to-v0.28.0-and-AWS-provider-v4-(POTENTIAL-DATA-LOSS)).
-    EOT
-  default     = false
-}
-
-################################################################################
-## cluster
-################################################################################
-variable "cluster_name_override" {
-  type        = string
-  description = "Name to assign the cluster. If null, the default will be `namespace-environment-cluster`"
-  default     = null
-}
-
-################################################################################
-## cluster
-################################################################################
-variable "additional_ssm_params" {
+variable "alb_target_group" {
+  description = "List of target groups to create"
   type = list(object({
-    name        = string
-    value       = string
-    description = string
-    type        = string
-    overwrite   = bool
+    name                              = optional(string, "target-group")
+    port                              = number
+    protocol                          = optional(string, null)
+    protocol_version                  = optional(string, "HTTP1")
+    vpc_id                            = optional(string, "")
+    target_type                       = optional(string, "ip")
+    ip_address_type                   = optional(string, "ipv4")
+    load_balancing_algorithm_type     = optional(string, "round_robin")
+    load_balancing_cross_zone_enabled = optional(string, "use_load_balancer_configuration")
+    deregistration_delay              = optional(number, 300)
+    slow_start                        = optional(number, 0)
+    tags                              = optional(map(string), {})
+
+    health_check = optional(object({
+      enabled             = optional(bool, true)
+      protocol            = optional(string, "HTTP") 
+      path                = optional(string, "/")
+      port                = optional(string, "traffic-port")
+      timeout             = optional(number, 6)
+      healthy_threshold   = optional(number, 3)
+      unhealthy_threshold = optional(number, 3)
+      interval            = optional(number, 30)
+      matcher             = optional(string, "200") 
+    }))
+
+    stickiness = optional(object({
+      enabled         = optional(bool, true)
+      type            = string
+      cookie_duration = optional(number, 86400)
+      })
+    )
+
   }))
-  description = <<-EOF
-    Additional SSM Parameters you would like to add for your ECS configuration.
-    The optional value defaults are:
-      description = "Managed by Terraform"
-      type = "SecureString"
-      overwrite = true
-  EOF
-  default     = []
+}
+
+variable "listener_rules" {
+  description = "List of listener rules to create"
+  type = list(object({
+    priority = number
+
+    conditions = list(object({
+      field  = string
+      values = list(string)
+    }))
+
+    actions = list(object({
+      type             = string
+      target_group_arn = optional(string)
+      order            = optional(number)
+      redirect = optional(object({
+        protocol    = string
+        port        = string
+        host        = optional(string)
+        path        = optional(string)
+        query       = optional(string)
+        status_code = string
+      }), null)
+
+      fixed_response = optional(object({
+        content_type = string
+        message_body = optional(string)
+        status_code  = optional(string)
+      }), null)
+    }))
+  }))
+}
+
+################################################################################
+## ecs service
+################################################################################
+
+variable "environment" {
+  type        = string
+  description = "The environment associated with the service"
+}
+
+
+variable "ecs" {
+  type = object({
+    cluster_name             = string
+    service_name             = string
+    repository_name          = string
+    enable_load_balancer     = bool
+    aws_lb_target_group_name = optional(string)
+  })
+  description = "The ECS-specific values to use such as cluster, service, and repository names."
+}
+
+# Task-specific variables
+variable "task" {
+  type = object({
+    tasks_desired               = optional(number)      
+    container_vcpu              = optional(number)      
+    container_memory            = optional(number)      
+    container_port              = number               
+    container_health_check_path = optional(string)      
+    container_definition        = optional(string)      
+    environment_variables       = optional(map(string)) 
+    task_execution_role         = optional(string)      
+  })
+
+  description = "Task-related information (vCPU, memory, # of tasks, port, and health check info.)"
+}
+
+# Load balancer
+variable "alb" {
+  type = object({
+    name                 = string
+    listener_port        = number
+    deregistration_delay = optional(number)
+    security_group_id    = string
+  })
+  description = "ALB-related information (listening port, deletion protection, security group)"
 }
