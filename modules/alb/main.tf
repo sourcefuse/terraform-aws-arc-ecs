@@ -146,7 +146,7 @@ resource "aws_lb_listener" "http" {
       target_group_arn = length(each.value.actions) > 0 ? lookup(each.value.actions[0], "target_group_arn", null) : null
     }
   }
-  depends_on = [ aws_lb_target_group.this ]
+  depends_on = [aws_lb_target_group.this]
 }
 
 
@@ -200,5 +200,5 @@ resource "aws_lb_listener_rule" "this" {
     }
   }
 
-  depends_on = [ aws_lb_listener.http ]
+  depends_on = [aws_lb_listener.http]
 }

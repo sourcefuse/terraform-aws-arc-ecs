@@ -17,14 +17,14 @@ module "alb" {
   alb = {
     name     = "arc-poc-alb"
     internal = false
-    port = 80
+    port     = 80
   }
 
   alb_target_group = [{
     name     = "arc-poc-alb-tg"
     port     = 80
     protocol = "HTTP"
-    vpc_id = "vpc-12345"
+    vpc_id   = "vpc-12345"
     health_check = {
       enabled = true
       path    = "/"
