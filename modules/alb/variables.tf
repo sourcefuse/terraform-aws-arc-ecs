@@ -9,6 +9,13 @@ variable "vpc_id" {
   description = "VPC in which security group for ALB has to be created"
 }
 
+variable "cidr_blocks" {
+  description = "CIDR blocks for security group ingress rules"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+
 variable "alb" {
   type = object({
     name                       = optional(string, null)
@@ -23,7 +30,7 @@ variable "alb" {
 
     access_logs = optional(object({
       bucket  = string
-      enabled = optional(bool, false)
+      enabled = optional(bool, true)
       prefix  = optional(string, "")
     }))
 

@@ -59,6 +59,7 @@ resource "aws_ecs_task_definition" "this" {
     container_port    = var.task.container_port,
     environment       = var.environment,
     environment_vars  = jsonencode(local.environment_variables),
+    secrets           = jsonencode(local.secrets)
     repository_name   = var.ecs_service.repository_name,
     service_name_full = local.service_name_full,
     cluster_name      = var.ecs_service.cluster_name,

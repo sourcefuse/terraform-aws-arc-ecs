@@ -23,8 +23,8 @@ module "ecs_cluster" {
   ##########################################
   ## Flags for ALB and service modules
   ##########################################
-  create_alb     = true
-  create_service = true
+  create_alb     = false
+  create_service = false
 
   #####################
   ## ecs cluster

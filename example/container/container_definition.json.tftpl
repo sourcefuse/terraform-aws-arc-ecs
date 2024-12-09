@@ -10,7 +10,18 @@
         "containerPort": ${container_port}
       }
     ],
+    "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl --fail http://localhost:80 || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 15
+    },
     "environment": ${environment_vars},
+    "secrets"    : ${secrets},
     "compatibilities": [
       "FARGATE"
     ],

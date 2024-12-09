@@ -29,6 +29,7 @@ variable "task" {
     container_health_check_path = optional(string)
     container_definition        = optional(string)
     environment_variables       = optional(map(string))
+    secrets                     = optional(map(string))
     task_execution_role         = optional(string)
   })
 
