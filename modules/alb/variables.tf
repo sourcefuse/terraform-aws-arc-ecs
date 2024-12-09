@@ -1,113 +1,110 @@
-################################################################################
-## defaults
-################################################################################
-variable "name" {
-  description = "Name to assign the resource"
-  type        = string
-  default     = ""
+
+variable "create_listener_rule" {
+  type    = bool
+  default = false
 }
 
 variable "vpc_id" {
-  description = "Id of the VPC where the resources will live"
   type        = string
+  description = "VPC in which security group for ALB has to be created"
 }
 
-variable "tags" {
-  description = "Tags to assign the resources"
-  type        = map(string)
-  default     = {}
-}
-
-################################################################################
-## alb
-################################################################################
-variable "cross_zone_load_balancing_enabled" {
-  description = "A boolean flag to enable/disable cross zone load balancing"
-  type        = bool
-  default     = true
-}
-
-variable "deletion_protection_enabled" {
-  type        = bool
-  description = "A boolean flag to enable/disable deletion protection for ALB"
-  default     = false
-}
-
-variable "deregistration_delay" {
-  description = "The amount of time to wait in seconds before changing the state of a deregistering target to unused"
-  type        = number
-  default     = 15
-}
-
-variable "idle_timeout" {
-  description = "The time in seconds that the connection is allowed to be idle"
-  type        = number
-  default     = 60
-}
-
-variable "internal" {
-  description = "Internal or external facing ALB."
-  type        = bool
-  default     = false
-}
-
-variable "ip_address_type" {
-  description = "The type of IP addresses used by the subnets for your load balancer. The possible values are `ipv4` and `dualstack`."
-  type        = string
-  default     = "ipv4"
-}
-
-variable "security_group_ids" {
-  description = "Security group Ids for access"
+variable "cidr_blocks" {
+  description = "CIDR blocks for ALB security group ingress rules"
   type        = list(string)
+  default     = null
 }
 
-variable "subnet_ids" {
-  description = "Subnet Ids assigned to the LB"
-  type        = list(string)
+
+variable "alb" {
+  type = object({
+    name                       = optional(string, null)
+    port                       = optional(number)
+    protocol                   = optional(string, "HTTP")
+    internal                   = optional(bool, false)
+    load_balancer_type         = optional(string, "application")
+    idle_timeout               = optional(number, 60)
+    enable_deletion_protection = optional(bool, false)
+    enable_http2               = optional(bool, true)
+    certificate_arn            = optional(string, null)
+
+    access_logs = optional(object({
+      bucket  = string
+      enabled = optional(bool, true)
+      prefix  = optional(string, "")
+    }))
+
+    tags = optional(map(string), {})
+  })
 }
 
-variable "http_ingress_cidr_blocks" {
-  description = "List of CIDR blocks to allow in HTTP security group"
-  type        = list(string)
-  default = [
-    "0.0.0.0/0"
-  ]
+
+variable "alb_target_group" {
+  description = "List of target groups to create"
+  type = list(object({
+    name                              = optional(string, "target-group")
+    port                              = number
+    protocol                          = optional(string, null)
+    protocol_version                  = optional(string, "HTTP1")
+    vpc_id                            = optional(string, "")
+    target_type                       = optional(string, "ip")
+    ip_address_type                   = optional(string, "ipv4")
+    load_balancing_algorithm_type     = optional(string, "round_robin")
+    load_balancing_cross_zone_enabled = optional(string, "use_load_balancer_configuration")
+    deregistration_delay              = optional(number, 300)
+    slow_start                        = optional(number, 0)
+    tags                              = optional(map(string), {})
+
+    health_check = optional(object({
+      enabled             = optional(bool, true)
+      protocol            = optional(string, "HTTP") # Allowed values: "HTTP", "HTTPS", "TCP", etc.
+      path                = optional(string, "/")
+      port                = optional(string, "traffic-port")
+      timeout             = optional(number, 6)
+      healthy_threshold   = optional(number, 3)
+      unhealthy_threshold = optional(number, 3)
+      interval            = optional(number, 30)
+      matcher             = optional(string, "200") # Default HTTP matcher. Range 200 to 499
+    }))
+
+    stickiness = optional(object({
+      enabled         = optional(bool, true)
+      type            = string
+      cookie_duration = optional(number, 86400)
+      })
+    )
+
+  }))
 }
 
-variable "https_ingress_cidr_blocks" {
-  description = "List of CIDR blocks to allow in HTTPS security group"
-  type        = list(string)
-  default = [
-    "0.0.0.0/0"
-  ]
-}
+variable "listener_rules" {
+  description = "List of listener rules to create"
+  type = list(object({
+    priority = number
 
-################################################################################
-## logs
-################################################################################
-variable "access_logs_enabled" {
-  description = "A boolean flag to enable/disable access_logs"
-  type        = bool
-  default     = true
-}
+    conditions = list(object({
+      field  = string
+      values = list(string)
+    }))
 
-variable "alb_access_logs_s3_bucket_force_destroy" {
-  type        = bool
-  default     = false
-  description = "A boolean that indicates all objects should be deleted from the ALB access logs S3 bucket so that the bucket can be destroyed without error"
-}
+    actions = list(object({
+      type             = string
+      target_group_arn = optional(string)
+      order            = optional(number)
+      redirect = optional(object({
+        protocol    = string
+        port        = string
+        host        = optional(string)
+        path        = optional(string)
+        query       = optional(string)
+        status_code = string
+      }), null)
 
-variable "alb_access_logs_s3_bucket_force_destroy_enabled" {
-  type        = bool
-  default     = false
-  description = <<-EOT
-    When `true`, permits `force_destroy` to be set to `true`.
-    This is an extra safety precaution to reduce the chance that Terraform will destroy and recreate
-    your S3 bucket, causing COMPLETE LOSS OF ALL DATA even if it was stored in Glacier.
-    WARNING: Upgrading this module from a version prior to 0.27.0 to this version
-      will cause Terraform to delete your existing S3 bucket CAUSING COMPLETE DATA LOSS
-      unless you follow the upgrade instructions on the Wiki [here](https://github.com/cloudposse/terraform-aws-s3-log-storage/wiki/Upgrading-to-v0.27.0-(POTENTIAL-DATA-LOSS)).
-      See additional instructions for upgrading from v0.27.0 to v0.28.0 [here](https://github.com/cloudposse/terraform-aws-s3-log-storage/wiki/Upgrading-to-v0.28.0-and-AWS-provider-v4-(POTENTIAL-DATA-LOSS)).
-    EOT
+      fixed_response = optional(object({
+        content_type = string
+        message_body = optional(string)
+        status_code  = optional(string)
+      }), null)
+    }))
+  }))
 }
