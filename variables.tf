@@ -1,12 +1,14 @@
 
 variable "create_alb" {
-  type    = bool
-  default = false
+  type        = bool
+  default     = false
+  description = "Flag to create or skip the creation of ALB"
 }
 
 variable "create_service" {
-  type    = bool
-  default = false
+  type        = bool
+  default     = false
+  description = "Flag to create or skip the creation of ECS demo service"
 }
 
 ################################################################################
@@ -50,6 +52,8 @@ EOT
 }
 
 variable "capacity_provider" {
+  description = "Configuration settings for the ECS capacity providers, including the capacity providers used for autoscaling and Fargate. This variable defines the properties of each capacity provider and how they are managed, such as scaling policies and termination protection."
+
   type = object({
     autoscaling_capacity_providers = map(object({
       name                           = optional(string)
@@ -76,10 +80,12 @@ variable "capacity_provider" {
 ################################################################################
 
 variable "vpc_id" {
-  type = string
+  type        = string
+  description = "ID of VPC in which all resources need to be created"
 }
 
 variable "alb" {
+  description = "Configuration settings for the Application Load Balancer (ALB). This includes attributes related to the ALB itself, such as its name, port, protocol, and other optional settings like access logs and tags."
   type = object({
     name                       = optional(string, null)
     port                       = optional(number)
@@ -177,7 +183,7 @@ variable "listener_rules" {
 
 variable "environment" {
   type        = string
-  description = "The environment associated with the service"
+  description = "The environment associated with the ECS service"
 }
 
 

@@ -9,7 +9,7 @@
 [![Known Vulnerabilities](https://github.com/sourcefuse/terraform-aws-arc-ecs/actions/workflows/snyk.yaml/badge.svg)](https://github.com/sourcefuse/terraform-aws-arc-ecs/actions/workflows/snyk.yaml)
 ## Overview
 
-SourceFuse's AWS Reference Architecture Terraform module leverages the terraform-aws-modules/terraform-aws-ecs GitHub repository to facilitate the deployment and management of an AWS ECS (Elastic Container Service) cluster. It streamlines the configuration of ECS tasks, services, and related components, providing a scalable and efficient solution for orchestrating containerized applications. With customizable settings for logging, load balancing, and service discovery, the module promotes seamless deployment and management of containerized workloads on AWS.
+SourceFuse's AWS Reference Architecture Terraform module leverages the terraform-aws-modules/terraform-aws-ecs GitHub repository to facilitate the deployment and management of an AWS ECS (Elastic Container Service) cluster. It streamlines the configuration of ECS tasks, services, and related components, providing a scalable and efficient solution for orchestrating containerized applications. With customizable settings for logging and load balancing the module promotes seamless deployment and management of containerized workloads on AWS.
 
 The module assumes that upstream dependencies, namely networking dependencies, are created upstream and the values are passed into this module via mechanisms such as Terraform data source queries.
 
@@ -17,12 +17,11 @@ The module assumes that upstream dependencies, namely networking dependencies, a
 
 The module provisions
 
-* ECS Cluster - we are focusing on the Fargate launch type, so we do not provision any underlying EC2 instances for the ECS launch type.
-* Application Load Balancer - default port 80 to 443 redirect.
+* ECS Cluster - we are focusing on the Fargate launch type, so we do not provision any underlying EC2 instances for the ECS launch type for the time being.
+* Application Load Balancer - default port 80.
 * Health Check Service - vanilla HTTP echo service that is used as the default target group for the load balancer. The purpose of the health check service is to ensure that the core infrastructure, networking, security groups, etc. are configured correctly.
 * Task execution IAM role - used by downstream services for task execution.
-* Utilizes ACM to generate a certificate specific to the ALB.
-* Tags/SSM params - the module tags resources and outputs SSM params that can be used in data source lookups downstream for ECS services to reference to deploy into the cluster.
+* Tags - the module tags resources for easy reference in the AWS console.
 
 
 ![Module Structure](./static/arc_ecs_basic_components.png)
@@ -35,7 +34,6 @@ Before using this module, ensure you have the following:
 - AWS credentials configured.
 - Terraform installed.
 - A working knowledge of Terraform.
-- Route 53 hosted zone
 - Network
 
 
@@ -53,7 +51,6 @@ ecs/
 |-- outputs.tf
 ```
 
-
 2. **Define Input Variables**
 
 Inside the `variables.tf` or in `*.tfvars` file, you should define values for the variables that the module requires.
@@ -63,37 +60,22 @@ In your main Terraform configuration file (e.g., main.tf), you can use the modul
 
 
 ```hcl
-module "ecs" {
-  source = "sourcefuse/arc-ecs/aws"
-  version     = "1.5.2"
+module "ecs_cluster" {
+  source = "./modules/ecs_cluster"
 
-  environment = var.environment
-  namespace   = var.namespace
+  ecs_cluster = {
+    name                        = var.ecs_cluster.name
+    configuration               = var.ecs_cluster.configuration
+    create_cloudwatch_log_group = var.ecs_cluster.create_cloudwatch_log_group
+    service_connect_defaults    = var.ecs_cluster.service_connect_defaults
+    settings                    = var.ecs_cluster.settings
+  }
 
-  vpc_id                  = data.aws_vpc.vpc.id
-  alb_subnet_ids          = data.aws_subnets.public.ids
-  health_check_subnet_ids = data.aws_subnets.private.ids
-
-  // --- Devs: DO NOT override, otherwise tests will fail --- //
-  access_logs_enabled                             = false
-  alb_access_logs_s3_bucket_force_destroy         = true
-  alb_access_logs_s3_bucket_force_destroy_enabled = true
-  // -------------------------- END ------------------------- //
-
-  ## create acm certificate and dns record for health check
-  route_53_zone_name            = var.route_53_zone
-  route_53_zone_id              = data.aws_route53_zone.this.id
-  acm_domain_name               = "healthcheck-ecs-${var.namespace}-${var.environment}.${local.route_53_zone}"
-  acm_subject_alternative_names = []
-  health_check_route_53_records = [
-    "healthcheck-ecs-${var.namespace}-${var.environment}.${local.route_53_zone}"
-  ]
-
-  service_discovery_private_dns_namespace = [
-    "${var.namespace}.${var.environment}.${local.route_53_zone}"
-  ]
-
-  tags = module.tags.tags
+  capacity_provider = {
+    autoscaling_capacity_providers        = var.capacity_provider.autoscaling_capacity_providers
+    default_capacity_provider_use_fargate = var.capacity_provider.default_capacity_provider_use_fargate
+    fargate_capacity_providers            = var.capacity_provider.fargate_capacity_providers
+  }
 }
 ```
 
@@ -107,10 +89,6 @@ output "cluster_name" {
   value       = module.ecs.cluster_name
 }
 
-output "health_check_fqdn" {
-  description = "Health check FQDN record created in Route 53."
-  value       = module.ecs.health_check_fqdn
-}
 ```
 
 5. **Execute Terraform Commands**
@@ -155,61 +133,29 @@ No resources.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_alb"></a> [alb](#input\_alb) | n/a | <pre>object({<br/>    name                       = optional(string, null)<br/>    port                       = optional(number)<br/>    protocol                   = optional(string, "HTTP")<br/>    internal                   = optional(bool, false)<br/>    load_balancer_type         = optional(string, "application")<br/>    idle_timeout               = optional(number, 60)<br/>    enable_deletion_protection = optional(bool, false)<br/>    enable_http2               = optional(bool, true)<br/>    certificate_arn            = optional(string, null)<br/><br/>    access_logs = optional(object({<br/>      bucket  = string<br/>      enabled = optional(bool, false)<br/>      prefix  = optional(string, "")<br/>    }))<br/><br/>    tags = optional(map(string), {})<br/>  })</pre> | n/a | yes |
+| <a name="input_alb"></a> [alb](#input\_alb) | Configuration settings for the Application Load Balancer (ALB). This includes attributes related to the ALB itself, such as its name, port, protocol, and other optional settings like access logs and tags. | <pre>object({<br/>    name                       = optional(string, null)<br/>    port                       = optional(number)<br/>    protocol                   = optional(string, "HTTP")<br/>    internal                   = optional(bool, false)<br/>    load_balancer_type         = optional(string, "application")<br/>    idle_timeout               = optional(number, 60)<br/>    enable_deletion_protection = optional(bool, false)<br/>    enable_http2               = optional(bool, true)<br/>    certificate_arn            = optional(string, null)<br/><br/>    access_logs = optional(object({<br/>      bucket  = string<br/>      enabled = optional(bool, false)<br/>      prefix  = optional(string, "")<br/>    }))<br/><br/>    tags = optional(map(string), {})<br/>  })</pre> | n/a | yes |
 | <a name="input_alb_target_group"></a> [alb\_target\_group](#input\_alb\_target\_group) | List of target groups to create | <pre>list(object({<br/>    name                              = optional(string, "target-group")<br/>    port                              = number<br/>    protocol                          = optional(string, null)<br/>    protocol_version                  = optional(string, "HTTP1")<br/>    vpc_id                            = optional(string, "")<br/>    target_type                       = optional(string, "ip")<br/>    ip_address_type                   = optional(string, "ipv4")<br/>    load_balancing_algorithm_type     = optional(string, "round_robin")<br/>    load_balancing_cross_zone_enabled = optional(string, "use_load_balancer_configuration")<br/>    deregistration_delay              = optional(number, 300)<br/>    slow_start                        = optional(number, 0)<br/>    tags                              = optional(map(string), {})<br/><br/>    health_check = optional(object({<br/>      enabled             = optional(bool, true)<br/>      protocol            = optional(string, "HTTP")<br/>      path                = optional(string, "/")<br/>      port                = optional(string, "traffic-port")<br/>      timeout             = optional(number, 6)<br/>      healthy_threshold   = optional(number, 3)<br/>      unhealthy_threshold = optional(number, 3)<br/>      interval            = optional(number, 30)<br/>      matcher             = optional(string, "200")<br/>    }))<br/><br/>    stickiness = optional(object({<br/>      enabled         = optional(bool, true)<br/>      type            = string<br/>      cookie_duration = optional(number, 86400)<br/>      })<br/>    )<br/><br/>  }))</pre> | n/a | yes |
-| <a name="input_capacity_provider"></a> [capacity\_provider](#input\_capacity\_provider) | n/a | <pre>object({<br/>    autoscaling_capacity_providers = map(object({<br/>      name                           = optional(string)<br/>      auto_scaling_group_arn         = string<br/>      managed_termination_protection = optional(string, "DISABLED")<br/>      managed_draining               = optional(string, "ENABLED")<br/>      managed_scaling = optional(object({<br/>        instance_warmup_period    = optional(number)<br/>        maximum_scaling_step_size = optional(number)<br/>        minimum_scaling_step_size = optional(number)<br/>        status                    = optional(string)<br/>        target_capacity           = optional(number)<br/>      }))<br/>      tags = optional(map(string), {})<br/>    }))<br/>    default_capacity_provider_use_fargate = bool<br/>    fargate_capacity_providers            = any<br/>  })</pre> | n/a | yes |
-| <a name="input_create_alb"></a> [create\_alb](#input\_create\_alb) | n/a | `bool` | `false` | no |
-| <a name="input_create_service"></a> [create\_service](#input\_create\_service) | n/a | `bool` | `false` | no |
+| <a name="input_capacity_provider"></a> [capacity\_provider](#input\_capacity\_provider) | Configuration settings for the ECS capacity providers, including the capacity providers used for autoscaling and Fargate. This variable defines the properties of each capacity provider and how they are managed, such as scaling policies and termination protection. | <pre>object({<br/>    autoscaling_capacity_providers = map(object({<br/>      name                           = optional(string)<br/>      auto_scaling_group_arn         = string<br/>      managed_termination_protection = optional(string, "DISABLED")<br/>      managed_draining               = optional(string, "ENABLED")<br/>      managed_scaling = optional(object({<br/>        instance_warmup_period    = optional(number)<br/>        maximum_scaling_step_size = optional(number)<br/>        minimum_scaling_step_size = optional(number)<br/>        status                    = optional(string)<br/>        target_capacity           = optional(number)<br/>      }))<br/>      tags = optional(map(string), {})<br/>    }))<br/>    default_capacity_provider_use_fargate = bool<br/>    fargate_capacity_providers            = any<br/>  })</pre> | n/a | yes |
+| <a name="input_create_alb"></a> [create\_alb](#input\_create\_alb) | Flag to create or skip the creation of ALB | `bool` | `false` | no |
+| <a name="input_create_service"></a> [create\_service](#input\_create\_service) | Flag to create or skip the creation of ECS demo service | `bool` | `false` | no |
 | <a name="input_ecs_cluster"></a> [ecs\_cluster](#input\_ecs\_cluster) | The ECS-specific values to use such as cluster, service, and repository names.<br/><br/>Keys:<br/>  - cluster\_name: The name of the ECS cluster.<br/>  - cluster\_configuration: The execute command configuration for the cluster.<br/>  - cluster\_settings: A list of cluster settings (e.g., container insights). Default is an empty list.<br/>  - cluster\_service\_connect\_defaults: Configures a default Service Connect namespace.<br/>  - create\_cloudwatch\_log\_group: Boolean flag to specify whether to create a CloudWatch log group for the ECS cluster. | <pre>object({<br/>    name = string<br/>    configuration = optional(object({<br/>      execute_command_configuration = optional(object({<br/>        kms_key_id = optional(string, "")<br/>        logging    = optional(string, "DEFAULT")<br/>        log_configuration = optional(object({<br/>          cloudwatch_encryption_enabled = optional(bool, null)<br/>          log_group_name                = optional(string, null)<br/>          log_group_retention_in_days   = optional(number, null)<br/>          log_group_kms_key_id          = optional(string, null)<br/>          log_group_tags                = optional(map(string), null)<br/>          s3_bucket_name                = optional(string, null)<br/>          s3_bucket_encryption_enabled  = optional(bool, null)<br/>          s3_key_prefix                 = optional(string, null)<br/>        }), {})<br/>      }), {})<br/>    }), {})<br/>    create_cloudwatch_log_group = bool<br/>    service_connect_defaults    = optional(map(string), null)<br/>    settings                    = optional(any, null)<br/>    tags                        = optional(map(string), null)<br/>  })</pre> | n/a | yes |
 | <a name="input_ecs_service"></a> [ecs\_service](#input\_ecs\_service) | The ECS-specific values to use such as cluster, service, and repository names. | <pre>object({<br/>    cluster_name             = string<br/>    service_name             = string<br/>    repository_name          = string<br/>    enable_load_balancer     = bool<br/>    aws_lb_target_group_name = optional(string)<br/>  })</pre> | n/a | yes |
-| <a name="input_environment"></a> [environment](#input\_environment) | The environment associated with the service | `string` | n/a | yes |
+| <a name="input_environment"></a> [environment](#input\_environment) | The environment associated with the ECS service | `string` | n/a | yes |
 | <a name="input_lb"></a> [lb](#input\_lb) | ALB-related information (listening port, deletion protection, security group) | <pre>object({<br/>    name                 = string<br/>    listener_port        = number<br/>    deregistration_delay = optional(number)<br/>    security_group_id    = string<br/>  })</pre> | n/a | yes |
 | <a name="input_listener_rules"></a> [listener\_rules](#input\_listener\_rules) | List of listener rules to create | <pre>list(object({<br/>    priority = number<br/><br/>    conditions = list(object({<br/>      field  = string<br/>      values = list(string)<br/>    }))<br/><br/>    actions = list(object({<br/>      type             = string<br/>      target_group_arn = optional(string)<br/>      order            = optional(number)<br/>      redirect = optional(object({<br/>        protocol    = string<br/>        port        = string<br/>        host        = optional(string)<br/>        path        = optional(string)<br/>        query       = optional(string)<br/>        status_code = string<br/>      }), null)<br/><br/>      fixed_response = optional(object({<br/>        content_type = string<br/>        message_body = optional(string)<br/>        status_code  = optional(string)<br/>      }), null)<br/>    }))<br/>  }))</pre> | n/a | yes |
 | <a name="input_task"></a> [task](#input\_task) | Task-related information (vCPU, memory, # of tasks, port, and health check info.) | <pre>object({<br/>    tasks_desired               = optional(number)<br/>    container_vcpu              = optional(number)<br/>    container_memory            = optional(number)<br/>    container_port              = number<br/>    container_health_check_path = optional(string)<br/>    container_definition        = optional(string)<br/>    environment_variables       = optional(map(string))<br/>    task_execution_role         = optional(string)<br/>  })</pre> | n/a | yes |
-| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | n/a | `string` | n/a | yes |
+| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | ID of VPC in which all resources need to be created | `string` | n/a | yes |
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_alb_name"></a> [alb\_name](#output\_alb\_name) | The names of the ALBs. |
+| <a name="output_ecs_cluster_configuration"></a> [ecs\_cluster\_configuration](#output\_ecs\_cluster\_configuration) | The configuration details of the ECS cluster. |
+| <a name="output_ecs_cluster_name"></a> [ecs\_cluster\_name](#output\_ecs\_cluster\_name) | The name of the ECS cluster. |
+| <a name="output_ecs_service_name"></a> [ecs\_service\_name](#output\_ecs\_service\_name) | The service names of the ECS services. |
+| <a name="output_ecs_task_definition_arn"></a> [ecs\_task\_definition\_arn](#output\_ecs\_task\_definition\_arn) | The ARNs of the ECS task definitions. |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-
-## SSM Parameters  
-There are some commonly referenced outputs generated by this module.
-These outputs are also published to SSM for ease of access for downstream resources.  
-The default SSM Parameter format used by this module is the following:  
-```
-[
-  ## alb
-  {
-    name        = "/${var.namespace}/${var.environment}/alb/${module.alb.alb_name}/endpoint"
-    value       = module.alb.alb_dns_name
-    description = "ALB DNS Endpoint"
-    type        = "String"
-  },
-  {
-    name        = "/${var.namespace}/${var.environment}/alb/${module.alb.alb_name}/arn"
-    value       = module.alb.alb_arn
-    description = "ALB ARN"
-    type        = "String"
-  },
-
-  ## ecs
-  {
-    name        = "/${var.namespace}/${var.environment}/ecs/${module.ecs.cluster_name}/id"
-    value       = module.ecs.cluster_id
-    description = "ECS Cluster ID"
-    type        = "String"
-  },
-  {
-    name        = "/${var.namespace}/${var.environment}/ecs/${module.ecs.cluster_name}/arn"
-    value       = module.ecs.cluster_arn
-    description = "ECS Cluster ARN"
-    type        = "String"
-  }
-]
-```  
-
-You can append to this array by adding values to `var.additional_ssm_params`.  
 
 ## Development
 
