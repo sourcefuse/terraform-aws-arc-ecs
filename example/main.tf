@@ -59,13 +59,13 @@ module "ecs_cluster" {
   ## ecs service
   #####################
 
-  vpc_id      = "vpc-0e6c09980580ecbf6"
+  vpc_id      = "vpc-12345"
   environment = "develop"
 
   ecs_service = {
     cluster_name             = "arc-ecs-module-poc"
     service_name             = "arc-ecs-module-service-poc"
-    repository_name          = "884360309640.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
+    repository_name          = "12345.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
     enable_load_balancer     = false
     aws_lb_target_group_name = "arc-poc-alb-tg"
   }
