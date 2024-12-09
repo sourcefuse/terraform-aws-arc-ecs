@@ -21,13 +21,6 @@ resource "aws_security_group" "lb_sg" {
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = local.cidr_blocks
-  }
-
-  ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"

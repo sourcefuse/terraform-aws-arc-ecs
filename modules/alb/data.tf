@@ -12,8 +12,3 @@ data "aws_subnet" "public" {
 
   id = each.value
 }
-
-# To get VPC CIDR for ALB security group as default ingress
-data "aws_vpc" "this" {
-  id = var.vpc_id
-}

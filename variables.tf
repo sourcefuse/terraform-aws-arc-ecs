@@ -1,16 +1,3 @@
-
-variable "create_alb" {
-  type        = bool
-  default     = false
-  description = "Flag to create or skip the creation of ALB"
-}
-
-variable "create_service" {
-  type        = bool
-  default     = false
-  description = "Flag to create or skip the creation of ECS demo service"
-}
-
 ################################################################################
 ## ecs cluster
 ################################################################################
@@ -69,8 +56,8 @@ variable "capacity_provider" {
       }))
       tags = optional(map(string), {})
     }))
-    default_capacity_provider_use_fargate = bool
-    fargate_capacity_providers            = any
+    use_fargate                = bool
+    fargate_capacity_providers = any
   })
 }
 
@@ -102,6 +89,7 @@ variable "alb" {
     enable_deletion_protection = optional(bool, false)
     enable_http2               = optional(bool, true)
     certificate_arn            = optional(string, null)
+    create_alb                 = optional(bool, false)
 
     access_logs = optional(object({
       bucket  = string
@@ -200,6 +188,7 @@ variable "ecs_service" {
     repository_name          = string
     enable_load_balancer     = bool
     aws_lb_target_group_name = optional(string)
+    create_service           = optional(bool, false)
   })
   description = "The ECS-specific values to use such as cluster, service, and repository names."
 }

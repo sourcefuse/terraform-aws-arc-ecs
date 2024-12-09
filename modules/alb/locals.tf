@@ -5,6 +5,6 @@ locals {
     s.id if lookup(s.tags, "Type", "") == "public"
   ]
 
-  cidr_blocks = var.cidr_blocks != null ? var.cidr_blocks : [data.aws_vpc.this.cidr_block]
+  cidr_blocks = var.cidr_blocks == null ? ["0.0.0.0/0"] : var.cidr_blocks
 
 }

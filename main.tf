@@ -14,9 +14,9 @@ module "ecs_cluster" {
   }
 
   capacity_provider = {
-    autoscaling_capacity_providers        = var.capacity_provider.autoscaling_capacity_providers
-    default_capacity_provider_use_fargate = var.capacity_provider.default_capacity_provider_use_fargate
-    fargate_capacity_providers            = var.capacity_provider.fargate_capacity_providers
+    autoscaling_capacity_providers = var.capacity_provider.autoscaling_capacity_providers
+    use_fargate                    = var.capacity_provider.use_fargate
+    fargate_capacity_providers     = var.capacity_provider.fargate_capacity_providers
   }
 }
 
@@ -26,7 +26,7 @@ module "ecs_cluster" {
 ################################################################################
 
 module "alb" {
-  count  = var.create_alb ? 1 : 0
+  count  = var.alb.create_alb ? 1 : 0
   source = "./modules/alb"
 
   vpc_id      = var.vpc_id
@@ -81,7 +81,7 @@ module "alb" {
 ################################################################################
 
 module "ecs_service" {
-  count  = var.create_service ? 1 : 0
+  count  = var.ecs_service.create_service ? 1 : 0
   source = "./modules/ecs_service"
 
   vpc_id      = var.vpc_id

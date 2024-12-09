@@ -120,8 +120,8 @@ resource "aws_ecs_capacity_provider" "this" {
 
 locals {
   default_capacity_providers = merge(
-    { for k, v in var.capacity_provider.fargate_capacity_providers : k => v if var.capacity_provider.default_capacity_provider_use_fargate },
-    { for k, v in var.capacity_provider.autoscaling_capacity_providers : k => v if !var.capacity_provider.default_capacity_provider_use_fargate }
+    { for k, v in var.capacity_provider.fargate_capacity_providers : k => v if var.capacity_provider.use_fargate },
+    { for k, v in var.capacity_provider.autoscaling_capacity_providers : k => v if !var.capacity_provider.use_fargate }
   )
 }
 

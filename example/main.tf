@@ -20,12 +20,6 @@ provider "aws" {
 module "ecs_cluster" {
   source = "../"
 
-  ##########################################
-  ## Flags for ALB and service modules
-  ##########################################
-  create_alb     = true
-  create_service = true
-
   #####################
   ## ecs cluster
   #####################
@@ -46,8 +40,8 @@ module "ecs_cluster" {
   }
 
   capacity_provider = {
-    autoscaling_capacity_providers        = {}
-    default_capacity_provider_use_fargate = true
+    autoscaling_capacity_providers = {}
+    use_fargate                    = true
     fargate_capacity_providers = {
       fargate_cp = {
         name = "FARGATE"
@@ -68,6 +62,7 @@ module "ecs_cluster" {
     repository_name          = "12345.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
     enable_load_balancer     = false
     aws_lb_target_group_name = "arc-poc-alb-tg"
+    create_service           = false
   }
 
   task = {
@@ -91,9 +86,10 @@ module "ecs_cluster" {
   cidr_blocks = null
 
   alb = {
-    name     = "arc-poc-alb"
-    internal = false
-    port     = 80
+    name       = "arc-poc-alb"
+    internal   = false
+    port       = 80
+    create_alb = false
   }
 
   alb_target_group = [{

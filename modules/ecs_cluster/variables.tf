@@ -78,7 +78,7 @@ variable "capacity_provider" {
       }))
       tags = optional(map(string), {}) # Optional; default to empty map
     }))
-    default_capacity_provider_use_fargate = bool
-    fargate_capacity_providers            = any
+    use_fargate                = bool
+    fargate_capacity_providers = any
   })
 }
