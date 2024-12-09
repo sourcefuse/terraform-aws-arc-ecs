@@ -147,7 +147,7 @@ resource "aws_lb_listener" "http" {
 ## Listener Rules
 ###################################################################
 resource "aws_lb_listener_rule" "this" {
-  for_each = var.create_listener_rule ? { for rule in var.listener_rules : "${rule.priority}" => rule } : {}
+  for_each = var.create_listener_rule ? { for rule in var.listener_rules : rule.priority => rule } : {}
 
   listener_arn = aws_lb_listener.http.arn
   priority     = each.value.priority

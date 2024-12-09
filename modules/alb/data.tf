@@ -1,5 +1,3 @@
-data "aws_region" "current" {}
-
 # Fetch all subnets in the VPC
 data "aws_subnets" "all" {
   filter {

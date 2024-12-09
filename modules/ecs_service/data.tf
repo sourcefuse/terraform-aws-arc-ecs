@@ -20,18 +20,10 @@ data "aws_subnets" "private" {
   }
 }
 
-data "aws_lb" "service" {
-  name = var.alb.name
-}
-
-data "aws_security_group" "alb_sg" {
-  id = var.alb.security_group_id
-}
-
 data "aws_ecs_cluster" "cluster" {
-  cluster_name = var.ecs.cluster_name
+  cluster_name = var.ecs_service.cluster_name
 }
 
 data "aws_lb_target_group" "ecs_target_group" {
-  name = var.ecs.aws_lb_target_group_name
+  name = var.ecs_service.aws_lb_target_group_name
 }

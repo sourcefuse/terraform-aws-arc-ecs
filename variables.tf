@@ -1,3 +1,14 @@
+
+variable "create_alb" {
+  type    = bool
+  default = false
+}
+
+variable "create_service" {
+  type    = bool
+  default = false
+}
+
 ################################################################################
 ## ecs cluster
 ################################################################################
@@ -59,6 +70,7 @@ variable "capacity_provider" {
   })
 }
 
+
 ################################################################################
 ##  ALB
 ################################################################################
@@ -107,14 +119,14 @@ variable "alb_target_group" {
 
     health_check = optional(object({
       enabled             = optional(bool, true)
-      protocol            = optional(string, "HTTP") 
+      protocol            = optional(string, "HTTP")
       path                = optional(string, "/")
       port                = optional(string, "traffic-port")
       timeout             = optional(number, 6)
       healthy_threshold   = optional(number, 3)
       unhealthy_threshold = optional(number, 3)
       interval            = optional(number, 30)
-      matcher             = optional(string, "200") 
+      matcher             = optional(string, "200")
     }))
 
     stickiness = optional(object({
@@ -169,7 +181,7 @@ variable "environment" {
 }
 
 
-variable "ecs" {
+variable "ecs_service" {
   type = object({
     cluster_name             = string
     service_name             = string
@@ -183,21 +195,21 @@ variable "ecs" {
 # Task-specific variables
 variable "task" {
   type = object({
-    tasks_desired               = optional(number)      
-    container_vcpu              = optional(number)      
-    container_memory            = optional(number)      
-    container_port              = number               
-    container_health_check_path = optional(string)      
-    container_definition        = optional(string)      
-    environment_variables       = optional(map(string)) 
-    task_execution_role         = optional(string)      
+    tasks_desired               = optional(number)
+    container_vcpu              = optional(number)
+    container_memory            = optional(number)
+    container_port              = number
+    container_health_check_path = optional(string)
+    container_definition        = optional(string)
+    environment_variables       = optional(map(string))
+    task_execution_role         = optional(string)
   })
 
   description = "Task-related information (vCPU, memory, # of tasks, port, and health check info.)"
 }
 
 # Load balancer
-variable "alb" {
+variable "lb" {
   type = object({
     name                 = string
     listener_port        = number

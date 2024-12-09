@@ -9,7 +9,7 @@ variable "tags" {
 
 variable "ecs_cluster" {
   type = object({
-    name                        = string
+    name = string
     configuration = optional(object({
       execute_command_configuration = optional(object({
         kms_key_id = optional(string, "")
@@ -29,7 +29,7 @@ variable "ecs_cluster" {
     create_cloudwatch_log_group = bool
     service_connect_defaults    = optional(map(string), null)
     settings                    = optional(any, null)
-    tags = optional(map(string), null)
+    tags                        = optional(map(string), null)
   })
   description = <<EOT
 The ECS-specific values to use such as cluster, service, and repository names.
@@ -51,8 +51,8 @@ EOT
         value = "enabled"
       }
     ]
-    service_connect_defaults = {}
-    create_cloudwatch_log_group      = true
+    service_connect_defaults    = {}
+    create_cloudwatch_log_group = true
   }
 }
 

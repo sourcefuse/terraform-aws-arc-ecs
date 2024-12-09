@@ -30,11 +30,10 @@ output "route_53_fqdn" {
 }
  */
 
- output "private_subnets" {
+output "private_subnets" {
   value = data.aws_subnets.private
 }
 
 output "private_subnet_ids" {
   value = data.aws_subnets.private.ids
 }
-
