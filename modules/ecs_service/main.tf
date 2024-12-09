@@ -75,11 +75,10 @@ resource "aws_security_group" "ecs" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "Allow inbound proxy traffic"
-    from_port   = var.task.container_port
-    to_port     = var.task.container_port
-    protocol    = "tcp"
-    #cidr_blocks     = [for subnet in data.aws_subnet.private : subnet.cidr_block]
+    description     = "Allow inbound proxy traffic"
+    from_port       = var.task.container_port
+    to_port         = var.task.container_port
+    protocol        = "tcp"
     security_groups = [var.lb.security_group_id]
   }
 

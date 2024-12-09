@@ -84,6 +84,12 @@ variable "vpc_id" {
   description = "ID of VPC in which all resources need to be created"
 }
 
+variable "cidr_blocks" {
+  description = "CIDR blocks for security group ingress rules"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
 variable "alb" {
   description = "Configuration settings for the Application Load Balancer (ALB). This includes attributes related to the ALB itself, such as its name, port, protocol, and other optional settings like access logs and tags."
   type = object({

@@ -29,7 +29,9 @@ module "alb" {
   count  = var.create_alb ? 1 : 0
   source = "./modules/alb"
 
-  vpc_id = var.vpc_id
+  vpc_id      = var.vpc_id
+  cidr_blocks = var.cidr_blocks
+
 
   alb = {
     name                       = var.alb.name

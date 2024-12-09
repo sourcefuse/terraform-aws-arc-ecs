@@ -4,4 +4,7 @@ locals {
     for s in data.aws_subnet.public :
     s.id if lookup(s.tags, "Type", "") == "public"
   ]
+
+  cidr_blocks = var.cidr_blocks != null ? var.cidr_blocks : [data.aws_vpc.this.cidr_block]
+
 }

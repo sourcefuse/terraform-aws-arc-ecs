@@ -10,9 +10,9 @@ variable "vpc_id" {
 }
 
 variable "cidr_blocks" {
-  description = "CIDR blocks for security group ingress rules"
+  description = "CIDR blocks for ALB security group ingress rules"
   type        = list(string)
-  default     = ["0.0.0.0/0"]
+  default     = null
 }
 
 
