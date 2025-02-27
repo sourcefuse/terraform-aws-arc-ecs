@@ -21,21 +21,7 @@ module "ecs_cluster" {
 launch_template = var.launch_template
   asg = var.asg
 }
-#   launch_template = {
-#     name = "my-launch-template"
-#      cpu_options = {
-#     core_count       = 2
-#     threads_per_core = 2
-#   }
-#   image_id                             = "ami-12345678"
-#   instance_type                        = "t3.medium"
-#   }
 
-#   asg = {
-#     max_size = 2
-#     min_size = 1
-#   }
-# }
 
 
 ################################################################################
