@@ -42,11 +42,8 @@ module "ecs_cluster" {
   capacity_provider = {
     autoscaling_capacity_providers = {}
     use_fargate                    = false
-    fargate_capacity_providers = {
-      # fargate_cp = {
-      #   name = "FARGATE"
-      # }
-    }
+    fargate_capacity_providers = {}
+   }
   }
 
   launch_template = {
@@ -70,11 +67,6 @@ module "ecs_cluster" {
   disable_api_termination = false
   ebs_optimized           = true
 
-  # elastic_gpu_specifications = [
-  #   {
-  #     type = "gp3"
-  #   }
-  # ]
 
   iam_instance_profile = {
     name = "poc-iam-role"
