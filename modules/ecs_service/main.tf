@@ -17,7 +17,7 @@ resource "aws_ecs_service" "this" {
   cluster         = data.aws_ecs_cluster.cluster.cluster_name
   task_definition = aws_ecs_task_definition.this.arn
   desired_count   = var.task.tasks_desired
-  launch_type     = "FARGATE"
+  launch_type     = "EC2"
 
   force_new_deployment = true
 
