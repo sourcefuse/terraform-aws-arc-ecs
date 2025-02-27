@@ -77,12 +77,12 @@ module "ecs_cluster" {
   # ]
 
   iam_instance_profile = {
-    name = "my-iam-instance-profile"
+    name = "poc-iam-role"
   }
 
   image_id                             = "ami-05b10e08d247fb927"
   instance_initiated_shutdown_behavior = "terminate"
-  instance_type                        = "t3.micro"
+  instance_type                        = "t3.medium"
   kernel_id                            = null
   key_name                             = "my-keypair"
 
