@@ -130,7 +130,7 @@ resource "aws_launch_template" "this" {
     }
   }
 
-  image_id = var.launch_template.image_id
+  image_id      = var.launch_template.image_id
   instance_type = var.launch_template.instance_type
 
   instance_initiated_shutdown_behavior = var.launch_template.instance_initiated_shutdown_behavior
@@ -191,7 +191,7 @@ resource "aws_autoscaling_group" "this" {
   vpc_zone_identifier = var.asg.vpc_zone_identifier != null ? var.asg.vpc_zone_identifier : []
 
   launch_template {
-    id = aws_launch_template.this[0].id
+    id      = aws_launch_template.this[0].id
     version = "$Latest"
   }
 
@@ -207,7 +207,6 @@ resource "aws_autoscaling_group" "this" {
     }
   }
 }
-
 ################################################################################
 # ECS Capacity Provider - EC2
 ################################################################################

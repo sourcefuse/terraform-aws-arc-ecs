@@ -61,7 +61,6 @@ variable "capacity_provider" {
   })
 }
 
-
 variable "launch_template" {
   type = object({
     name = string
@@ -292,7 +291,7 @@ variable "task" {
     tasks_desired               = optional(number)
     launch_type                 = optional(string)
     network_mode                = optional(string)
-     compatibilities             = optional(list(string))
+    compatibilities             = optional(list(string))
     container_vcpu              = optional(number)
     container_memory            = optional(number)
     container_port              = number

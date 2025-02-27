@@ -1,3 +1,25 @@
+variable "region" {
+  type        = string
+  description = "AWS region"
+}
+
+variable "environment" {
+  type        = string
+  description = "The environment associated with the ECS service"
+}
+
+variable "namespace" {
+  type        = string
+  description = "Namespace of the project, i.e. arc"
+}
+
+variable "vpc_name" {
+  type        = string
+  description = "Name of the VPC to add the resources"
+  default     = "arc-poc-vpc"
+}
+
+
 ################################################################################
 ## ecs cluster
 ################################################################################
@@ -158,11 +180,6 @@ variable "asg" {
 ##  ALB
 ################################################################################
 
-variable "vpc_id" {
-  type        = string
-  description = "ID of VPC in which all resources need to be created"
-}
-
 variable "cidr_blocks" {
   description = "CIDR blocks for security group ingress rules"
   type        = list(string)
@@ -267,12 +284,6 @@ variable "listener_rules" {
 ## ecs service
 ################################################################################
 
-variable "environment" {
-  type        = string
-  description = "The environment associated with the ECS service"
-}
-
-
 variable "ecs_service" {
   type = object({
     cluster_name             = string
@@ -292,7 +303,7 @@ variable "task" {
     tasks_desired               = optional(number)
     launch_type                 = optional(string)
     network_mode                = optional(string)
-     compatibilities             = optional(list(string))
+    compatibilities             = optional(list(string))
     container_vcpu              = optional(number)
     container_memory            = optional(number)
     container_port              = number

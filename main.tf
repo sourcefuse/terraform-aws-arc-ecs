@@ -18,8 +18,8 @@ module "ecs_cluster" {
     use_fargate                    = var.capacity_provider.use_fargate
     fargate_capacity_providers     = var.capacity_provider.fargate_capacity_providers
   }
-launch_template = var.launch_template
-  asg = var.asg
+  launch_template = var.launch_template
+  asg             = var.asg
 }
 
 

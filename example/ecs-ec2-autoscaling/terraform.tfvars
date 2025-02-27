@@ -18,10 +18,10 @@ ecs_cluster = {
 capacity_provider = {
   autoscaling_capacity_providers = {}
   use_fargate                    = false
-  fargate_capacity_providers = {}
+  fargate_capacity_providers     = {}
 }
 
- launch_template = {
+launch_template = {
   name = "my-launch-template"
 
   block_device_mappings = [
