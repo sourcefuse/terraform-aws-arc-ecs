@@ -117,7 +117,7 @@ module "ecs_service" {
     tasks_desired               = var.task.tasks_desired
     container_vcpu              = var.task.container_vcpu
     network_mode                = var.task.network_mode
-    compatibilities             = var.task.compatibilities
+    # compatibilities             = var.task.compatibilities
     container_memory            = var.task.container_memory
     container_port              = var.task.container_port
     container_definition        = var.task.container_definition
