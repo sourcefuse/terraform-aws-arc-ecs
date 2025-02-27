@@ -158,7 +158,8 @@ asg = {
     cluster_name             = "arc-ecs-module-poc"
     service_name             = "arc-ecs-module-service-poc"
     repository_name          = "12345.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
-    enable_load_balancer     = false
+    ecs_subnets              = ["subnet-06f8c7235832d8376", "subnet-041c09d6be7020e07"]
+    enable_load_balancer     = true
     aws_lb_target_group_name = "arc-poc-alb-tg"
     create_service           = true
   }

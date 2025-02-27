@@ -276,6 +276,7 @@ variable "ecs_service" {
     service_name             = string
     repository_name          = string
     enable_load_balancer     = bool
+    ecs_subnets              = list(string)
     aws_lb_target_group_name = optional(string)
     create_service           = optional(bool, false)
   })

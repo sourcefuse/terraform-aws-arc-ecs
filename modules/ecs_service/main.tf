@@ -32,7 +32,7 @@ resource "aws_ecs_service" "this" {
   }
 
   network_configuration {
-    subnets         = data.aws_subnets.private.ids
+    subnets         = var.ecs_service.ecs_subnets
     security_groups = [aws_security_group.ecs.id]
   }
   propagate_tags = "TASK_DEFINITION"
