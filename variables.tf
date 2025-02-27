@@ -62,7 +62,7 @@ variable "capacity_provider" {
 }
 
 
-/* variable "launch_template" {
+variable "launch_template" {
   type = object({
     name = string
     block_device_mappings = optional(list(object({
@@ -148,7 +148,7 @@ variable "asg" {
       }))
     })
   })
-} */
+}
 
 
 ################################################################################

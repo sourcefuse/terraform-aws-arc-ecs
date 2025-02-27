@@ -41,13 +41,111 @@ module "ecs_cluster" {
 
   capacity_provider = {
     autoscaling_capacity_providers = {}
-    use_fargate                    = true
+    use_fargate                    = false
     fargate_capacity_providers = {
-      fargate_cp = {
-        name = "FARGATE"
-      }
+      # fargate_cp = {
+      #   name = "FARGATE"
+      # }
     }
   }
+
+  launch_template = {
+  name = "my-launch-template"
+
+  block_device_mappings = [
+    {
+      device_name = "/dev/xvda"
+      ebs = {
+        volume_size = 30
+      }
+    }
+  ]
+
+  cpu_options = {
+    core_count       = 2
+    threads_per_core = 2
+  }
+
+  disable_api_stop        = false
+  disable_api_termination = false
+  ebs_optimized           = true
+
+  # elastic_gpu_specifications = [
+  #   {
+  #     type = "gp3"
+  #   }
+  # ]
+
+  iam_instance_profile = {
+    name = "my-iam-instance-profile"
+  }
+
+  image_id                             = "ami-05b10e08d247fb927"
+  instance_initiated_shutdown_behavior = "terminate"
+  instance_type                        = "t3.micro"
+  kernel_id                            = null
+  key_name                             = "my-keypair"
+
+  monitoring = {
+    enabled = true
+  }
+
+  network_interfaces = [
+    {
+      associate_public_ip_address = true
+      ipv4_prefixes               = []
+      ipv6_prefixes               = []
+      ipv4_addresses              = []
+      ipv6_addresses              = []
+      network_interface_id        = null
+      private_ip_address          = null
+      # security_groups             = ["sg-055c714881fa07de7"]
+      subnet_id                   = "subnet-06f8c7235832d8376"
+    }
+  ]
+
+  placement = {
+    availability_zone = "us-east-1a"
+  }
+
+  # vpc_security_group_ids = ["sg-055c714881fa07de7"]
+
+  tag_specifications = [
+    {
+      resource_type = "instance"
+      tags = {
+        Name        = "my-instance"
+        Environment = "dev"
+      }
+    }
+  ]
+
+  # user_data = <<-EOF
+  #             #!/bin/bash
+  #             echo "Hello, world!" > /tmp/hello.txt
+  #             EOF
+}
+
+asg = {
+  name                = "my-asg"
+  min_size            = 1
+  max_size            = 3
+  desired_capacity    = 2
+  vpc_zone_identifier = ["subnet-06f8c7235832d8376", "subnet-041c09d6be7020e07"]
+
+  health_check_type         = "EC2"
+  health_check_grace_period = 300
+  protect_from_scale_in     = false
+  default_cooldown          = 300
+
+  instance_refresh = {
+    strategy = "Rolling"
+    preferences = {
+      min_healthy_percentage = 50
+    }
+  }
+}
+
 
   #####################
   ## ecs service
