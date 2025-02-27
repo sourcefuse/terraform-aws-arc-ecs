@@ -152,7 +152,7 @@ asg = {
   #####################
 
   vpc_id      = "vpc-00d2052787d912bb2"
-  environment = "dev""
+  environment = "dev"
 
   ecs_service = {
     cluster_name             = "arc-ecs-module-poc"
