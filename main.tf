@@ -109,6 +109,7 @@ module "ecs_service" {
     service_name             = var.ecs_service.service_name
     repository_name          = var.ecs_service.repository_name
     enable_load_balancer     = var.ecs_service.enable_load_balancer
+    ecs_subnets              = var.ecs_service.ecs_subnets
     aws_lb_target_group_name = var.ecs_service.aws_lb_target_group_name
   }
 
