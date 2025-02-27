@@ -166,7 +166,7 @@ asg = {
 
   task = {
     tasks_desired        = 1
-    network_mode             = "bridge"
+    network_mode             = "awsvpc"
     # compatibilities     = "EC2"
     container_port       = 80
     container_memory     = 1024
