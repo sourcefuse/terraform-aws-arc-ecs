@@ -192,7 +192,7 @@ resource "aws_autoscaling_group" "this" {
 
   launch_template {
     id = aws_launch_template.this[0].id
-    version = "$Latest" 
+    version = "$Latest"
   }
 
   health_check_type         = var.asg.health_check_type != null ? var.asg.health_check_type : "EC2"
