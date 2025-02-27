@@ -1,6 +1,6 @@
 locals {
   service_name_full = "${var.ecs_service.service_name}-${var.environment}"
-  cluster_name_full = "${var.ecs_service.cluster_name}-${var.environment}"
+  cluster_name_full = "${var.ecs_service.cluster_name}"
 
   security_group_name = "${var.ecs_service.service_name}-${var.environment}-ecs"
 
