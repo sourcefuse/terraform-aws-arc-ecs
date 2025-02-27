@@ -25,14 +25,11 @@ capacity_provider = {
   }
 }
 
-vpc_id = "vpc-00d2052787d912bb2"
-
-
 ecs_service = {
   cluster_name             = "arc-ecs-module-poc"
   service_name             = "arc-ecs-module-service-poc"
   repository_name          = "12345.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
-  ecs_subnets              = ["subnet-06f8c7235832d8376", "subnet-041c09d6be7020e07"]
+  ecs_subnets              = ["subnet-1234567890", "subnet-1234567890"]
   enable_load_balancer     = true
   aws_lb_target_group_name = "arc-poc-alb-tg"
   create_service           = true
@@ -52,7 +49,7 @@ task = {
 lb = {
   name              = "arc-poc-alb"
   listener_port     = 80
-  security_group_id = "sg-055c714881fa07de7"
+  security_group_id = "sg-1234567890"
 }
 
 cidr_blocks = null
@@ -69,7 +66,7 @@ alb_target_group = [
     name        = "arc-poc-alb-tg"
     port        = 80
     protocol    = "HTTP"
-    vpc_id      = "vpc-00d2052787d912bb2"
+    vpc_id      = "vpc-1234567890"
     target_type = "ip"
     health_check = {
       enabled = true
