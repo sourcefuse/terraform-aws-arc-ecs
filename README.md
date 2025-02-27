@@ -59,22 +59,46 @@ In your main Terraform configuration file (e.g., main.tf), you can use the modul
 
 
 ```hcl
-module "ecs_cluster" {
-  source = "./modules/ecs_cluster"
+##########################################
+## ecs cluster with fargate
+##########################################
 
-  ecs_cluster = {
-    name                        = var.ecs_cluster.name
-    configuration               = var.ecs_cluster.configuration
-    create_cloudwatch_log_group = var.ecs_cluster.create_cloudwatch_log_group
-    service_connect_defaults    = var.ecs_cluster.service_connect_defaults
-    settings                    = var.ecs_cluster.settings
-  }
+module "arc-ecs" {
+  source  = "sourcefuse/arc-ecs/aws"
+  version = "1.5.0"
+  ecs_cluster       = var.ecs_cluster
+  capacity_provider = var.capacity_provider
+  vpc_id            = data.aws_vpc.default.id
+  environment       = var.environment
+  ecs_service       = var.ecs_service
+  task              = var.task
+  lb                = var.lb
+  cidr_blocks       = var.cidr_blocks
+  alb               = var.alb
+  alb_target_group  = var.alb_target_group
+  listener_rules    = var.listener_rules
+}
 
-  capacity_provider = {
-    autoscaling_capacity_providers        = var.capacity_provider.autoscaling_capacity_providers
-    default_capacity_provider_use_fargate = var.capacity_provider.default_capacity_provider_use_fargate
-    fargate_capacity_providers            = var.capacity_provider.fargate_capacity_providers
-  }
+##########################################
+## ecs cluster with ec2 autoscaling
+##########################################
+
+module "arc-ecs" {
+  source  = "sourcefuse/arc-ecs/aws"
+  version = "1.5.0"
+  ecs_cluster       = var.ecs_cluster
+  capacity_provider = var.capacity_provider
+  launch_template   = var.launch_template
+  asg               = var.asg
+  vpc_id            = data.aws_vpc.default.id
+  environment       = var.environment
+  ecs_service       = var.ecs_service
+  task              = var.task
+  lb                = var.lb
+  cidr_blocks       = var.cidr_blocks
+  alb               = var.alb
+  alb_target_group  = var.alb_target_group
+  listener_rules    = var.listener_rules
 }
 ```
 

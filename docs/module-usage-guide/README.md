@@ -27,11 +27,48 @@ Before using this module, ensure you have the following:
 To use the module in your Terraform configuration, include the following source block:
 
 ```hcl
+##########################################
+## ecs cluster with fargate
+##########################################
+
 module "arc-ecs" {
   source  = "sourcefuse/arc-ecs/aws"
   version = "1.5.0"
-  # insert the 6 required variables here
+  ecs_cluster       = var.ecs_cluster
+  capacity_provider = var.capacity_provider
+  vpc_id            = data.aws_vpc.default.id
+  environment       = var.environment
+  ecs_service       = var.ecs_service
+  task              = var.task
+  lb                = var.lb
+  cidr_blocks       = var.cidr_blocks
+  alb               = var.alb
+  alb_target_group  = var.alb_target_group
+  listener_rules    = var.listener_rules
 }
+
+##########################################
+## ecs cluster with ec2 autoscaling
+##########################################
+
+module "arc-ecs" {
+  source  = "sourcefuse/arc-ecs/aws"
+  version = "1.5.0"
+  ecs_cluster       = var.ecs_cluster
+  capacity_provider = var.capacity_provider
+  launch_template   = var.launch_template
+  asg               = var.asg
+  vpc_id            = data.aws_vpc.default.id
+  environment       = var.environment
+  ecs_service       = var.ecs_service
+  task              = var.task
+  lb                = var.lb
+  cidr_blocks       = var.cidr_blocks
+  alb               = var.alb
+  alb_target_group  = var.alb_target_group
+  listener_rules    = var.listener_rules
+}
+
 ```
 
 Refer to the [Terraform Registry](https://registry.terraform.io/modules/sourcefuse/arc-ecs/aws/latest) for the latest version.
