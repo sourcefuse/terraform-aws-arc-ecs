@@ -125,7 +125,7 @@ variable "launch_template" {
 
     user_data = optional(string, null)
   })
-  default = []
+  default = null
 }
 
 
@@ -150,7 +150,7 @@ variable "asg" {
       }))
     })
   })
-  default = []
+  default = null
 }
 
 
