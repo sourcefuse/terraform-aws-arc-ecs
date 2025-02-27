@@ -174,7 +174,7 @@ asg = {
   lb = {
     name              = "arc-poc-alb"
     listener_port     = 80
-    security_group_id = "sg-12345"
+    security_group_id = "sg-055c714881fa07de7"
   }
 
   #####################
@@ -194,7 +194,7 @@ asg = {
     name        = "arc-poc-alb-tg"
     port        = 80
     protocol    = "HTTP"
-    vpc_id      = "vpc-12345"
+    vpc_id      = "vpc-00d2052787d912bb2"
     target_type = "ip"
     health_check = {
       enabled = true
