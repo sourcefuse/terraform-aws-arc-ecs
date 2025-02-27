@@ -25,7 +25,7 @@ resource "aws_ecs_service" "this" {
     for_each = var.ecs_service.enable_load_balancer ? [1] : []
 
     content {
-      container_name   = var.ecs_service.cluster_name
+      container_name   = local.container_name
       container_port   = var.task.container_port
       target_group_arn = data.aws_lb_target_group.ecs_target_group.arn
     }
