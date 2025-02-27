@@ -44,7 +44,7 @@ module "ecs_cluster" {
     use_fargate                    = false
     fargate_capacity_providers = {}
    }
-  }
+  
 
   launch_template = {
   name = "my-launch-template"
