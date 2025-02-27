@@ -151,7 +151,7 @@ asg = {
   ## ecs service
   #####################
 
-  vpc_id      = "vpc-12345"
+  vpc_id      = "vpc-00d2052787d912bb2"
   environment = "develop"
 
   ecs_service = {
