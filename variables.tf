@@ -290,8 +290,9 @@ variable "ecs_service" {
 variable "task" {
   type = object({
     tasks_desired               = optional(number)
+    launch_type                 = optional(string)
     network_mode                = optional(string)
-    # compatibilities               = optional(string)
+     compatibilities             = optional(list(string))
     container_vcpu              = optional(number)
     container_memory            = optional(number)
     container_port              = number

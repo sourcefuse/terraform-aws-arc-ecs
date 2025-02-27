@@ -17,7 +17,7 @@ resource "aws_ecs_service" "this" {
   cluster         = data.aws_ecs_cluster.cluster.cluster_name
   task_definition = aws_ecs_task_definition.this.arn
   desired_count   = var.task.tasks_desired
-  launch_type     = "EC2"
+  launch_type     = var.task.launch_type
 
   force_new_deployment = true
 
@@ -46,7 +46,7 @@ resource "aws_ecs_service" "this" {
 resource "aws_ecs_task_definition" "this" {
   family                   = local.service_name_full
   network_mode             = var.task.network_mode
-  requires_compatibilities = ["EC2"]
+  requires_compatibilities = var.task.compatibilities
   cpu                      = var.task.container_vcpu
   memory                   = var.task.container_memory
   task_role_arn            = aws_iam_role.task_role.arn

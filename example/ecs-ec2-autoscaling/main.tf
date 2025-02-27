@@ -158,8 +158,9 @@ asg = {
 
   task = {
     tasks_desired        = 1
+    launch_type          = "EC2"
     network_mode             = "awsvpc"
-    # compatibilities     = "EC2"
+    compatibilities     = ["EC2"]
     container_port       = 80
     container_memory     = 1024
     container_vcpu       = 256

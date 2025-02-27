@@ -62,15 +62,16 @@ module "ecs_cluster" {
     service_name             = "arc-ecs-module-service-poc"
     repository_name          = "12345.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
     ecs_subnets              = ["subnet-06f8c7235832d8376", "subnet-041c09d6be7020e07"]
-    enable_load_balancer     = false
+    enable_load_balancer     = true
     aws_lb_target_group_name = "arc-poc-alb-tg"
-    create_service           = false
+    create_service           = true
   }
 
   task = {
     tasks_desired        = 1
+    launch_type          = "FARGATE"
     network_mode             = "awsvpc"
-    # compatibilities     = "EC2"
+    compatibilities     = ["FARGATE"]
     container_port       = 80
     container_memory     = 1024
     container_vcpu       = 256
