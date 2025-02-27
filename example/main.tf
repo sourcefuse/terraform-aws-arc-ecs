@@ -187,7 +187,7 @@ asg = {
     name       = "arc-poc-alb"
     internal   = false
     port       = 80
-    create_alb = false
+    create_alb = true
   }
 
   alb_target_group = [{
