@@ -17,12 +17,8 @@ ecs_cluster = {
 
 capacity_provider = {
   autoscaling_capacity_providers = {}
-  use_fargate                    = true
-  fargate_capacity_providers = {
-    fargate_cp = {
-      name = "EC2"
-    }
-  }
+  use_fargate                    = false
+  fargate_capacity_providers = {}
 }
 
  launch_template = {

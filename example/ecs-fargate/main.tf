@@ -20,27 +20,13 @@ provider "aws" {
 module "ecs_cluster" {
   source = "../../"
 
-  #####################
-  ## ecs cluster
-  #####################
-
   ecs_cluster = var.ecs_cluster
  capacity_provider = var.capacity_provider
-
-  #####################
-  ## ecs service and task
-  #####################
-
   vpc_id      = var.vpc_id
   environment = var.environment
   ecs_service = var.ecs_service
   task = var.task
   lb = var.lb
-
-  #####################
-  ## ALB
-  #####################
-
   cidr_blocks = var.cidr_blocks
   alb = var.alb
   alb_target_group = var.alb_target_group
