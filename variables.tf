@@ -125,7 +125,9 @@ variable "launch_template" {
 
     user_data = optional(string, null)
   })
+  default = []
 }
+
 
 variable "asg" {
   description = "Auto Scaling Group configuration"
@@ -148,6 +150,7 @@ variable "asg" {
       }))
     })
   })
+  default = []
 }
 
 
