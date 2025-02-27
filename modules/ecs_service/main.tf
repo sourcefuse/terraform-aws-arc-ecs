@@ -46,7 +46,7 @@ resource "aws_ecs_service" "this" {
 resource "aws_ecs_task_definition" "this" {
   family                   = local.service_name_full
   network_mode             = var.task.network_mode
-  requires_compatibilities = var.task.compatibility
+  requires_compatibilities = var.task.compatibilities
   cpu                      = var.task.container_vcpu
   memory                   = var.task.container_memory
   task_role_arn            = aws_iam_role.task_role.arn

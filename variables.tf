@@ -288,7 +288,7 @@ variable "task" {
   type = object({
     tasks_desired               = optional(number)
     network_mode                = optional(string)
-    compatibility               = optional(string)
+    compatibilities               = optional(string)
     container_vcpu              = optional(number)
     container_memory            = optional(number)
     container_port              = number
