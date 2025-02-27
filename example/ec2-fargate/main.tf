@@ -18,7 +18,7 @@ provider "aws" {
 
 
 module "ecs_cluster" {
-  source = "../"
+  source = "../../"
 
   #####################
   ## ecs cluster
