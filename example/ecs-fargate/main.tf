@@ -27,9 +27,8 @@ module "ecs_cluster" {
   ecs_cluster = var.ecs_cluster
  capacity_provider = var.capacity_provider
 
-
   #####################
-  ## ecs service
+  ## ecs service and task
   #####################
 
   vpc_id      = var.vpc_id
