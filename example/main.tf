@@ -160,7 +160,7 @@ asg = {
     repository_name          = "12345.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
     enable_load_balancer     = false
     aws_lb_target_group_name = "arc-poc-alb-tg"
-    create_service           = false
+    create_service           = true
   }
 
   task = {
