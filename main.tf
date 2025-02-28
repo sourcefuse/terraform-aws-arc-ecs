@@ -3,7 +3,7 @@
 ################################################################################
 
 module "ecs_cluster" {
-  source = "./modules/ecs_cluster"
+  source = "./modules/ecs-cluster"
 
   ecs_cluster = {
     name                        = var.ecs_cluster.name
@@ -20,6 +20,7 @@ module "ecs_cluster" {
   }
   launch_template = var.launch_template
   asg             = var.asg
+  tags            = var.tags
 }
 
 
@@ -47,7 +48,7 @@ module "alb" {
     enable_http2               = var.alb.enable_http2
     certificate_arn            = var.alb.certificate_arn
     access_logs                = var.alb.access_logs
-    tags                       = var.alb.tags
+    # tags                       = var.tags
   }
 
   alb_target_group = [
@@ -61,7 +62,6 @@ module "alb" {
       load_balancing_cross_zone_enabled = tg.load_balancing_cross_zone_enabled
       deregistration_delay              = tg.deregistration_delay
       slow_start                        = tg.slow_start
-      tags                              = tg.tags
       vpc_id                            = tg.vpc_id
       target_type                       = tg.target_type
       health_check = {
@@ -76,6 +76,7 @@ module "alb" {
     }
   ]
   listener_rules = var.listener_rules
+  tags           = var.tags
 }
 
 
@@ -85,7 +86,7 @@ module "alb" {
 
 module "ecs_service" {
   count  = var.ecs_service.create_service ? 1 : 0
-  source = "./modules/ecs_service"
+  source = "./modules/ecs-service"
 
   vpc_id      = var.vpc_id
   environment = var.environment
@@ -119,5 +120,6 @@ module "ecs_service" {
     listener_port        = var.lb.listener_port
     security_group_id    = var.lb.security_group_id
   }
+  tags       = var.tags
   depends_on = [module.alb]
 }

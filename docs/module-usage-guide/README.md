@@ -32,8 +32,8 @@ To use the module in your Terraform configuration, include the following source 
 ##########################################
 
 module "arc-ecs" {
-  source  = "sourcefuse/arc-ecs/aws"
-  version = "1.5.0"
+  source            = "sourcefuse/arc-ecs/aws"
+  version           = "1.5.0"
   ecs_cluster       = var.ecs_cluster
   capacity_provider = var.capacity_provider
   vpc_id            = data.aws_vpc.default.id
@@ -52,8 +52,8 @@ module "arc-ecs" {
 ##########################################
 
 module "arc-ecs" {
-  source  = "sourcefuse/arc-ecs/aws"
-  version = "1.5.0"
+  source            = "sourcefuse/arc-ecs/aws"
+  version           = "1.5.0"
   ecs_cluster       = var.ecs_cluster
   capacity_provider = var.capacity_provider
   launch_template   = var.launch_template
@@ -78,7 +78,7 @@ Refer to the [Terraform Registry](https://registry.terraform.io/modules/sourcefu
 Integrate the module with your existing Terraform mono repo configuration, follow the steps below:
 
 1. Create a new folder in `terraform/` named `ecs`.
-2. Create the required files, see the [examples](https://github.com/sourcefuse/terraform-aws-arc-ecs/tree/main/example) to base off of.
+2. Create the required files, see the [examples](https://github.com/sourcefuse/terraform-aws-arc-ecs/tree/main/examples) to base off of.
 3. Configure with your backend
   - Create the environment backend configuration file: `config.<environment>.hcl`
     - **region**: Where the backend resides
@@ -111,7 +111,7 @@ For a list of outputs, see the README [Outputs](https://github.com/sourcefuse/te
 
 ### Basic Usage
 
-For basic usage, see the [example](https://github.com/sourcefuse/terraform-aws-arc-ecs/tree/main/example) folder.
+For basic usage, see the [example](https://github.com/sourcefuse/terraform-aws-arc-ecs/tree/main/examples) folder.
 
 This example will create:
 

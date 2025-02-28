@@ -1,6 +1,11 @@
 ################################################################################
 ## ecs cluster
 ################################################################################
+variable "tags" {
+  description = "A map of tags to add to all resources"
+  type        = map(string)
+  default     = {}
+}
 
 variable "ecs_cluster" {
   type = object({
@@ -187,8 +192,6 @@ variable "alb" {
       enabled = optional(bool, false)
       prefix  = optional(string, "")
     }))
-
-    tags = optional(map(string), {})
   })
 }
 

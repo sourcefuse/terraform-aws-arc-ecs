@@ -15,6 +15,12 @@ variable "cidr_blocks" {
   default     = null
 }
 
+variable "tags" {
+  description = "A map of tags to add to all resources"
+  type        = map(string)
+  default     = {}
+}
+
 
 variable "alb" {
   type = object({
@@ -33,8 +39,6 @@ variable "alb" {
       enabled = optional(bool, true)
       prefix  = optional(string, "")
     }))
-
-    tags = optional(map(string), {})
   })
 }
 
@@ -53,7 +57,6 @@ variable "alb_target_group" {
     load_balancing_cross_zone_enabled = optional(string, "use_load_balancer_configuration")
     deregistration_delay              = optional(number, 300)
     slow_start                        = optional(number, 0)
-    tags                              = optional(map(string), {})
 
     health_check = optional(object({
       enabled             = optional(bool, true)

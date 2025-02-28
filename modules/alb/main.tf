@@ -103,7 +103,7 @@ resource "aws_lb_target_group" "this" {
     create_before_destroy = true
   }
 
-  tags = each.value.tags
+  tags = var.tags
 }
 
 ###################################################################
@@ -185,6 +185,7 @@ resource "aws_lb_listener_rule" "this" {
       }
     }
   }
+  tags = var.tags
 
   depends_on = [aws_lb_listener.http]
 }

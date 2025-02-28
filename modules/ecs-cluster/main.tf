@@ -175,6 +175,8 @@ resource "aws_launch_template" "this" {
   }
 
   user_data = var.launch_template.user_data != null ? filebase64(var.launch_template.user_data) : null
+
+  tags = var.tags
 }
 
 ################################################################################

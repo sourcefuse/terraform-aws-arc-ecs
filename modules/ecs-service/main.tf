@@ -41,6 +41,7 @@ resource "aws_ecs_service" "this" {
     aws_security_group.ecs,
     aws_ecs_task_definition.this
   ]
+  tags = var.tags
 }
 
 resource "aws_ecs_task_definition" "this" {
@@ -66,6 +67,7 @@ resource "aws_ecs_task_definition" "this" {
     service_name      = var.ecs_service.service_name,
     log_group_name    = aws_cloudwatch_log_group.this.name
   })
+  tags = var.tags
 }
 
 
@@ -88,4 +90,5 @@ resource "aws_security_group" "ecs" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  tags = var.tags
 }

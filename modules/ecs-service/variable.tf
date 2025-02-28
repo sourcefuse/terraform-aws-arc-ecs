@@ -8,6 +8,12 @@ variable "vpc_id" {
   description = "VPC in which security group for ALB has to be created"
 }
 
+variable "tags" {
+  description = "A map of tags to add to all resources"
+  type        = map(string)
+  default     = {}
+}
+
 variable "ecs_service" {
   type = object({
     cluster_name             = string
