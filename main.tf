@@ -38,7 +38,7 @@ module "ecs_service" {
   target_group_arn = var.target_group_arn
 
   ecs_service = {
-    cluster_name             = module.ecs_cluster.ecs_cluster.name
+    cluster_name             = module.ecs_cluster[0].ecs_cluster.name
     service_name             = var.ecs_service.service_name
     repository_name          = var.ecs_service.repository_name
     enable_load_balancer     = var.ecs_service.enable_load_balancer
