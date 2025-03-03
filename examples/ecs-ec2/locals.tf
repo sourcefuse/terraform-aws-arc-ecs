@@ -42,9 +42,9 @@ launch_template = {
   ebs_optimized           = true
 
 
-  iam_instance_profile = {
-    name = "poc-iam-role"
-  }
+#   iam_instance_profile = {
+#     name = "poc-iam-role"
+#   }
 
   image_id                             = data.aws_ami.amazon_linux.id
   instance_initiated_shutdown_behavior = "terminate"

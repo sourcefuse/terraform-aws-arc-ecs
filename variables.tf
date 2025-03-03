@@ -78,8 +78,12 @@ variable "launch_template" {
     elastic_gpu_specifications = optional(list(object({
       type = string
     })), [])
+<<<<<<< HEAD
 
     iam_instance_profile = optional(string)
+=======
+    
+>>>>>>> 7df57f3 (adding ec2)
 
     image_id                             = optional(string, null)
     instance_initiated_shutdown_behavior = optional(string, "stop")
