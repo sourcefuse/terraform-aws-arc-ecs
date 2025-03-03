@@ -79,10 +79,6 @@ variable "launch_template" {
       type = string
     })), [])
 
-    iam_instance_profile = optional(object({
-      name = string
-    }), null)
-
     image_id                             = optional(string, null)
     instance_initiated_shutdown_behavior = optional(string, "stop")
 
@@ -102,7 +98,6 @@ variable "launch_template" {
       ipv6_addresses              = optional(list(string), [])
       network_interface_id        = optional(string, null)
       private_ip_address          = optional(string, null)
-      security_groups             = optional(list(string), [])
       subnet_id                   = optional(string, null)
     })), [])
 
