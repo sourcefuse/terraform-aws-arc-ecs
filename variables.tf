@@ -79,6 +79,10 @@ variable "launch_template" {
       type = string
     })), [])
 
+    iam_instance_profile = optional(object({
+      name = string
+    }), null)
+
     image_id                             = optional(string, null)
     instance_initiated_shutdown_behavior = optional(string, "stop")
 
