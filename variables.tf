@@ -172,6 +172,10 @@ variable "environment" {
   description = "The environment associated with the ECS service"
 }
 
+variable "vpc_id" {
+  type        = string
+  description = "ID of VPC in which all resources need to be created"
+}
 
 variable "ecs_service" {
   type = object({
