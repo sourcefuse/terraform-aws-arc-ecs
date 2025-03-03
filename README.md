@@ -142,6 +142,7 @@ No resources.
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
 | <a name="input_target_group_arn"></a> [target\_group\_arn](#input\_target\_group\_arn) | ARN of the target group | `string` | n/a | yes |
 | <a name="input_task"></a> [task](#input\_task) | Task-related information (vCPU, memory, # of tasks, port, and health check info.) | <pre>object({<br>    tasks_desired               = optional(number)<br>    launch_type                 = optional(string)<br>    network_mode                = optional(string)<br>    compatibilities             = optional(list(string))<br>    container_vcpu              = optional(number)<br>    container_memory            = optional(number)<br>    container_port              = number<br>    container_health_check_path = optional(string)<br>    container_definition        = optional(string)<br>    environment_variables       = optional(map(string))<br>    secrets                     = optional(map(string))<br>    task_execution_role         = optional(string)<br>  })</pre> | n/a | yes |
+| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | ID of VPC in which all resources need to be created | `string` | n/a | yes |
 
 ## Outputs
 
