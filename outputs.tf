@@ -1,12 +1,12 @@
-output "ecs_cluster_name" {
-  description = "The name of the ECS cluster."
-  value       = module.ecs_cluster.ecs_cluster.name
-}
+# output "ecs_cluster_name" {
+#   description = "The name of the ECS cluster."
+#   value       = module.ecs_cluster.ecs_cluster.name
+# }
 
-output "alb_name" {
-  description = "The names of the ALBs."
-  value       = [for alb in module.alb : alb.alb.name]
-}
+# output "alb_name" {
+#   description = "The names of the ALBs."
+#   value       = [for alb in module.alb : alb.alb.name]
+# }
 
 
 output "ecs_service_name" {

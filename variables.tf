@@ -72,6 +72,97 @@ variable "target_group_arn" {
   type        = string
 }
 
+
+variable "launch_template" {
+  type = object({
+    name = string
+    block_device_mappings = optional(list(object({
+      device_name = string
+      ebs = optional(object({
+        volume_size = number
+      }))
+    })), [])
+
+    cpu_options = optional(object({
+      core_count       = number
+      threads_per_core = number
+    }), null)
+
+    disable_api_stop        = optional(bool, false)
+    disable_api_termination = optional(bool, false)
+    ebs_optimized           = optional(bool, false)
+
+    elastic_gpu_specifications = optional(list(object({
+      type = string
+    })), [])
+
+    iam_instance_profile = optional(object({
+      name = string
+    }), null)
+
+    image_id                             = optional(string, null)
+    instance_initiated_shutdown_behavior = optional(string, "stop")
+
+    instance_type = optional(string, null)
+    kernel_id     = optional(string, null)
+    key_name      = optional(string, null)
+
+    monitoring = optional(object({
+      enabled = bool
+    }), null)
+
+    network_interfaces = optional(list(object({
+      associate_public_ip_address = optional(bool, null)
+      ipv4_prefixes               = optional(list(string), [])
+      ipv6_prefixes               = optional(list(string), [])
+      ipv4_addresses              = optional(list(string), [])
+      ipv6_addresses              = optional(list(string), [])
+      network_interface_id        = optional(string, null)
+      private_ip_address          = optional(string, null)
+      security_groups             = optional(list(string), [])
+      subnet_id                   = optional(string, null)
+    })), [])
+
+    placement = optional(object({
+      availability_zone = string
+    }), null)
+
+    vpc_security_group_ids = optional(list(string), [])
+
+    tag_specifications = optional(list(object({
+      resource_type = string
+      tags          = map(string)
+    })), [])
+
+    user_data = optional(string, null)
+  })
+  default = null
+}
+
+variable "asg" {
+  description = "Auto Scaling Group configuration"
+  type = object({
+    name                = optional(string, null)
+    min_size            = number
+    max_size            = number
+    desired_capacity    = optional(number)
+    vpc_zone_identifier = optional(list(string))
+
+    health_check_type         = optional(string)
+    health_check_grace_period = optional(number, 300)
+    protect_from_scale_in     = optional(bool)
+    default_cooldown          = optional(number)
+
+    instance_refresh = optional(object({
+      strategy = string
+      preferences = optional(object({
+        min_healthy_percentage = optional(number)
+      }))
+    }))
+  })
+  default = null
+}
+
 ################################################################################
 ## ecs service
 ################################################################################
@@ -98,12 +189,16 @@ variable "ecs_service" {
 variable "task" {
   type = object({
     tasks_desired               = optional(number)
+    launch_type                 = optional(string)
+    network_mode                = optional(string)
+    compatibilities             = optional(list(string))
     container_vcpu              = optional(number)
     container_memory            = optional(number)
     container_port              = number
     container_health_check_path = optional(string)
     container_definition        = optional(string)
     environment_variables       = optional(map(string))
+    secrets                     = optional(map(string))
     task_execution_role         = optional(string)
   })
 
@@ -119,4 +214,10 @@ variable "lb" {
     security_group_id    = string
   })
   description = "ALB-related information (listening port, deletion protection, security group)"
+}
+
+variable "alb_name" {
+  description = "Name of the Application Load Balancer"
+  type        = string
+  default     = "my-application-load-balancer"  # Change this default value as needed
 }

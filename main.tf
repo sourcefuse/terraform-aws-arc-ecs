@@ -61,7 +61,7 @@ module "ecs_service" {
   }
 
   lb = {
-    name                 = var.alb.name
+    name                 = var.alb_name
     deregistration_delay = var.lb.deregistration_delay
     listener_port        = var.lb.listener_port
     security_group_id    = var.lb.security_group_id

@@ -38,6 +38,7 @@ module "ecs_cluster" {
   task              = local.task
   lb                = local.lb
   # cidr_blocks       = var.cidr_blocks
+  alb_name          = local.load_balancer_config.name
   target_group_arn  = module.alb.target_group_arn
   tags              = module.tags.tags
   depends_on = [module.alb]
