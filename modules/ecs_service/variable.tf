@@ -8,11 +8,23 @@ variable "vpc_id" {
   description = "VPC in which security group for ALB has to be created"
 }
 
+variable "tags" {
+  description = "A map of tags to add to all resources"
+  type        = map(string)
+  default     = {}
+}
+
+variable "target_group_arn" {
+  description = "ARN of the target group"
+  type        = string
+}
+
 variable "ecs_service" {
   type = object({
     cluster_name             = string
     service_name             = string
     repository_name          = string
+    ecs_subnets              = list(string)
     enable_load_balancer     = bool
     aws_lb_target_group_name = optional(string)
   })
@@ -23,6 +35,9 @@ variable "ecs_service" {
 variable "task" {
   type = object({
     tasks_desired               = optional(number)
+    launch_type                 = optional(string)
+    network_mode                = optional(string)
+    compatibilities             = optional(list(string))
     container_vcpu              = optional(number)
     container_memory            = optional(number)
     container_port              = number

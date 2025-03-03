@@ -1,7 +1,6 @@
 .terraform
 terraform.tfstate
 *.tfstate*
-terraform.tfvars
 *.backup
 secrets.tfvars
 .idea

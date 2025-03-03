@@ -1,3 +1,30 @@
+variable "region" {
+  type        = string
+  description = "AWS region"
+}
+
+variable "environment" {
+  type        = string
+  description = "The environment associated with the ECS service"
+}
+
+variable "namespace" {
+  type        = string
+  description = "Namespace of the project, i.e. arc"
+}
+
+variable "vpc_name" {
+  type        = string
+  description = "Name of the VPC to add the resources"
+  default     = "arc-poc-vpc"
+}
+
+variable "subnet_names" {
+  type        = list(string)
+  description = "List of subnet names to lookup"
+  default     = ["arc-poc-private-subnet-private-us-east-1a", "arc-poc-private-subnet-private-us-east-1b"]
+}
+
 ################################################################################
 ## ecs cluster
 ################################################################################
@@ -5,7 +32,6 @@
 variable "ecs_cluster" {
   type = object({
     name = string
-    create_cluster           = optional(bool, true)
     configuration = optional(object({
       execute_command_configuration = optional(object({
         kms_key_id = optional(string, "")
@@ -63,15 +89,10 @@ variable "capacity_provider" {
 }
 
 
+
 ################################################################################
 ##  ALB
 ################################################################################
-
-variable "vpc_id" {
-  type        = string
-  description = "ID of VPC in which all resources need to be created"
-}
-
 variable "cidr_blocks" {
   description = "CIDR blocks for security group ingress rules"
   type        = list(string)
@@ -176,18 +197,13 @@ variable "listener_rules" {
 ## ecs service
 ################################################################################
 
-variable "environment" {
-  type        = string
-  description = "The environment associated with the ECS service"
-}
-
-
 variable "ecs_service" {
   type = object({
     cluster_name             = string
     service_name             = string
     repository_name          = string
     enable_load_balancer     = bool
+    ecs_subnets              = list(string)
     aws_lb_target_group_name = optional(string)
     create_service           = optional(bool, false)
   })
@@ -198,6 +214,9 @@ variable "ecs_service" {
 variable "task" {
   type = object({
     tasks_desired               = optional(number)
+    launch_type                 = optional(string)
+    network_mode                = optional(string)
+    compatibilities             = optional(list(string))
     container_vcpu              = optional(number)
     container_memory            = optional(number)
     container_port              = number
