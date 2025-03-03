@@ -82,7 +82,7 @@ variable "launch_template" {
 
     iam_instance_profile = optional(string)
 =======
-    
+
 >>>>>>> 7df57f3 (adding ec2)
 
     image_id                             = optional(string, null)
