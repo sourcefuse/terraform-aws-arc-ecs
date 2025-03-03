@@ -49,7 +49,7 @@ task = {
 lb = {
   name              = "arc-poc-alb"
   listener_port     = 80
-  security_group_id = module.alb.security_group_ids
+  security_group_id = "sg-023e8f71ae18450ff"
 }
 
 cidr_blocks = null
