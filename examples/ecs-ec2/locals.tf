@@ -90,7 +90,7 @@ asg = {
   min_size            = 1
   max_size            = 3
   desired_capacity    = 2
-  vpc_zone_identifier = [data.aws_subnets.private.ids]
+  vpc_zone_identifier = data.aws_subnets.private.ids
 
   health_check_type         = "EC2"
   health_check_grace_period = 300
