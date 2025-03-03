@@ -216,7 +216,7 @@ variable "lb" {
     name                 = string
     listener_port        = number
     deregistration_delay = optional(number)
-    security_group_id    = string
+    security_group_id    = list(string)
   })
   description = "ALB-related information (listening port, deletion protection, security group)"
 }
