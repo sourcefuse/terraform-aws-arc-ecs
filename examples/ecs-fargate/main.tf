@@ -51,7 +51,6 @@ module "alb" {
   version                        = "0.0.1"
   load_balancer_config           = local.load_balancer_config
   target_group_config            = local.target_group_config
-  target_group_attachment_config = local.target_group_attachment_config
   alb_listener                   = local.alb_listener
   default_action                 = local.default_action
   listener_rules                 = local.listener_rules

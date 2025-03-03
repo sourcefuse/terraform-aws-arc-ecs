@@ -1,4 +1,5 @@
 locals {
+security_group_name    = "arc-alb-sg"
 ecs_cluster = {
   name = "arc-ecs-fargate-poc"
   configuration = {
