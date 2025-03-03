@@ -33,7 +33,7 @@ module "ecs_cluster" {
 
   ecs_cluster       = local.ecs_cluster
   capacity_provider = local.capacity_provider
-  environment       = local.environment
+  environment       = var.environment
   ecs_service       = local.ecs_service
   task              = local.task
   lb                = local.lb
