@@ -30,7 +30,7 @@ module "tags" {
 
 module "ecs_cluster" {
   source = "../../"
- 
+
   ecs_cluster = local.ecs_cluster
   capacity_provider = local.capacity_provider
   launch_template = local.launch_template
