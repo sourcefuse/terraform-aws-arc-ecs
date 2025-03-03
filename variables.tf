@@ -180,6 +180,7 @@ variable "ecs_service" {
     repository_name          = string
     enable_load_balancer     = bool
     aws_lb_target_group_name = optional(string)
+    ecs_subnets              = list(string)
     create_service           = optional(bool, false)
   })
   description = "The ECS-specific values to use such as cluster, service, and repository names."
