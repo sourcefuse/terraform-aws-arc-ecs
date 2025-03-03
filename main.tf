@@ -110,7 +110,6 @@ resource "aws_launch_template" "this" {
   }
 
   dynamic "iam_instance_profile" {
-    for_each = var.launch_template.iam_instance_profile != null
     content {
       name = "${var.ecs_cluster.name}-ec2-role"
     }
