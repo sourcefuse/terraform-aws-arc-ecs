@@ -1,5 +1,5 @@
 locals {
-    ecs_cluster = {
+ecs_cluster = {
   name = "arc-ecs-fargate-poc"
   configuration = {
     execute_command_configuration = {

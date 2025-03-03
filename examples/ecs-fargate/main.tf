@@ -31,13 +31,12 @@ module "tags" {
 module "ecs_cluster" {
   source = "../../"
 
-  ecs_cluster       = var.ecs_cluster
-  capacity_provider = var.capacity_provider
-  vpc_id            = data.aws_vpc.default.id
-  environment       = var.environment
-  ecs_service       = var.ecs_service
-  task              = var.task
-  lb                = var.lb
+  ecs_cluster       = local.ecs_cluster
+  capacity_provider = local.capacity_provider
+  environment       = local.environment
+  ecs_service       = local.ecs_service
+  task              = local.task
+  lb                = local.lb
   # cidr_blocks       = var.cidr_blocks
   target_group_arn  = module.alb.target_group_arn
   tags              = module.tags.tags
