@@ -112,7 +112,7 @@ resource "aws_launch_template" "this" {
   dynamic "iam_instance_profile" {
     for_each = var.launch_template.iam_instance_profile != null ? [var.launch_template.iam_instance_profile] : []
     content {
-      name = coalesce(var.launch_template.iam_instance_profile, "${var.ecs_cluster.name}-ec2-role")
+      name = "${var.ecs_cluster.name}-ec2-role"
     }
   }
 
