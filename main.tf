@@ -270,7 +270,7 @@ module "arc_security_group" {
   version = "0.0.1"
 
   count = var.capacity_provider.use_fargate != true ? 1 : 0
-  name          = var.security_group_name
+  name          = "${var.ecs_cluster.name}-ec2-security-group"
   vpc_id        = var.vpc_id
   ingress_rules = var.security_group_data.ingress_rules
   egress_rules  = var.security_group_data.egress_rules
@@ -297,6 +297,6 @@ resource "aws_iam_role" "ec2_role" {
 resource "aws_iam_policy_attachment" "ec2_role_policy" {
   for_each   = toset(concat(["arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"], var.additional_launch_template_policy_arns))
   name       = "ec2-role-policy-attachment-${each.key}"
-  roles      = [aws_iam_role.ec2_role.name]
+  roles      = [aws_iam_role.ec2_role[0].name]
   policy_arn = each.key
 }

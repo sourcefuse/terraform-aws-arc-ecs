@@ -202,3 +202,8 @@ variable "additional_launch_template_policy_arns" {
   type        = list(string)
   default     = [] # Making it optional by providing an empty list as the default
 }
+
+variable "vpc_id" {
+  description = "The VPC ID for the resources"
+  type        = string
+}

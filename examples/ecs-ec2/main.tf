@@ -32,6 +32,7 @@ module "ecs_cluster" {
   source = "../../"
 
   ecs_cluster = local.ecs_cluster
+  vpc_id      = data.aws_vpc.default.id
   capacity_provider = local.capacity_provider
   launch_template = local.launch_template
   security_group_data            = local.security_group_data
