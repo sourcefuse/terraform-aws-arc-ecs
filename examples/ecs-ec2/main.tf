@@ -37,4 +37,3 @@ module "ecs_cluster" {
   asg = local.asg
    tags            = module.tags.tags
 }
-
