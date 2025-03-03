@@ -119,6 +119,7 @@ variable "launch_template" {
 
     user_data = optional(string, null)
   })
+  default = null
 }
 
 variable "asg" {
@@ -142,6 +143,7 @@ variable "asg" {
       }))
     }))
   })
+  default = null
 }
 
 ################################################################################
