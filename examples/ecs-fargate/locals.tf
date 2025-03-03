@@ -73,15 +73,17 @@ load_balancer_config = {
         subnet_id = data.aws_subnets.private.ids[1]
       }
     ]
-    access_logs = {
+     access_logs = {
       enabled = false
-
+      bucket  = "alb-logs"
+      prefix  = "alb-logs"
     }
 
     connection_logs = {
       enabled = false
+      bucket  = "connection-logs"
+      prefix  = "connection-logs"
     }
-
   }
 
   security_group_data = {
