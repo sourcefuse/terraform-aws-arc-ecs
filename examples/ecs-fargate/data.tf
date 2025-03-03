@@ -21,4 +21,3 @@ data "aws_subnets" "private" {
     values = [data.aws_vpc.default.id]
   }
 }
-
