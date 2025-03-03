@@ -170,3 +170,40 @@ variable "capacity_provider" {
     fargate_capacity_providers = any
   })
 }
+
+########## alb security group config ##########
+variable "security_group_data" {
+  type = object({
+    security_group_ids_to_attach = optional(list(string), [])
+    create                       = optional(bool, true)
+    description                  = optional(string, null)
+    ingress_rules = optional(list(object({
+      description              = optional(string, null)
+      cidr_block               = optional(string, null)
+      source_security_group_id = optional(string, null)
+      from_port                = number
+      ip_protocol              = string
+      to_port                  = string
+      self                     = optional(bool, false)
+    })), [])
+    egress_rules = optional(list(object({
+      description                   = optional(string, null)
+      cidr_block                    = optional(string, null)
+      destination_security_group_id = optional(string, null)
+      from_port                     = number
+      ip_protocol                   = string
+      to_port                       = string
+      prefix_list_id                = optional(string, null)
+    })), [])
+  })
+  description = "(optional) Security Group data"
+  default = {
+    create = false
+  }
+}
+
+variable "additional_launch_template_policy_arns" {
+  description = "List of additional IAM policy ARNs to attach to the IAM role"
+  type        = list(string)
+  default     = [] # Making it optional by providing an empty list as the default
+}

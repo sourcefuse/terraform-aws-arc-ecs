@@ -1,17 +1,3 @@
-################################################################################
-## defaults
-################################################################################
-# terraform {
-#   required_version = "~> 1.5"
-
-#   required_providers {
-#     aws = {
-#       source  = "hashicorp/aws"
-#       version = "~> 5.0"
-#     }
-#   }
-# }
-
 ########################################################################
 # CloudWatch Log Group
 ########################################################################
@@ -126,7 +112,7 @@ resource "aws_launch_template" "this" {
   dynamic "iam_instance_profile" {
     for_each = var.launch_template.iam_instance_profile != null ? [var.launch_template.iam_instance_profile] : []
     content {
-      name = iam_instance_profile.value.name
+      name = "${var.ecs_cluster.name}-ec2-role"
     }
   }
 
@@ -152,7 +138,7 @@ resource "aws_launch_template" "this" {
       ipv6_addresses              = network_interfaces.value.ipv6_addresses
       network_interface_id        = network_interfaces.value.network_interface_id
       private_ip_address          = network_interfaces.value.private_ip_address
-      security_groups             = network_interfaces.value.security_groups
+      security_groups             = [for sg in module.arc_security_group : sg.id]
       subnet_id                   = network_interfaces.value.subnet_id
     }
   }
@@ -274,4 +260,43 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
     }
   }
   depends_on = [aws_ecs_capacity_provider.this]
+}
+
+###################################################################
+#                 Security Group
+###################################################################
+module "arc_security_group" {
+  source  = "sourcefuse/arc-security-group/aws"
+  version = "0.0.1"
+
+  count = var.capacity_provider.use_fargate != true ? 1 : 0
+  name          = var.security_group_name
+  vpc_id        = var.vpc_id
+  ingress_rules = var.security_group_data.ingress_rules
+  egress_rules  = var.security_group_data.egress_rules
+
+  tags = var.tags
+}
+
+# The ECS Ec2 role IAM permissions
+resource "aws_iam_role" "ec2_role" {
+  count = var.capacity_provider.use_fargate != true ? 1 : 0
+  name               = "${var.ecs_cluster.name}-ec2-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_policy_attachment" "ec2_role_policy" {
+  for_each   = toset(concat(["arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"], var.additional_launch_template_policy_arns))
+  name       = "ec2-role-policy-attachment-${each.key}"
+  roles      = [aws_iam_role.ec2_role.name]
+  policy_arn = each.key
 }

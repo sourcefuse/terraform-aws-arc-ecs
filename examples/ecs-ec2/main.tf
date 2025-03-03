@@ -34,6 +34,7 @@ module "ecs_cluster" {
   ecs_cluster = local.ecs_cluster
   capacity_provider = local.capacity_provider
   launch_template = local.launch_template
+  security_group_data            = local.security_group_data
   asg = local.asg
    tags            = module.tags.tags
 }
