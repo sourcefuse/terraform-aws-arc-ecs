@@ -35,6 +35,9 @@ locals {
 
   ecs_services = {
     service1 = {
+       ecs_cluster = {
+          create_cluster        = false
+       }
       ecs_service = {
         cluster_name             = "arc-ecs-module-poc-1"
         service_name             = "arc-ecs-module-service-poc-1"
@@ -64,6 +67,9 @@ locals {
     }
 
     service2 = { # FIXED: Changed from duplicate "service1" to "service2"
+     ecs_cluster = {
+          create_cluster        = false
+       }
       ecs_service = {
         cluster_name             = "arc-ecs-module-poc-2"
         service_name             = "arc-ecs-module-service-poc-2"

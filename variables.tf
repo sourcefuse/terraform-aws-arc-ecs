@@ -9,7 +9,7 @@ variable "tags" {
 
 variable "ecs_cluster" {
   type = object({
-    name = string
+    name = optional(string)
     create_cluster           = optional(bool, true)
     configuration = optional(object({
       execute_command_configuration = optional(object({
@@ -27,7 +27,7 @@ variable "ecs_cluster" {
         }), {})
       }), {})
     }), {})
-    create_cloudwatch_log_group = bool
+    create_cloudwatch_log_group = optional(bool, true)
     service_connect_defaults    = optional(map(string), null)
     settings                    = optional(any, null)
     tags                        = optional(map(string), null)
