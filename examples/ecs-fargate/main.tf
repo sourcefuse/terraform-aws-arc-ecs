@@ -37,8 +37,7 @@ module "ecs_cluster" {
   ecs_service       = local.ecs_service
   task              = local.task
   lb                = local.lb
-  vpc_id                         = data.aws_vpc.default.id
-  # cidr_blocks       = var.cidr_blocks
+  vpc_id            = data.aws_vpc.default.id
   alb_name          = local.load_balancer_config.name
   target_group_arn  = module.alb.target_group_arn
   tags              = module.tags.tags
