@@ -1,20 +1,20 @@
 data "aws_region" "current" {}
 
-data "aws_subnets" "private" {
+# data "aws_subnets" "private" {
 
-  filter {
-    name   = "vpc-id"
-    values = [var.vpc_id]
-  }
+#   filter {
+#     name   = "vpc-id"
+#     values = [var.vpc_id]
+#   }
 
-  filter {
-    name = "tag:Name"
+#   filter {
+#     name = "tag:Name"
 
-    values = [
-      "*private*",
-    ]
-  }
-}
+#     values = [
+#       "*private*",
+#     ]
+#   }
+# }
 
 data "aws_ecs_cluster" "cluster" {
   cluster_name = var.ecs_service.cluster_name

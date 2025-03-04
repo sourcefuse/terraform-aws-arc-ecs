@@ -63,6 +63,7 @@ module "ecs_services" {
   ecs_service      = each.value.ecs_service
   task             = each.value.task
   lb               = each.value.lb
+  vpc_id            = data.aws_vpc.default.id
   target_group_arn = module.alb.target_group_arn
   environment      = var.environment
   tags              = module.tags.tags
