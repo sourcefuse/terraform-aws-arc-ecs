@@ -58,8 +58,8 @@ module "ecs_services" {
   for_each = local.ecs_services
 
   source = "../../"
-  ecs_cluster       = ecs_cluster
-  ecs_cluster_name       = each.ecs_cluster.name
+  ecs_cluster       = each.ecs_cluster
+  ecs_cluster_name       = local.ecs_cluster.name
   ecs_service      = each.value.service
   task             = each.value.task
   lb               = each.value.lb
