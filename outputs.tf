@@ -1,7 +1,7 @@
-output "ecs_cluster_name" {
-  description = "The name of the ECS cluster."
-  value       = module.ecs_cluster[0].ecs_cluster.name
-}
+# output "ecs_cluster_name" {
+#   description = "The name of the ECS cluster."
+#   value       = module.ecs_cluster[0].ecs_cluster.name
+# }
 
 # output "alb_name" {
 #   description = "The names of the ALBs."

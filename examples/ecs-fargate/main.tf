@@ -60,7 +60,7 @@ module "ecs_services" {
   source = "../../"
   ecs_cluster       = each.value.ecs_cluster
   ecs_cluster_name       = local.ecs_cluster.name
-  ecs_service      = each.value.service
+  ecs_service      = each.value.ecs_service
   task             = each.value.task
   lb               = each.value.lb
   target_group_arn = module.alb.target_group_arn
