@@ -58,11 +58,11 @@ module "ecs_services" {
   for_each = local.ecs_services
 
   source = "../../"
-  ecs_cluster       = each.value.ecs_services.ecs_cluster
+  ecs_cluster       = each.value.ecs_cluster
   ecs_cluster_name       = local.ecs_cluster.name
-  ecs_service      = each.value.ecs_services.ecs_service
-  task             = each.value.ecs_services.task
-  lb               = each.value.ecs_services.lb
+  ecs_service      = each.value.service
+  task             = each.value.task
+  lb               = each.value.lb
   target_group_arn = module.alb.target_group_arn
   environment      = var.environment
   tags              = module.tags.tags
