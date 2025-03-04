@@ -32,6 +32,7 @@ variable "ecs_cluster" {
     settings                    = optional(any, null)
     tags                        = optional(map(string), null)
   })
+  default = null
   description = <<EOT
 The ECS-specific values to use such as cluster, service, and repository names.
 
@@ -65,11 +66,13 @@ variable "capacity_provider" {
     use_fargate                = bool
     fargate_capacity_providers = any
   })
+  default = null
 }
 
 variable "target_group_arn" {
   description = "ARN of the target group"
   type        = string
+  default = null
 }
 
 
@@ -169,11 +172,13 @@ variable "asg" {
 
 variable "environment" {
   type        = string
+  default = null
   description = "The environment associated with the ECS service"
 }
 
 variable "vpc_id" {
   type        = string
+  default = null
   description = "ID of VPC in which all resources need to be created"
 }
 
@@ -187,6 +192,7 @@ variable "ecs_service" {
     ecs_subnets              = list(string)
     create_service           = optional(bool, false)
   })
+  default = null
   description = "The ECS-specific values to use such as cluster, service, and repository names."
 }
 
@@ -206,6 +212,7 @@ variable "task" {
     secrets                     = optional(map(string))
     task_execution_role         = optional(string)
   })
+  default = null
 
   description = "Task-related information (vCPU, memory, # of tasks, port, and health check info.)"
 }
@@ -213,6 +220,7 @@ variable "task" {
 variable "ecs_cluster_name" {
   description = "Name of the ECS cluster"
   type        = string
+  default = null
 }
 
 # Load balancer
@@ -223,11 +231,12 @@ variable "lb" {
     deregistration_delay = optional(number)
     security_group_id    = string
   })
+  default = null
   description = "ALB-related information (listening port, deletion protection, security group)"
 }
 
 variable "alb_name" {
   description = "Name of the Application Load Balancer"
   type        = string
-  default     = "my-application-load-balancer"  # Change this default value as needed
+  default     = null
 }
