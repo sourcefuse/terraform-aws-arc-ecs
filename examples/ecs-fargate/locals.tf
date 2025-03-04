@@ -7,7 +7,7 @@ locals {
     create_cloudwatch_log_group = true
     service_connect_defaults    = {}
     settings                    = []
-    
+
     configuration = {
       execute_command_configuration = {
         logging = "OVERRIDE"
@@ -129,7 +129,7 @@ locals {
   security_group_data = {
     create      = true
     description = "Security Group for alb"
-    
+
     ingress_rules = [
       {
         description = "Allow VPC traffic"
