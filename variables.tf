@@ -32,7 +32,6 @@ variable "ecs_cluster" {
     settings                    = optional(any, null)
     tags                        = optional(map(string), null)
   })
-  default = {}
   description = <<EOT
 The ECS-specific values to use such as cluster, service, and repository names.
 
