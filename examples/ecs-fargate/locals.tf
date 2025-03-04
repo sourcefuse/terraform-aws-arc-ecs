@@ -2,7 +2,7 @@ locals {
 security_group_name    = "arc-alb-sg"
 ecs_cluster = {
   name = "arc-ecs-fargate-poc"
-  create_service           = true
+  create_cluster = true
   configuration = {
     execute_command_configuration = {
       logging = "OVERRIDE"
