@@ -192,7 +192,6 @@ variable "ecs_service" {
     ecs_subnets              = optional(list(string))
     create_service           = optional(bool, false)
   })
-  default = null
   description = "The ECS-specific values to use such as cluster, service, and repository names."
 }
 
