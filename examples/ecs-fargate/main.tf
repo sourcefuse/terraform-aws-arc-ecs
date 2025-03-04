@@ -58,7 +58,7 @@ module "ecs_services" {
 
   source = "../../"
 
-  ecs_cluster_name       = module.ecs_cluster.name
+  ecs_cluster_name       = module.ecs_cluster.id
   ecs_service      = each.value.service
   task             = each.value.task
   lb               = each.value.lb
