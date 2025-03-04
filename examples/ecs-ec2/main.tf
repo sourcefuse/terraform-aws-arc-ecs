@@ -28,29 +28,14 @@ module "tags" {
   }
 }
 
-# module "ecs_cluster" {
-#   source = "../../"
-
-#   ecs_cluster       = local.ecs_cluster
-#   capacity_provider = local.capacity_provider
-#   environment       = var.environment
-#   ecs_service       = local.ecs_service
-#   task              = local.task
-#   lb                = local.lb
-#   vpc_id            = data.aws_vpc.default.id
-#   alb_name          = local.load_balancer_config.name
-#   target_group_arn  = module.alb.target_group_arn
-#   tags              = module.tags.tags
-#   depends_on = [module.alb]
-# }
-
-
 module "ecs_cluster" {
   source = "../../"
 
   ecs_cluster       = local.ecs_cluster
   capacity_provider = local.capacity_provider
   ecs_service       = local.ecs_service
+  launch_template   = local.launch_template
+  asg               = local.asg
   tags              = module.tags.tags
 }
 

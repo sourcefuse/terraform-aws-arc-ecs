@@ -24,7 +24,6 @@ module "ecs_cluster" {
 }
 
 
-
 ################################################################################
 ## ecs service
 ################################################################################
@@ -33,8 +32,8 @@ module "ecs_service" {
   count  = var.ecs_service.create_service ? 1 : 0
   source = "./modules/ecs-service"
 
-  vpc_id      = var.vpc_id
-  environment = var.environment
+  vpc_id           = var.vpc_id
+  environment      = var.environment
   target_group_arn = var.target_group_arn
 
   ecs_service = {
@@ -67,5 +66,5 @@ module "ecs_service" {
     listener_port        = var.lb.listener_port
     security_group_id    = var.lb.security_group_id
   }
-  tags       = var.tags
+  tags = var.tags
 }

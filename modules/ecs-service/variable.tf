@@ -50,7 +50,6 @@ variable "task" {
 
   description = "Task-related information (vCPU, memory, # of tasks, port, and health check info.)"
 }
-
 # Load balancer
 variable "lb" {
   type = object({

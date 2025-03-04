@@ -70,7 +70,6 @@ resource "aws_ecs_task_definition" "this" {
   tags = var.tags
 }
 
-
 resource "aws_security_group" "ecs" {
   name        = local.security_group_name
   description = "Allow traffic from the ALB into the Docker containers."

@@ -8,7 +8,6 @@
 #   value       = [for alb in module.alb : alb.alb.name]
 # }
 
-
 # output "ecs_service_name" {
 #   description = "The service names of the ECS services."
 #   value       = module.ecs_service[*].service_name

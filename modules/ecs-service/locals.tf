@@ -12,7 +12,6 @@ locals {
     secrets               = coalesce(var.task.secrets, {})
   }
 
-
   environment_variables = [for name, value in local.task.environment_variables : {
     Name  = name
     Value = value

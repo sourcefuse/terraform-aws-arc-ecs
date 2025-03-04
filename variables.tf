@@ -9,8 +9,8 @@ variable "tags" {
 
 variable "ecs_cluster" {
   type = object({
-    name = optional(string)
-    create_cluster           = optional(bool, true)
+    name           = optional(string)
+    create_cluster = optional(bool, true)
     configuration = optional(object({
       execute_command_configuration = optional(object({
         kms_key_id = optional(string, "")
@@ -71,9 +71,8 @@ variable "capacity_provider" {
 variable "target_group_arn" {
   description = "ARN of the target group"
   type        = string
-  default = null
+  default     = null
 }
-
 
 variable "launch_template" {
   type = object({
@@ -171,13 +170,13 @@ variable "asg" {
 
 variable "environment" {
   type        = string
-  default = null
+  default     = null
   description = "The environment associated with the ECS service"
 }
 
 variable "vpc_id" {
   type        = string
-  default = null
+  default     = null
   description = "ID of VPC in which all resources need to be created"
 }
 
@@ -218,7 +217,7 @@ variable "task" {
 variable "ecs_cluster_name" {
   description = "Name of the ECS cluster"
   type        = string
-  default = null
+  default     = null
 }
 
 # Load balancer
@@ -229,7 +228,7 @@ variable "lb" {
     deregistration_delay = optional(number)
     security_group_id    = string
   })
-  default = null
+  default     = null
   description = "ALB-related information (listening port, deletion protection, security group)"
 }
 
