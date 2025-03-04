@@ -37,6 +37,7 @@ module "ecs_cluster" {
   launch_template   = local.launch_template
   asg               = local.asg
   tags              = module.tags.tags
+  depends_on        = [aws_iam_role.ec2_role]
 }
 
 module "ecs_services" {
