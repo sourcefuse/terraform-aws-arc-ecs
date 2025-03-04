@@ -53,7 +53,6 @@ variable "task" {
 # Load balancer
 variable "lb" {
   type = object({
-    name                 = string
     listener_port        = number
     deregistration_delay = optional(number)
     security_group_id    = string

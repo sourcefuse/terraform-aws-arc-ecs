@@ -214,26 +214,25 @@ variable "task" {
   description = "Task-related information (vCPU, memory, # of tasks, port, and health check info.)"
 }
 
-variable "ecs_cluster_name" {
-  description = "Name of the ECS cluster"
-  type        = string
-  default     = null
-}
+# variable "ecs_cluster_name" {
+#   description = "Name of the ECS cluster"
+#   type        = string
+#   default     = null
+# }
 
 # Load balancer
-variable "lb" {
+variable "lb_data" {
   type = object({
-    name                 = string
     listener_port        = number
     deregistration_delay = optional(number)
-    security_group_id    = string
+    security_group_id    = optional(string)
   })
   default     = null
   description = "ALB-related information (listening port, deletion protection, security group)"
 }
 
-variable "alb_name" {
-  description = "Name of the Application Load Balancer"
-  type        = string
-  default     = null
-}
+# variable "alb_name" {
+#   description = "Name of the Application Load Balancer"
+#   type        = string
+#   default     = null
+# }

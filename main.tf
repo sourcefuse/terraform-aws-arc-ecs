@@ -37,8 +37,8 @@ module "ecs_service" {
   target_group_arn = var.target_group_arn
 
   ecs_service = {
-    # cluster_name             = module.ecs_cluster[0].ecs_cluster.name
-    cluster_name             = var.ecs_cluster_name
+    cluster_name = module.ecs_cluster[0].ecs_cluster.name
+    # cluster_name             = var.ecs_cluster_name
     service_name             = var.ecs_service.service_name
     repository_name          = var.ecs_service.repository_name
     enable_load_balancer     = var.ecs_service.enable_load_balancer
@@ -61,10 +61,9 @@ module "ecs_service" {
   }
 
   lb = {
-    name                 = var.alb_name
-    deregistration_delay = var.lb.deregistration_delay
-    listener_port        = var.lb.listener_port
-    security_group_id    = var.lb.security_group_id
+    deregistration_delay = var.lb_data.deregistration_delay
+    listener_port        = var.lb_data.listener_port
+    security_group_id    = var.lb_data.security_group_id
   }
   tags = var.tags
 }

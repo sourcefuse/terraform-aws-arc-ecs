@@ -24,9 +24,6 @@ locals {
     fargate_capacity_providers = {
     }
   }
-  ecs_service = {
-    create_service = false
-  }
 
   launch_template = {
     name = "my-launch-template"
@@ -118,9 +115,6 @@ locals {
 
   ecs_services = {
     service1 = {
-      ecs_cluster = {
-        create_cluster = false
-      }
       ecs_service = {
         cluster_name             = "arc-ecs-module-poc-1"
         service_name             = "arc-ecs-module-service-poc-1"
@@ -142,17 +136,13 @@ locals {
         container_definition = "container/container_definition.json.tftpl"
       }
 
-      lb = {
-        name              = "arc-load-balancer"
+      lb_data = {
         listener_port     = 80
         security_group_id = "sg-023e8f71ae18450ff"
       }
     }
 
     service2 = { # FIXED: Changed from duplicate "service1" to "service2"
-      ecs_cluster = {
-        create_cluster = false
-      }
       ecs_service = {
         cluster_name             = "arc-ecs-module-poc-2"
         service_name             = "arc-ecs-module-service-poc-2"
@@ -174,8 +164,7 @@ locals {
         container_definition = "container/container_definition.json.tftpl"
       }
 
-      lb = {
-        name              = "arc-load-balancer"
+      lb_data = {
         listener_port     = 80
         security_group_id = "sg-023e8f71ae18450ff"
       }
