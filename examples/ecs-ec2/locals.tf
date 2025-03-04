@@ -94,7 +94,7 @@ locals {
 
   asg = {
     name                = "my-asg"
-    min_size            = 1
+    min_size            = 2
     max_size            = 3
     desired_capacity    = 2
     vpc_zone_identifier = tolist(data.aws_subnets.private.ids)
