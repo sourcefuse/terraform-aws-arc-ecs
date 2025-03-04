@@ -184,12 +184,12 @@ variable "vpc_id" {
 
 variable "ecs_service" {
   type = object({
-    cluster_name             = string
-    service_name             = string
-    repository_name          = string
-    enable_load_balancer     = bool
+    cluster_name             = optional(string)
+    service_name             = optional(string)
+    repository_name          = optional(string)
+    enable_load_balancer     = optional(bool, false)
     aws_lb_target_group_name = optional(string)
-    ecs_subnets              = list(string)
+    ecs_subnets              = optional(list(string))
     create_service           = optional(bool, false)
   })
   default = null
