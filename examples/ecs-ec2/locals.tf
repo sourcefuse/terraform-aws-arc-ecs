@@ -1,8 +1,8 @@
 locals {
   security_group_name = "arc-alb-sg"
-  ecs_service = {
-    create_service = false
-  }
+  # ecs_service = {
+  #   create_service = false
+  # }
   ecs_cluster = {
     name                        = "arc-ecs-ec2-poc"
     create_cluster              = true

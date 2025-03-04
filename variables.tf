@@ -214,11 +214,11 @@ variable "task" {
   description = "Task-related information (vCPU, memory, # of tasks, port, and health check info.)"
 }
 
-variable "ecs_cluster_name" {
-  description = "Name of the ECS cluster"
-  type        = string
-  default     = null
-}
+# variable "ecs_cluster_name" {
+#   description = "Name of the ECS cluster"
+#   type        = string
+#   default     = null
+# }
 
 # Load balancer
 variable "lb_data" {
