@@ -62,7 +62,7 @@ locals {
       lb = {
         name              = "arc-load-balancer"
         listener_port     = 80
-        security_group_id = "sg-023e8f71ae18450ff"
+        # security_group_id = "sg-023e8f71ae18450ff"
       }
     }
 
@@ -94,7 +94,7 @@ locals {
       lb = {
         name              = "arc-load-balancer"
         listener_port     = 80
-        security_group_id = "sg-023e8f71ae18450ff"
+        # security_group_id = "sg-023e8f71ae18450ff"
       }
     }
   }
