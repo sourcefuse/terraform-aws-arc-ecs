@@ -28,52 +28,52 @@ module "tags" {
   }
 }
 
-# module "ecs_cluster" {
-#   source = "../../"
-#   # for_each = local.ecs_services
-
-#   ecs_cluster       = local.ecs_cluster
-#   capacity_provider = local.capacity_provider
-#   ecs_service       = local.ecs_service
-#   launch_template   = local.launch_template
-#   asg               = local.asg
-#   tags              = module.tags.tags
-# }
-
 module "ecs_cluster" {
-  source   = "../../"
-  for_each = local.ecs_services
+  source = "../../"
+  # for_each = local.ecs_services
 
   ecs_cluster       = local.ecs_cluster
   capacity_provider = local.capacity_provider
+  ecs_service       = local.ecs_service
   launch_template   = local.launch_template
   asg               = local.asg
-  ecs_service       = each.value.ecs_service
-  task              = each.value.task
-  lb_data           = each.value.lb_data
-  vpc_id            = data.aws_vpc.default.id
-  target_group_arn  = module.alb.target_group_arn
-  environment       = var.environment
   tags              = module.tags.tags
-  depends_on        = [module.alb]
 }
 
-# module "ecs_services" {
+# module "ecs_cluster" {
+#   source   = "../../"
 #   for_each = local.ecs_services
 
-#   source           = "../../"
-#   ecs_cluster      = each.value.ecs_cluster
-#   ecs_cluster_name = local.ecs_cluster.name
-#   ecs_service      = each.value.ecs_service
-#   task             = each.value.task
-#   lb_data          = each.value.lb_data
-#   vpc_id           = data.aws_vpc.default.id
-#   target_group_arn = module.alb.target_group_arn
-#   environment      = var.environment
-#   tags             = module.tags.tags
-#   depends_on       = [module.ecs_cluster, module.alb]
-
+#   ecs_cluster       = local.ecs_cluster
+#   capacity_provider = local.capacity_provider
+#   launch_template   = local.launch_template
+#   asg               = local.asg
+#   ecs_service       = each.value.ecs_service
+#   task              = each.value.task
+#   lb_data           = each.value.lb_data
+#   vpc_id            = data.aws_vpc.default.id
+#   target_group_arn  = module.alb.target_group_arn
+#   environment       = var.environment
+#   tags              = module.tags.tags
+#   depends_on        = [module.alb]
 # }
+
+module "ecs_services" {
+  for_each = local.ecs_services
+
+  source           = "../../"
+  ecs_cluster      = each.value.ecs_cluster
+  ecs_cluster_name = local.ecs_cluster.name
+  ecs_service      = each.value.ecs_service
+  task             = each.value.task
+  lb_data          = each.value.lb_data
+  vpc_id           = data.aws_vpc.default.id
+  target_group_arn = module.alb.target_group_arn
+  environment      = var.environment
+  tags             = module.tags.tags
+  depends_on       = [module.ecs_cluster, module.alb]
+
+}
 
 ################################################################################
 ## application load balancer
