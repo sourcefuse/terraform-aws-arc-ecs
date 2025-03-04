@@ -15,16 +15,16 @@ terraform {
 ########################################################################
 # CloudWatch Log Group
 ########################################################################
-resource "aws_cloudwatch_log_group" "this" {
-  count = var.ecs_cluster.create_cloudwatch_log_group ? 1 : 0
+# resource "aws_cloudwatch_log_group" "this" {
+#   count = var.ecs_cluster.create_cloudwatch_log_group ? 1 : 0
 
-  name = var.ecs_cluster.configuration.execute_command_configuration.log_configuration.log_group_name != null ? var.ecs_cluster.configuration.execute_command_configuration.log_configuration.log_group_name : "/aws/ecs/${var.ecs_cluster.name}"
+#   name = var.ecs_cluster.configuration.execute_command_configuration.log_configuration.log_group_name != null ? var.ecs_cluster.configuration.execute_command_configuration.log_configuration.log_group_name : "/aws/ecs/${var.ecs_cluster.name}"
 
-  retention_in_days = var.ecs_cluster.configuration.execute_command_configuration.log_configuration.log_group_retention_in_days
-  kms_key_id        = var.ecs_cluster.configuration.execute_command_configuration.log_configuration.log_group_kms_key_id
+#   retention_in_days = var.ecs_cluster.configuration.execute_command_configuration.log_configuration.log_group_retention_in_days
+#   kms_key_id        = var.ecs_cluster.configuration.execute_command_configuration.log_configuration.log_group_kms_key_id
 
-  tags = merge(var.tags, var.ecs_cluster.configuration.execute_command_configuration.log_configuration.log_group_tags)
-}
+#   tags = merge(var.tags, var.ecs_cluster.configuration.execute_command_configuration.log_configuration.log_group_tags)
+# }
 
 
 ########################################################################
