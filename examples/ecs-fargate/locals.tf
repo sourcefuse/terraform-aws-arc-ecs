@@ -28,7 +28,7 @@ capacity_provider = {
 ecs_service = {
   cluster_name             = "arc-ecs-module-poc"
   service_name             = "arc-ecs-module-service-poc"
-  repository_name          = "12345.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
+  repository_name          = "884360309640.dkr.ecr.us-east-1.amazonaws.com/test"
   ecs_subnets              = data.aws_subnets.private.ids
   enable_load_balancer     = true
   aws_lb_target_group_name = "arc-poc-alb-tg"
@@ -153,30 +153,27 @@ load_balancer_config = {
   }
 
   listener_rules = {
-    rule1 = {
-      priority = 9
+    rule2 = {
+      priority = 999
       actions = [
         {
-          type  = "redirect"
+          type  = "fixed-response"
           order = 1
-          redirect = {
-            host        = "docs.example.com"
-            path        = "/redirect"
-            query       = "action=redirect"
-            protocol    = "HTTPS"
-            port        = 443
-            status_code = "HTTP_301"
+          fixed_response = {
+            status_code  = "200"
+            content_type = "text/plain"
+            message_body = "OK"
           }
         }
       ]
       conditions = [
         {
-          host_header = {
-            values = ["example.com"]
+          path_pattern = {
+            values = ["/status"]
           }
         }
       ]
-    },
+    }
   }
 
 }
