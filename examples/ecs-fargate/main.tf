@@ -28,20 +28,45 @@ module "tags" {
   }
 }
 
+# module "ecs_cluster" {
+#   source = "../../"
+
+#   ecs_cluster       = local.ecs_cluster
+#   capacity_provider = local.capacity_provider
+#   environment       = var.environment
+#   ecs_service       = local.ecs_service
+#   task              = local.task
+#   lb                = local.lb
+#   vpc_id            = data.aws_vpc.default.id
+#   alb_name          = local.load_balancer_config.name
+#   target_group_arn  = module.alb.target_group_arn
+#   tags              = module.tags.tags
+#   depends_on = [module.alb]
+# }
+
+
 module "ecs_cluster" {
   source = "../../"
 
   ecs_cluster       = local.ecs_cluster
   capacity_provider = local.capacity_provider
-  environment       = var.environment
-  ecs_service       = local.ecs_service
-  task              = local.task
-  lb                = local.lb
-  vpc_id            = data.aws_vpc.default.id
-  alb_name          = local.load_balancer_config.name
-  target_group_arn  = module.alb.target_group_arn
   tags              = module.tags.tags
-  depends_on = [module.alb]
+}
+
+module "ecs_services" {
+  for_each = local.ecs_services
+
+  source = "../../"
+
+  ecs_cluster_name       = module.ecs_cluster.name
+  ecs_service      = each.value.service
+  task             = each.value.task
+  lb               = each.value.lb
+  target_group_arn = module.alb.target_group_arn
+  environment      = var.environment
+  tags              = module.tags.tags
+  depends_on       = [module.ecs_cluster, module.alb]
+
 }
 
 ################################################################################

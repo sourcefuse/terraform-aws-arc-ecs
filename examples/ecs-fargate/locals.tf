@@ -2,6 +2,7 @@ locals {
 security_group_name    = "arc-alb-sg"
 ecs_cluster = {
   name = "arc-ecs-fargate-poc"
+  create_service           = true
   configuration = {
     execute_command_configuration = {
       logging = "OVERRIDE"
@@ -25,10 +26,14 @@ capacity_provider = {
   }
 }
 
-ecs_service = {
-  cluster_name             = "arc-ecs-module-poc"
-  service_name             = "arc-ecs-module-service-poc"
-  repository_name          = "884360309640.dkr.ecr.us-east-1.amazonaws.com/test"
+
+############################   ecs service    ###############################
+ ecs_services = {
+    service1 = {
+   ecs_service = {
+  cluster_name             = "arc-ecs-module-poc-1"
+  service_name             = "arc-ecs-module-service-poc-1"
+  repository_name          = "12345.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
   ecs_subnets              = data.aws_subnets.private.ids
   enable_load_balancer     = true
   aws_lb_target_group_name = "arc-poc-alb-tg"
@@ -51,8 +56,36 @@ lb = {
   listener_port     = 80
   security_group_id = "sg-023e8f71ae18450ff"
 }
+    }
+  service1 = {
+   ecs_service = {
+  cluster_name             = "arc-ecs-module-poc-2"
+  service_name             = "arc-ecs-module-service-poc-2"
+  repository_name          = "12345.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
+  ecs_subnets              = data.aws_subnets.private.ids
+  enable_load_balancer     = true
+  aws_lb_target_group_name = "arc-poc-alb-tg"
+  create_service           = true
+}
 
-cidr_blocks = null
+task = {
+  tasks_desired        = 1
+  launch_type          = "FARGATE"
+  network_mode         = "awsvpc"
+  compatibilities      = ["FARGATE"]
+  container_port       = 80
+  container_memory     = 1024
+  container_vcpu       = 256
+  container_definition = "container/container_definition.json.tftpl"
+}
+
+lb = {
+  name              = "arc-load-balancer"
+  listener_port     = 80
+  security_group_id = "sg-023e8f71ae18450ff"
+}
+    }
+    }
 
 load_balancer_config = {
     name                                        = "arc-load-balancer"
