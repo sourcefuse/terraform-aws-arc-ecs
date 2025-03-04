@@ -51,7 +51,7 @@ locals {
 
 
     iam_instance_profile = {
-      name = aws_iam_role.ec2_role.name
+      name = "poc-iam-role"
     }
 
     image_id                             = data.aws_ami.amazon_linux.id
