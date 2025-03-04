@@ -50,6 +50,7 @@ module "ecs_cluster" {
 
   ecs_cluster       = local.ecs_cluster
   capacity_provider = local.capacity_provider
+  ecs_service       = local.ecs_service
   tags              = module.tags.tags
 }
 

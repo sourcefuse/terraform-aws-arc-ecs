@@ -1,93 +1,101 @@
 locals {
-security_group_name    = "arc-alb-sg"
-ecs_cluster = {
-  name = "arc-ecs-fargate-poc"
-  create_cluster = true
-  configuration = {
-    execute_command_configuration = {
-      logging = "OVERRIDE"
-      log_configuration = {
-        log_group_name = "arc-poc-cluster-log-group-fargate"
+  security_group_name = "arc-alb-sg"
+
+  ecs_cluster = {
+    name                  = "arc-ecs-fargate-poc"
+    create_cluster        = true
+    create_cloudwatch_log_group = true
+    service_connect_defaults    = {}
+    settings                    = []
+    
+    configuration = {
+      execute_command_configuration = {
+        logging = "OVERRIDE"
+        log_configuration = {
+          log_group_name = "arc-poc-cluster-log-group-fargate"
+        }
       }
     }
   }
-  create_cloudwatch_log_group = true
-  service_connect_defaults    = {}
-  settings                    = []
-}
 
-capacity_provider = {
-  autoscaling_capacity_providers = {}
-  use_fargate                    = true
-  fargate_capacity_providers = {
-    fargate_cp = {
-      name = "FARGATE"
+  capacity_provider = {
+    autoscaling_capacity_providers = {}
+    use_fargate                    = true
+    fargate_capacity_providers = {
+      fargate_cp = {
+        name = "FARGATE"
+      }
     }
   }
-}
+  ecs_service = {
+    create_service           = false
+  }
 
+  ############################### ECS Services ################################
 
-############################   ecs service    ###############################
- ecs_services = {
+  ecs_services = {
     service1 = {
-   ecs_service = {
-  cluster_name             = "arc-ecs-module-poc-1"
-  service_name             = "arc-ecs-module-service-poc-1"
-  repository_name          = "12345.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
-  ecs_subnets              = data.aws_subnets.private.ids
-  enable_load_balancer     = true
-  aws_lb_target_group_name = "arc-poc-alb-tg"
-  create_service           = true
-}
+      ecs_service = {
+        cluster_name             = "arc-ecs-module-poc-1"
+        service_name             = "arc-ecs-module-service-poc-1"
+        repository_name          = "12345.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
+        ecs_subnets              = data.aws_subnets.private.ids
+        enable_load_balancer     = true
+        aws_lb_target_group_name = "arc-poc-alb-tg"
+        create_service           = true
+      }
 
-task = {
-  tasks_desired        = 1
-  launch_type          = "FARGATE"
-  network_mode         = "awsvpc"
-  compatibilities      = ["FARGATE"]
-  container_port       = 80
-  container_memory     = 1024
-  container_vcpu       = 256
-  container_definition = "container/container_definition.json.tftpl"
-}
+      task = {
+        tasks_desired        = 1
+        launch_type          = "FARGATE"
+        network_mode         = "awsvpc"
+        compatibilities      = ["FARGATE"]
+        container_port       = 80
+        container_memory     = 1024
+        container_vcpu       = 256
+        container_definition = "container/container_definition.json.tftpl"
+      }
 
-lb = {
-  name              = "arc-load-balancer"
-  listener_port     = 80
-  security_group_id = "sg-023e8f71ae18450ff"
-}
-    }
-  service1 = {
-   ecs_service = {
-  cluster_name             = "arc-ecs-module-poc-2"
-  service_name             = "arc-ecs-module-service-poc-2"
-  repository_name          = "12345.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
-  ecs_subnets              = data.aws_subnets.private.ids
-  enable_load_balancer     = true
-  aws_lb_target_group_name = "arc-poc-alb-tg"
-  create_service           = true
-}
-
-task = {
-  tasks_desired        = 1
-  launch_type          = "FARGATE"
-  network_mode         = "awsvpc"
-  compatibilities      = ["FARGATE"]
-  container_port       = 80
-  container_memory     = 1024
-  container_vcpu       = 256
-  container_definition = "container/container_definition.json.tftpl"
-}
-
-lb = {
-  name              = "arc-load-balancer"
-  listener_port     = 80
-  security_group_id = "sg-023e8f71ae18450ff"
-}
-    }
+      lb = {
+        name              = "arc-load-balancer"
+        listener_port     = 80
+        security_group_id = "sg-023e8f71ae18450ff"
+      }
     }
 
-load_balancer_config = {
+    service2 = { # FIXED: Changed from duplicate "service1" to "service2"
+      ecs_service = {
+        cluster_name             = "arc-ecs-module-poc-2"
+        service_name             = "arc-ecs-module-service-poc-2"
+        repository_name          = "12345.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
+        ecs_subnets              = data.aws_subnets.private.ids
+        enable_load_balancer     = true
+        aws_lb_target_group_name = "arc-poc-alb-tg"
+        create_service           = true
+      }
+
+      task = {
+        tasks_desired        = 1
+        launch_type          = "FARGATE"
+        network_mode         = "awsvpc"
+        compatibilities      = ["FARGATE"]
+        container_port       = 80
+        container_memory     = 1024
+        container_vcpu       = 256
+        container_definition = "container/container_definition.json.tftpl"
+      }
+
+      lb = {
+        name              = "arc-load-balancer"
+        listener_port     = 80
+        security_group_id = "sg-023e8f71ae18450ff"
+      }
+    }
+  }
+
+  ############################### Load Balancer Config ################################
+
+  load_balancer_config = {
     name                                        = "arc-load-balancer"
     type                                        = "application"
     enable_deletion_protection                  = false
@@ -99,14 +107,11 @@ load_balancer_config = {
     enable_tls_version_and_cipher_suite_headers = false
 
     subnet_mapping = [
-      {
-        subnet_id = data.aws_subnets.private.ids[0]
-      },
-      {
-        subnet_id = data.aws_subnets.private.ids[1]
-      }
+      { subnet_id = data.aws_subnets.private.ids[0] },
+      { subnet_id = data.aws_subnets.private.ids[1] }
     ]
-     access_logs = {
+
+    access_logs = {
       enabled = false
       bucket  = "alb-logs"
       prefix  = "alb-logs"
@@ -119,14 +124,17 @@ load_balancer_config = {
     }
   }
 
+  ############################### Security Group Config ################################
+
   security_group_data = {
     create      = true
     description = "Security Group for alb"
+    
     ingress_rules = [
       {
         description = "Allow VPC traffic"
-        cidr_block  = "0.0.0.0/0" # Changed to string
-        from_port   = 0
+        cidr_block  = "0.0.0.0/0"  # Ensure it's a string
+        from_port   = 443
         ip_protocol = "tcp"
         to_port     = 443
       },
@@ -136,24 +144,28 @@ load_balancer_config = {
         from_port   = 80
         ip_protocol = "tcp"
         to_port     = 80
-      },
+      }
     ]
+
     egress_rules = [
       {
         description = "Allow all outbound traffic"
-        cidr_block  = "0.0.0.0/0" # Changed to string
-        from_port   = -1
+        cidr_block  = "0.0.0.0/0"  # Ensure it's a string
+        from_port   = 0
         ip_protocol = "-1"
-        to_port     = -1
+        to_port     = 0
       }
     ]
   }
+
+  ############################### Target Group Config ################################
 
   target_group_config = {
     name        = "arc-poc-alb"
     port        = 80
     protocol    = "HTTP"
     target_type = "ip"
+
     health_check = {
       enabled             = true
       interval            = 30
@@ -167,23 +179,29 @@ load_balancer_config = {
     }
   }
 
-  default_action = [{
-    type = "forward"
-    forward = {
-      target_groups = [{
-        weight = 20
-      }]
-      stickiness = {
-        duration = 300
-        enabled  = true
+  ############################### Default ALB Action ################################
+
+  default_action = [
+    {
+      type = "forward"
+      forward = {
+        target_groups = [{ weight = 20 }]
+        stickiness = {
+          duration = 300
+          enabled  = true
+        }
       }
     }
-  }]
+  ]
+
+  ############################### ALB Listener ################################
 
   alb_listener = {
     port     = 88
     protocol = "HTTP"
   }
+
+  ############################### Listener Rules ################################
 
   listener_rules = {
     rule2 = {
@@ -208,5 +226,4 @@ load_balancer_config = {
       ]
     }
   }
-
 }
