@@ -50,9 +50,9 @@ locals {
     ebs_optimized           = true
 
 
-    #   iam_instance_profile = {
-    #     name = "poc-iam-role"
-    #   }
+    iam_instance_profile = {
+      name = aws_iam_role.ec2_role.name
+    }
 
     image_id                             = data.aws_ami.amazon_linux.id
     instance_initiated_shutdown_behavior = "terminate"
