@@ -29,8 +29,8 @@ module "tags" {
 }
 
 module "ecs_cluster" {
-  source   = "../../"
-  for_each = local.ecs_services
+  source = "../../"
+  # for_each = local.ecs_services
 
   ecs_cluster       = local.ecs_cluster
   capacity_provider = local.capacity_provider
