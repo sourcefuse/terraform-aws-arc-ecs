@@ -4,7 +4,7 @@
 
 module "ecs_cluster" {
   source = "./modules/ecs-cluster"
-  count  = var.ecs_cluster.create_cluster ? 1 : 0
+  count  = var.ecs_cluster.create ? 1 : 0
   ecs_cluster = {
     name                        = var.ecs_cluster.name
     configuration               = var.ecs_cluster.configuration
@@ -29,7 +29,7 @@ module "ecs_cluster" {
 ################################################################################
 
 module "ecs_service" {
-  count  = var.ecs_service.create_service ? 1 : 0
+  count  = var.ecs_service.create ? 1 : 0
   source = "./modules/ecs-service"
 
   vpc_id           = var.vpc_id

@@ -3,7 +3,7 @@ locals {
 
   ecs_cluster = {
     name                        = "arc-ecs-fargate-poc"
-    create_cluster              = true
+    create                      = true
     create_cloudwatch_log_group = true
     service_connect_defaults    = {}
     settings                    = []
@@ -28,7 +28,7 @@ locals {
     }
   }
   ecs_service = {
-    create_service = false
+    create = false
   }
 
   ############################### ECS Services ################################
@@ -36,7 +36,7 @@ locals {
   ecs_services = {
     service1 = {
       ecs_cluster = {
-        create_cluster = false
+        create = false
       }
       ecs_service = {
         cluster_name             = "arc-ecs-module-poc-1"
@@ -45,7 +45,7 @@ locals {
         ecs_subnets              = data.aws_subnets.private.ids
         enable_load_balancer     = true
         aws_lb_target_group_name = "arc-poc-alb-tg"
-        create_service           = true
+        create                   = true
       }
 
       task = {
@@ -67,7 +67,7 @@ locals {
 
     service2 = { # FIXED: Changed from duplicate "service1" to "service2"
       ecs_cluster = {
-        create_cluster = false
+        create = false
       }
       ecs_service = {
         cluster_name             = "arc-ecs-module-poc-2"
@@ -76,7 +76,7 @@ locals {
         ecs_subnets              = data.aws_subnets.private.ids
         enable_load_balancer     = true
         aws_lb_target_group_name = "arc-poc-alb-tg"
-        create_service           = true
+        create                   = true
       }
 
       task = {

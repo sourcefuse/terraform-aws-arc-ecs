@@ -9,8 +9,8 @@ variable "tags" {
 
 variable "ecs_cluster" {
   type = object({
-    name           = optional(string)
-    create_cluster = optional(bool, true)
+    name   = optional(string)
+    create = optional(bool, true)
     configuration = optional(object({
       execute_command_configuration = optional(object({
         kms_key_id = optional(string, "")
@@ -188,7 +188,7 @@ variable "ecs_service" {
     enable_load_balancer     = optional(bool, false)
     aws_lb_target_group_name = optional(string)
     ecs_subnets              = optional(list(string))
-    create_service           = optional(bool, false)
+    create                   = optional(bool, false)
   })
   description = "The ECS-specific values to use such as cluster, service, and repository names."
 }
