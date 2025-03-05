@@ -5,15 +5,15 @@ output "ecs_cluster_name" {
 
 output "ecs_service_name" {
   description = "The name of the ECS service"
-  value       = module.ecs_service[0].service_name
+  value       = length(module.ecs_service) > 0 ? module.ecs_service[0].ecs_service_name : null
 }
 
 output "ecs_service_arn" {
   description = "The ARN of the ECS service"
-  value       = module.ecs_service[0].ecs_service_arn
+  value       = length(module.ecs_service) > 0 ? module.ecs_service[0].ecs_service_arn : null
 }
 
 output "ecs_task_definition_arn" {
   description = "The ARN of the ECS task definition"
-  value       = module.ecs_service[0].ecs_task_definition_arn
+  value       = length(module.ecs_service) > 0 ? module.ecs_service[0].ecs_task_definition_arn : null
 }
