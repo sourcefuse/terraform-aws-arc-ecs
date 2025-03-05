@@ -230,9 +230,3 @@ variable "lb_data" {
   default     = null
   description = "ALB-related information (listening port, deletion protection, security group)"
 }
-
-# variable "alb_name" {
-#   description = "Name of the Application Load Balancer"
-#   type        = string
-#   default     = null
-# }

@@ -59,8 +59,7 @@ locals {
         container_definition = "container/container_definition.json.tftpl"
       }
 
-      lb = {
-        name              = "arc-load-balancer"
+      lb_data = {
         listener_port     = 80
         security_group_id = "sg-023e8f71ae18450ff"
       }
@@ -91,8 +90,7 @@ locals {
         container_definition = "container/container_definition.json.tftpl"
       }
 
-      lb = {
-        name              = "arc-load-balancer"
+      lb_data = {
         listener_port     = 80
         security_group_id = "sg-023e8f71ae18450ff"
       }
