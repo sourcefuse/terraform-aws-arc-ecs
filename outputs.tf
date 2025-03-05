@@ -1,6 +1,6 @@
 output "ecs_cluster_name" {
   description = "The name of the ECS cluster"
-  value       = module.ecs_cluster[0].ecs_cluster
+  value       = length(module.ecs_service) > 0 ? module.ecs_service[0].ecs_service : null
 }
 
 output "ecs_service_name" {
