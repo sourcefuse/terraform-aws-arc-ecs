@@ -69,12 +69,13 @@ variable "capacity_provider" {
 }
 
 variable "target_group_arn" {
-  description = "ARN of the target group"
+  description = "ARN of the target group used for the ECS service."
   type        = string
   default     = null
 }
 
 variable "launch_template" {
+  description = "Configuration for the EC2 launch template used in ECS."
   type = object({
     name = string
     block_device_mappings = optional(list(object({
@@ -190,7 +191,7 @@ variable "ecs_service" {
     ecs_subnets              = optional(list(string))
     create                   = optional(bool, false)
   })
-  description = "The ECS-specific values to use such as cluster, service, and repository names."
+  description = "Configuration for the ECS service, including cluster, service name, and load balancer settings."
 }
 
 # Task-specific variables
@@ -215,7 +216,7 @@ variable "task" {
 }
 
 variable "ecs_cluster_name" {
-  description = "Name of the ECS cluster"
+  description = "Name of the ECS cluster to attach services"
   type        = string
   default     = null
 }
@@ -228,5 +229,5 @@ variable "lb_data" {
     security_group_id    = optional(string)
   })
   default     = null
-  description = "ALB-related information (listening port, deletion protection, security group)"
+  description = "Load balancer configuration including listener port and security group."
 }
