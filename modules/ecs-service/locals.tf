@@ -1,6 +1,7 @@
 locals {
   service_name_full = "${var.ecs_service.service_name}-${var.environment}"
   cluster_name_full = "${var.ecs_service.cluster_name}-${var.environment}"
+  container_name    = "${var.ecs_service.service_name}-${var.environment}"
 
   security_group_name = "${var.ecs_service.service_name}-${var.environment}-ecs"
 
@@ -10,7 +11,6 @@ locals {
     environment_variables = coalesce(var.task.environment_variables, {}),
     secrets               = coalesce(var.task.secrets, {})
   }
-
 
   environment_variables = [for name, value in local.task.environment_variables : {
     Name  = name

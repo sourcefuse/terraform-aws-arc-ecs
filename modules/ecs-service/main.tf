@@ -17,7 +17,7 @@ resource "aws_ecs_service" "this" {
   cluster         = data.aws_ecs_cluster.cluster.cluster_name
   task_definition = aws_ecs_task_definition.this.arn
   desired_count   = var.task.tasks_desired
-  launch_type     = "FARGATE"
+  launch_type     = var.task.launch_type
 
   force_new_deployment = true
 
@@ -25,14 +25,14 @@ resource "aws_ecs_service" "this" {
     for_each = var.ecs_service.enable_load_balancer ? [1] : []
 
     content {
-      container_name   = var.ecs_service.cluster_name
+      container_name   = local.container_name
       container_port   = var.task.container_port
-      target_group_arn = data.aws_lb_target_group.ecs_target_group.arn
+      target_group_arn = var.target_group_arn
     }
   }
 
   network_configuration {
-    subnets         = data.aws_subnets.private.ids
+    subnets         = var.ecs_service.ecs_subnets
     security_groups = [aws_security_group.ecs.id]
   }
   propagate_tags = "TASK_DEFINITION"
@@ -41,12 +41,13 @@ resource "aws_ecs_service" "this" {
     aws_security_group.ecs,
     aws_ecs_task_definition.this
   ]
+  tags = var.tags
 }
 
 resource "aws_ecs_task_definition" "this" {
   family                   = local.service_name_full
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
+  network_mode             = var.task.network_mode
+  requires_compatibilities = var.task.compatibilities
   cpu                      = var.task.container_vcpu
   memory                   = var.task.container_memory
   task_role_arn            = aws_iam_role.task_role.arn
@@ -66,8 +67,8 @@ resource "aws_ecs_task_definition" "this" {
     service_name      = var.ecs_service.service_name,
     log_group_name    = aws_cloudwatch_log_group.this.name
   })
+  tags = var.tags
 }
-
 
 resource "aws_security_group" "ecs" {
   name        = local.security_group_name
@@ -88,4 +89,5 @@ resource "aws_security_group" "ecs" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  tags = var.tags
 }

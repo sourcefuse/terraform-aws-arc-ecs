@@ -1,10 +1,16 @@
 ################################################################################
 ## ecs cluster
 ################################################################################
+variable "tags" {
+  description = "A map of tags to add to all resources"
+  type        = map(string)
+  default     = {}
+}
 
 variable "ecs_cluster" {
   type = object({
-    name = string
+    name   = optional(string)
+    create = optional(bool, true)
     configuration = optional(object({
       execute_command_configuration = optional(object({
         kms_key_id = optional(string, "")
@@ -21,7 +27,7 @@ variable "ecs_cluster" {
         }), {})
       }), {})
     }), {})
-    create_cloudwatch_log_group = bool
+    create_cloudwatch_log_group = optional(bool, true)
     service_connect_defaults    = optional(map(string), null)
     settings                    = optional(any, null)
     tags                        = optional(map(string), null)
@@ -59,116 +65,104 @@ variable "capacity_provider" {
     use_fargate                = bool
     fargate_capacity_providers = any
   })
+  default = null
 }
 
-
-################################################################################
-##  ALB
-################################################################################
-
-variable "vpc_id" {
+variable "target_group_arn" {
+  description = "ARN of the target group used for the ECS service."
   type        = string
-  description = "ID of VPC in which all resources need to be created"
+  default     = null
 }
 
-variable "cidr_blocks" {
-  description = "CIDR blocks for security group ingress rules"
-  type        = list(string)
-  default     = ["0.0.0.0/0"]
-}
-
-variable "alb" {
-  description = "Configuration settings for the Application Load Balancer (ALB). This includes attributes related to the ALB itself, such as its name, port, protocol, and other optional settings like access logs and tags."
+variable "launch_template" {
+  description = "Configuration for the EC2 launch template used in ECS."
   type = object({
-    name                       = optional(string, null)
-    port                       = optional(number)
-    protocol                   = optional(string, "HTTP")
-    internal                   = optional(bool, false)
-    load_balancer_type         = optional(string, "application")
-    idle_timeout               = optional(number, 60)
-    enable_deletion_protection = optional(bool, false)
-    enable_http2               = optional(bool, true)
-    certificate_arn            = optional(string, null)
-    create_alb                 = optional(bool, false)
+    name = string
+    block_device_mappings = optional(list(object({
+      device_name = string
+      ebs = optional(object({
+        volume_size = number
+      }))
+    })), [])
 
-    access_logs = optional(object({
-      bucket  = string
-      enabled = optional(bool, false)
-      prefix  = optional(string, "")
-    }))
+    cpu_options = optional(object({
+      core_count       = number
+      threads_per_core = number
+    }), null)
 
-    tags = optional(map(string), {})
+    disable_api_stop        = optional(bool, false)
+    disable_api_termination = optional(bool, false)
+    ebs_optimized           = optional(bool, false)
+
+    elastic_gpu_specifications = optional(list(object({
+      type = string
+    })), [])
+
+    iam_instance_profile = optional(object({
+      name = string
+    }), null)
+
+    image_id                             = optional(string, null)
+    instance_initiated_shutdown_behavior = optional(string, "stop")
+
+    instance_type = optional(string, null)
+    kernel_id     = optional(string, null)
+    key_name      = optional(string, null)
+
+    monitoring = optional(object({
+      enabled = bool
+    }), null)
+
+    network_interfaces = optional(list(object({
+      associate_public_ip_address = optional(bool, null)
+      ipv4_prefixes               = optional(list(string), [])
+      ipv6_prefixes               = optional(list(string), [])
+      ipv4_addresses              = optional(list(string), [])
+      ipv6_addresses              = optional(list(string), [])
+      network_interface_id        = optional(string, null)
+      private_ip_address          = optional(string, null)
+      security_groups             = optional(list(string), [])
+      subnet_id                   = optional(string, null)
+    })), [])
+
+    placement = optional(object({
+      availability_zone = string
+    }), null)
+
+    vpc_security_group_ids = optional(list(string), [])
+
+    tag_specifications = optional(list(object({
+      resource_type = string
+      tags          = map(string)
+    })), [])
+
+    user_data = optional(string, null)
   })
+  default = null
 }
 
-variable "alb_target_group" {
-  description = "List of target groups to create"
-  type = list(object({
-    name                              = optional(string, "target-group")
-    port                              = number
-    protocol                          = optional(string, null)
-    protocol_version                  = optional(string, "HTTP1")
-    vpc_id                            = optional(string, "")
-    target_type                       = optional(string, "ip")
-    ip_address_type                   = optional(string, "ipv4")
-    load_balancing_algorithm_type     = optional(string, "round_robin")
-    load_balancing_cross_zone_enabled = optional(string, "use_load_balancer_configuration")
-    deregistration_delay              = optional(number, 300)
-    slow_start                        = optional(number, 0)
-    tags                              = optional(map(string), {})
+variable "asg" {
+  description = "Auto Scaling Group configuration"
+  type = object({
+    name                = optional(string, null)
+    min_size            = number
+    max_size            = number
+    desired_capacity    = optional(number)
+    vpc_zone_identifier = optional(list(string))
 
-    health_check = optional(object({
-      enabled             = optional(bool, true)
-      protocol            = optional(string, "HTTP")
-      path                = optional(string, "/")
-      port                = optional(string, "traffic-port")
-      timeout             = optional(number, 6)
-      healthy_threshold   = optional(number, 3)
-      unhealthy_threshold = optional(number, 3)
-      interval            = optional(number, 30)
-      matcher             = optional(string, "200")
+    health_check_type         = optional(string)
+    health_check_grace_period = optional(number, 300)
+    protect_from_scale_in     = optional(bool)
+    default_cooldown          = optional(number)
+
+    instance_refresh = optional(object({
+      strategy = string
+      preferences = optional(object({
+        min_healthy_percentage = optional(number)
+      }))
     }))
-
-    stickiness = optional(object({
-      enabled         = optional(bool, true)
-      type            = string
-      cookie_duration = optional(number, 86400)
-      })
-    )
-
-  }))
-}
-
-variable "listener_rules" {
-  description = "List of listener rules to create"
-  type = list(object({
-    priority = number
-
-    conditions = list(object({
-      field  = string
-      values = list(string)
-    }))
-
-    actions = list(object({
-      type             = string
-      target_group_arn = optional(string)
-      order            = optional(number)
-      redirect = optional(object({
-        protocol    = string
-        port        = string
-        host        = optional(string)
-        path        = optional(string)
-        query       = optional(string)
-        status_code = string
-      }), null)
-
-      fixed_response = optional(object({
-        content_type = string
-        message_body = optional(string)
-        status_code  = optional(string)
-      }), null)
-    }))
-  }))
+  })
+  default = null
 }
 
 ################################################################################
@@ -177,45 +171,63 @@ variable "listener_rules" {
 
 variable "environment" {
   type        = string
+  default     = null
   description = "The environment associated with the ECS service"
 }
 
+variable "vpc_id" {
+  type        = string
+  default     = null
+  description = "ID of VPC in which all resources need to be created"
+}
 
 variable "ecs_service" {
   type = object({
-    cluster_name             = string
-    service_name             = string
-    repository_name          = string
-    enable_load_balancer     = bool
+    cluster_name             = optional(string)
+    service_name             = optional(string)
+    repository_name          = optional(string)
+    enable_load_balancer     = optional(bool, false)
     aws_lb_target_group_name = optional(string)
-    create_service           = optional(bool, false)
+    ecs_subnets              = optional(list(string))
+    create                   = optional(bool, false)
   })
-  description = "The ECS-specific values to use such as cluster, service, and repository names."
+  description = "Configuration for the ECS service, including cluster, service name, and load balancer settings."
 }
 
 # Task-specific variables
 variable "task" {
   type = object({
     tasks_desired               = optional(number)
+    launch_type                 = optional(string)
+    network_mode                = optional(string)
+    compatibilities             = optional(list(string))
     container_vcpu              = optional(number)
     container_memory            = optional(number)
     container_port              = number
     container_health_check_path = optional(string)
     container_definition        = optional(string)
     environment_variables       = optional(map(string))
+    secrets                     = optional(map(string))
     task_execution_role         = optional(string)
   })
+  default = null
 
   description = "Task-related information (vCPU, memory, # of tasks, port, and health check info.)"
 }
 
+variable "ecs_cluster_name" {
+  description = "Name of the ECS cluster to attach services"
+  type        = string
+  default     = null
+}
+
 # Load balancer
-variable "lb" {
+variable "lb_data" {
   type = object({
-    name                 = string
     listener_port        = number
     deregistration_delay = optional(number)
-    security_group_id    = string
+    security_group_id    = optional(string)
   })
-  description = "ALB-related information (listening port, deletion protection, security group)"
+  default     = null
+  description = "Load balancer configuration including listener port and security group."
 }
