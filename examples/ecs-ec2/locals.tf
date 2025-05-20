@@ -143,7 +143,8 @@ locals {
 
       lb_data = {
         listener_port     = 80
-        security_group_id = "sg-023e8f71ae18450ff"
+        #security_group_id = "sg-023e8f71ae18450ff"
+        security_group_id = "sg-03fce1229012b0955"
       }
     }
 
@@ -154,7 +155,8 @@ locals {
       ecs_service = {
         cluster_name             = "arc-ecs-module-poc-2"
         service_name             = "arc-ecs-module-service-poc-2"
-        repository_name          = "12345.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
+        #repository_name          = "12345.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs"
+        repository_name          = "884360309640.dkr.ecr.us-east-1.amazonaws.com/arc/arc-poc-ecs-test" 
         ecs_subnets              = data.aws_subnets.private.ids
         enable_load_balancer     = true
         aws_lb_target_group_name = "arc-poc-alb-tg"
@@ -174,7 +176,8 @@ locals {
 
       lb_data = {
         listener_port     = 80
-        security_group_id = "sg-023e8f71ae18450ff"
+        #security_group_id = "sg-023e8f71ae18450ff"
+        security_group_id = "sg-03fce1229012b0955"
       }
     }
   }
