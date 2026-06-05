@@ -5,3 +5,4 @@ terraform.tfstate
 secrets.tfvars
 .idea
 poc
+.DS_Store
