@@ -19,6 +19,9 @@
 
 [![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=sourcefuse_terraform-aws-arc-ecs&token=470128924743a0aace992ff0eb4f2460199e267f)](https://sonarcloud.io/summary/new_code?id=sourcefuse_terraform-aws-arc-ecs)
 
+> [!TIP]
+> 🤖 **New:** Use this module with AI assistants via the [ARC IaC MCP Server](https://github.com/sourcefuse/arc-iac-mcp) — search, scaffold, and security-scan ARC modules from natural language. [Quick setup ↓](#ai-assistant-integration-arc-iac-mcp)
+
 ## Overview
 
 SourceFuse's AWS Reference Architecture Terraform module leverages the terraform-aws-modules/terraform-aws-ecs GitHub repository to facilitate the deployment and management of an AWS ECS (Elastic Container Service) cluster. It streamlines the configuration of ECS tasks, services, and related components, providing a scalable and efficient solution for orchestrating containerized applications. With customizable settings for logging and load balancing the module promotes seamless deployment and management of containerized workloads on AWS.
