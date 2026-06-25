@@ -61,7 +61,8 @@ locals {
 
       lb_data = {
         listener_port     = 80
-        security_group_id = "sg-023e8f71ae18450ff"
+        #security_group_id = "sg-023e8f71ae18450ff"
+        security_group_id =  "sg-03fce1229012b0955"
       }
     }
 
@@ -92,7 +93,8 @@ locals {
 
       lb_data = {
         listener_port     = 80
-        security_group_id = "sg-023e8f71ae18450ff"
+        #security_group_id = "sg-023e8f71ae18450ff"
+        security_group_id =  "sg-03fce1229012b0955"
       }
     }
   }

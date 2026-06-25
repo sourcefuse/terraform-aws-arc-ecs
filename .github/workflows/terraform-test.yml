@@ -1,0 +1,86 @@
+---
+name: Terratest
+on:        # yamllint disable-line rule:truthy
+  pull_request:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Pull Request Number'
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+  statuses: write  # Required for setting commit status
+
+jobs:
+  terratest:
+    runs-on: ubuntu-latest
+    name: Terratest Checks
+
+    env:
+      PR_NUMBER: >-
+        ${{ github.event_name == 'workflow_dispatch' &&
+        github.event.inputs.pr_number || github.event.pull_request.number }}
+
+
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ env.PR_NUMBER }}/head
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ARC_IAC_TERRATEST_ROLE }}
+          aws-region: us-east-1
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+          terraform_wrapper: false
+
+      - name: Create test directory and download go from S3
+        run: |
+          mkdir -p terra-test
+          aws s3 cp ${{ secrets.ARC_TERRATEST_GO_FILE }} terra-test/terra_test.go
+      - name: Initialize Go module and install dependencies
+        run: |
+          cd terra-test
+          ls
+          go mod init terraform-test || true
+          go get github.com/gruntwork-io/terratest/modules/terraform
+          go get github.com/stretchr/testify/assert
+          go mod tidy
+          go test -v -timeout 40m
+      - name: Report check status manually
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr_number = parseInt(process.env.PR_NUMBER);
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr_number,
+            });
+            const sha = pr.data.head.sha;
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: sha,
+              state: 'success',
+              context: 'terratest',
+              description: 'Manual terratest completed successfully',
+              target_url:
+                `https://github.com/${context.repo.owner}/${context.repo.repo}` +
+                `/actions/runs/${process.env.GITHUB_RUN_ID}`,
+            });
